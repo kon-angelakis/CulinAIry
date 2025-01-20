@@ -1,0 +1,47 @@
+# Maven-specific
+/target/
+/pom.xml.tag
+/pom.xml.releaseBackup
+/pom.xml.versionsBackup
+/logs/
+/dependency-reduced-pom.xml
+/release.properties
+
+# Compiled Java class files
+*.class
+
+# Logs
+*.log
+
+# Spring Boot-specific
+*.pid
+hs_err_pid*
+
+# VSCode-specific files
+.vscode/
+.settings/
+*.code-workspace
+
+# IntelliJ IDEA-specific files (in case someone uses IntelliJ)
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+
+# Build artifacts
+*.jar
+*.war
+*.ear
+
+# Other
+*.bak
+
