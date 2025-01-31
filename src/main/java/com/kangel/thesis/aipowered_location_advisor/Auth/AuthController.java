@@ -13,40 +13,58 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
     @Autowired
     private AuthService authService;
 
-    public static final String ACCOUNT_SID = "AC832494f9078ebb668e628cdadebe338e";
-    public static final String AUTH_TOKEN = "ef9ca484a0cd7925a524fbe46cb1f5ae";
-
-    @PostMapping("/register")
-    public ResponseEntity<String> registerUser(@RequestBody Map<String, String> payload) {
-        try{
-            authService.register(new User(payload.get("firstname"), 
-                                                payload.get("lastname"), 
-                                                payload.get("email"), 
-                                                payload.get("username"), 
-                                                payload.get("password")
-                                            )
-                                    );
-            return new ResponseEntity<String>("User registered successfully", HttpStatus.CREATED);
-        }catch(Exception e){
-            return new ResponseEntity<String>("User registration failed", HttpStatus.CONFLICT);
-        }
-    }
-    
-
     @PostMapping("/login")
-    public ResponseEntity<String> loginUser(@RequestBody Map<String, String> payload) {
-        User loginedUser = authService.login(payload.get("user"), payload.get("pass"));
-        if(loginedUser != null)
+    public ResponseEntity<String> LoginUser(@RequestBody Map<String, String> payload) {
+        User loginedUser = authService.Login(payload.get("user"), payload.get("pass"));
+        if (loginedUser != null)
             return new ResponseEntity<String>("User login successfully", HttpStatus.OK);
         else
             return new ResponseEntity<String>("User login failed", HttpStatus.UNAUTHORIZED);
+    }
+
+    // First step of registration sends OTP
+    @PostMapping("/register")
+    public ResponseEntity<String> RegisterUser(@RequestBody Map<String, String> payload) {
+        try {
+            User user = new User(payload.get("firstname"),
+                    payload.get("lastname"),
+                    payload.get("email"),
+                    payload.get("username"),
+                    payload.get("password"));
+
+            if (authService.SendOTP(user))
+                return new ResponseEntity<String>(String.format("Sent Verification code to: %s", user.getEmail()),
+                        HttpStatus.OK);
+            else
+                return new ResponseEntity<String>("User already registered", HttpStatus.CONFLICT);
+        } catch (Exception e) {
+            return new ResponseEntity<String>("Unexpected Error", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    // Second step of registration verifies OTP and saves user
+    @PostMapping("/verify")
+    public ResponseEntity<String> VerifyUser(@RequestBody Map<String, String> payload) {
+        try {
+            User user = new User(payload.get("firstname"),
+                    payload.get("lastname"),
+                    payload.get("email"),
+                    payload.get("username"),
+                    payload.get("password"));
+
+            if (authService.VerifyAndRegister(user, payload.get("otp")))
+                return new ResponseEntity<String>("User registered successfully", HttpStatus.CREATED);
+            else
+                return new ResponseEntity<String>("Invalid OTP verification", HttpStatus.UNAUTHORIZED);
+        } catch (Exception e) {
+            return new ResponseEntity<String>("User registration failed", HttpStatus.CONFLICT);
+        }
     }
 
 }

@@ -14,7 +14,6 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-
 @Document(collection = "Users")
 @Data
 @AllArgsConstructor
@@ -23,15 +22,15 @@ public class User {
 
     @Id
     private ObjectId id;
-    
+
     private String firstName;
     private String lastName;
 
     private String email;
     private String username;
     private String password;
-    
-    private String profilePicture = "";
+
+    private String pfp = "";
 
     private List<Place> history = List.of();
     private List<Place> visited = List.of();
