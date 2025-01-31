@@ -20,6 +20,9 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
+    public static final String ACCOUNT_SID = "AC832494f9078ebb668e628cdadebe338e";
+    public static final String AUTH_TOKEN = "ef9ca484a0cd7925a524fbe46cb1f5ae";
+
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@RequestBody Map<String, String> payload) {
         try{
@@ -27,8 +30,7 @@ public class AuthController {
                                                 payload.get("lastname"), 
                                                 payload.get("email"), 
                                                 payload.get("username"), 
-                                                payload.get("password"), 
-                                                payload.get("pfp")
+                                                payload.get("password")
                                             )
                                     );
             return new ResponseEntity<String>("User registered successfully", HttpStatus.CREATED);
@@ -36,6 +38,7 @@ public class AuthController {
             return new ResponseEntity<String>("User registration failed", HttpStatus.CONFLICT);
         }
     }
+    
 
     @PostMapping("/login")
     public ResponseEntity<String> loginUser(@RequestBody Map<String, String> payload) {
@@ -45,5 +48,5 @@ public class AuthController {
         else
             return new ResponseEntity<String>("User login failed", HttpStatus.UNAUTHORIZED);
     }
-    
+
 }

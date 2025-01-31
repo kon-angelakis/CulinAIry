@@ -1,9 +1,13 @@
 package com.kangel.thesis.aipowered_location_advisor.Auth;
 
+import java.io.IOException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.kangel.thesis.aipowered_location_advisor.Services.EmailService;
 import com.kangel.thesis.aipowered_location_advisor.Users.User;
+
 
 @Service
 public class AuthService {
@@ -19,7 +23,9 @@ public class AuthService {
         }
     }
 
-    public void register(User user){
+    public void register(User user) throws IOException{
         authRepo.save(user);
+        EmailService.SendRegistrationEmail(user);
     }
+
 }

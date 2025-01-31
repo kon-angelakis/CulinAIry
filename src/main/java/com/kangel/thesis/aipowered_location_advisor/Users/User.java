@@ -31,7 +31,7 @@ public class User {
     private String username;
     private String password;
     
-    private String profilePicture;
+    private String profilePicture = "";
 
     private List<Place> history = List.of();
     private List<Place> visited = List.of();
@@ -41,13 +41,12 @@ public class User {
     @CreatedDate
     private final LocalDateTime dateCreated = LocalDateTime.now();
 
-    public User(String firstName, String lastName, String email, String username, String password, String profilePicture) {
+    public User(String firstName, String lastName, String email, String username, String password) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.username = username;
         this.password = password;
-        this.profilePicture = profilePicture;
     }
 
 }
