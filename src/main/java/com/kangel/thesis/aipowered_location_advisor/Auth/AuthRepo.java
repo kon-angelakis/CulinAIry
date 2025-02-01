@@ -11,10 +11,6 @@ import com.kangel.thesis.aipowered_location_advisor.Users.User;
 @Repository
 public interface AuthRepo extends MongoRepository<User, ObjectId> {
 
-    public Optional<User> findByUsernameAndPassword(String username, String password);
-
-    public Optional<User> findByEmailAndPassword(String email, String password);
-
     public Optional<User> findByEmail(String email);
 
     public Optional<User> findByUsername(String username);
