@@ -1,0 +1,105 @@
+.container{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 80vh;
+    opacity: 0;
+    animation: fadeIn 0.5s ease-in-out forwards; /* adjust duration and easing as needed */
+}
+
+
+.form-container{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: start;
+    width: 30rem;
+    border-radius: 4%;
+    padding-bottom:5%;
+    background-color: var(--triary);
+    box-shadow: 5px 5px 5px 2px rgba(0, 0, 0, 0.897);
+    scale: 1.5;
+}
+
+.form-inputs{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 2rem;
+    width: 60%;
+}
+
+.form-input{
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: start;
+    width: 100%;
+    margin-bottom: 1rem;
+    padding-left: 10%;
+    gap: 0.5rem;
+    padding: 0.4rem;
+    transition: all;
+    opacity: 0;
+    animation: fadeIn 1s ease-in forwards;
+    animation-delay: calc(0.4s * var(--i));
+}
+
+
+input{
+    width:80%;
+    padding: 0.5rem;
+    border: none;
+    border-radius: 5%;
+    border-bottom: 2px solid var(--primary);
+    background-color: var(--tetriary);
+    color: var(--text);
+    transition: all 0.2s ease;
+}
+
+input:focus{
+    outline: none;
+    scale: 0.985;
+    border-bottom: 2px solid var(--secondary);
+}
+
+.form-input:focus-within .icon:not(#show-password) {
+    color: var(--accent);
+}
+
+.icon{
+    font-size: 1.4rem;
+    min-width: 1.4rem;
+    color: #ffffffa6;
+    cursor: pointer;
+    transition: all 0.5s;
+}
+
+.icon:hover{
+    color: var(--accent);
+}
+
+.icon:active{
+    color: var(--secondary);
+    scale: 0.9;
+}
+
+#show-password {
+    position: absolute;
+    right: -1.5rem;
+    transition: all 0.2s ease-in-out;
+}
+
+#show-password:active{
+    scale: 0.9;
+}
+
+
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+    }
+}
