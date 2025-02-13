@@ -16,13 +16,12 @@ function SubmitButton({text, data, endpoint, disabled, setVerified}){
 
 
     return(
-        <div className="submit-button">
+        <>
             <button className="primary-button" 
             onClick={PostData}
             disabled={disabled}
             >{text}</button>
-            
-        </div>
+        </>
     )
 }
 

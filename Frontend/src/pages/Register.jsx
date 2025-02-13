@@ -1,4 +1,5 @@
 import RegisterForm from '../components/RegisterForm';
+import Footer from '../components/PageInfo/Footer'
 
 function Register(){
     
@@ -6,6 +7,7 @@ function Register(){
     return(
     <>
         <RegisterForm/>
+        <Footer/>
     </>
     );
 }

@@ -48,6 +48,21 @@ public class AuthController {
         }
     }
 
+    // Used to validate front end fields
+    @PostMapping("/register/validate")
+    public ResponseEntity<Boolean> ValidateUser(@RequestBody Map<String, String> payload) {
+        try {
+            String user = payload.get("user");
+
+            if (authService.UserExists(user) != null)
+                return new ResponseEntity<Boolean>(true, HttpStatus.OK);
+            return new ResponseEntity<Boolean>(false, HttpStatus.CONFLICT);
+
+        } catch (Exception e) {
+            return new ResponseEntity<Boolean>(false, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     // Second step of registration verifies OTP and saves user
     @PostMapping("/verify")
     public ResponseEntity<String> VerifyUser(@RequestBody Map<String, String> payload) {
