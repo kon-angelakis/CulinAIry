@@ -1,12 +1,16 @@
-function FullNameInput({ name1, name2, required, icon : Icon, animationIndex, onChange }){
+function FullNameInput({ name1, placeholder1, name2, placeholder2, required, icon : Icon, animationIndex, onChange }){
     return(
-        <div className="form-input" style={{ "--i": animationIndex }}>
-            {Icon ? <Icon className="icon" /> : <span className="icon"></span>}
-            <div className="form-firstname">
-                <input name={name1} type="text" placeholder="First Name" required={required} onChange={onChange}></input>
+        <div className="test">
+            <div className="form-input">
+                {Icon ? <Icon className="icon" /> : <span className="icon"></span>}
+                <input name={name1} placeholder=" " type="text" required={required} onChange={onChange}></input>
+                <label for={name1} className="placeholder">{placeholder1}</label>
+
             </div>
-            <div className="form-lastname">
-                <input name={name2} type="text" placeholder="Last Name" required={required} onChange={onChange}></input>
+            <div className="form-input">
+                {Icon ? <Icon className="icon" /> : <span className="icon"></span>}
+                <input name={name2} placeholder=" " type="text" required={required} onChange={onChange}></input>
+                <label for={name2} className="placeholder">{placeholder2}</label>
             </div>
         </div>
     )

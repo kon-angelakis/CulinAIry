@@ -29,12 +29,13 @@ body{
 }
 
 .primary-button {
+    width: 100%;
     background: var(--primary);
     color: black;
     font-family: inherit;
     padding: 0.6em 1.3em;
     font-weight: 900;
-    font-size: 18px;
+    font-size: 1rem;
     border: 3px solid var(--tetriary);
     border-radius: 0.5em;
     box-shadow: 0.1em 0.1em;
@@ -75,3 +76,12 @@ body{
     margin: 0 auto;
     border-radius: 0.5rem;
   }
+
+  .footer{
+    font-size: 0.89rem;
+    display: flex;
+    justify-content: center;
+    margin-top: 10em;
+    margin-bottom: 2em;
+  }
+  

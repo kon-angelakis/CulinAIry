@@ -1,9 +1,10 @@
 .container{
     font-size: 1rem;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-height: 98vh;
+    height: 100vh;
     opacity: 0;
     animation: fadeIn 0.5s ease-in-out forwards; 
 }
@@ -27,7 +28,7 @@
     align-items: center;
     justify-content: center;
     margin-top: 2rem;
-    width: 20em;
+    width: 25em;
 }
 
 .form-input{
@@ -35,28 +36,28 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: start;
+    justify-content: center;
     width: 100%;
     margin-bottom: 0.8rem;
-    padding-left: 10%;
     gap: 0.5rem;
     padding: 0.4rem;
     transition: all;
-    opacity: 0;
     animation: fadeIn 1s ease-in forwards;
     animation-delay: calc(0.4s * var(--i));
 }
 
 
 input{
-    width:80%;
-    padding: 0.5rem;
+    position: relative;
+    width:100%;
+    padding: 0.6rem;
     border: none;
     border-radius: 0.2em;
     border-left: 2px solid var(--primary);
     background-color: var(--tetriary);
     color: var(--text);
     transition: all 0.1s ease;
+
 }
 
 input:hover{
@@ -68,6 +69,7 @@ input:hover{
 input:focus{
     outline: none;
     transform: scale(0.975);
+    caret-color: rgba(255, 255, 255, 0.5);
     border-left: 2px solid var(--secondary);
 }
 
@@ -76,15 +78,16 @@ input:focus{
 }
 
 .icon{
-    font-size: 1.4rem;
-    min-width: 1.4rem;
+    font-size: 1.3rem;
+    min-width: 1.3rem;
     color: #ffffffa6;
     cursor: pointer;
-    transition: all 0.5s;
+    transition: all 0.1s ease-in-out;
 }
 
 .icon:hover{
     color: var(--accent);
+    transform: scale(0.95);
 }
 
 .icon:active{
@@ -95,7 +98,6 @@ input:focus{
 #show-password {
     position: absolute;
     right: -1.5rem;
-    transition: all 0.2s ease-in-out;
 }
 
 #show-password:active{
@@ -171,4 +173,58 @@ strong{
     p{
         font-size: 0.5rem;
     }
+}
+
+.helper-section{
+    font-size: 0.85rem;
+    line-height: 1.2em;
+    padding: 0.8em;
+    text-align: center;
+}
+
+.icon.unavailable {
+    fill: rgb(255, 0, 0);
+    animation: wobble 1.2s ease-in-out infinite alternate;
+}
+
+.input.unavailable{
+    border-color:  red;
+    background-color: rgba(255, 0, 0, 0.171);
+}
+
+
+@keyframes wobble {
+    0% { transform: scale(1.0) rotate(5deg) }
+    25% { transform: scale(1.0) rotate(-5deg) }
+    50% { transform: scale(1.0) rotate(5deg) }
+    75% { transform:  scale(1.0) rotate(-5deg) }
+    100% { transform: scale(1.0) rotate(5deg) }
+}
+
+.placeholder {
+    position: absolute;
+    opacity: 0.5;
+    font-size: 0.8rem;
+    left: 45px;
+    pointer-events: none;
+    transition: all 0.25s ease-in-out;
+  }
+
+  .form-input:hover .placeholder{
+    transform: scale(0.9);
+  }
+  
+  .form-input input:focus + .placeholder,
+  .form-input input:not(:placeholder-shown) + .placeholder {
+    transform: scale(0.9) translateY(-2rem) translateX(-15%);
+    color: var(--accent);
+    opacity: 1;
+  }
+
+.test{
+    display: flex;
+    justify-content: start;
+    align-items: start;
+    align-content: space-evenly;
+    width: 100%;
 }

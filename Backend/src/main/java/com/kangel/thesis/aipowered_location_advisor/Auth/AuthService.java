@@ -30,9 +30,7 @@ public class AuthService {
     public User Login(String user, String pass) {
         // Get the user accordingly via email or username and if the password(newly
         // encoded) matches the encoded one login else return null
-        User loginedUser = user.contains("@") ? authRepo.findByEmail(user).orElse(null)
-                : authRepo.findByUsername(user).orElse(null);
-
+        User loginedUser = UserExists(user);
         if (loginedUser != null && encoder.matches(pass, loginedUser.getPassword()))
             return loginedUser;
         return null;
@@ -59,6 +57,12 @@ public class AuthService {
             return true;
         }
         return false;
+    }
+
+    public User UserExists(String user) {
+        User loginedUser = user.contains("@") ? authRepo.findByEmail(user).orElse(null)
+                : authRepo.findByUsername(user).orElse(null);
+        return loginedUser;
     }
 
 }
