@@ -84,8 +84,8 @@ function RegisterForm() {
                         <hr/>
                         <div className="form-inputs">
                             <FullNameInput name1="firstname" placeholder1="First Name" name2="lastname" placeholder2="Last Name" value={formData.fullname} onChange={handleFormChange} required={false} icon={FaRegAddressCard} animationIndex={1} />                            
-                            <FormInput name="email" value={formData.email} onChange={(e)=>{handleFormChange(e); handleFormValidation(e)}} type="email" placeholder="Email" available={fieldsAvailable.email} required={true} icon={FaRegEnvelope} animationIndex={2}/>
-                            <FormInput name="username" value={formData.username} onChange={(e)=>{handleFormChange(e); handleFormValidation(e)}} type="text" placeholder="Username" available={fieldsAvailable.username} required={true} icon={FaRegUser} animationIndex={3}/>
+                            <FormInput name="email" value={formData.email} onChange={(e)=>{handleFormChange(e); handleFormValidation(e)}} type="email" placeholder="Email" available={fieldsAvailable.email} warning="Already in use" required={true} icon={FaRegEnvelope} animationIndex={2}/>
+                            <FormInput name="username" value={formData.username} onChange={(e)=>{handleFormChange(e); handleFormValidation(e)}} type="text" placeholder="Username" available={fieldsAvailable.username} warning="Already in use" required={true} icon={FaRegUser} animationIndex={3}/>
                             <PasswordInput name="password" value={formData.password} onChange={handleFormChange} placeholder="Password" icon={MdPassword} animationIndex={4} />
                             <PasswordInput name="cpassword" value={formData.cpassword} onChange={handleFormChange} placeholder="Confirm Password" animationIndex={5} />
                             

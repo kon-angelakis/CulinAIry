@@ -14,7 +14,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: start;
-    width: 30em;
+    width: 32em;
     border-radius: 1.5em;
     padding: 0.5em;
     background-color: var(--triary);
@@ -42,13 +42,14 @@
     gap: 0.5rem;
     padding: 0.4rem;
     transition: all;
+    opacity: 0;
     animation: fadeIn 1s ease-in forwards;
     animation-delay: calc(0.4s * var(--i));
 }
 
 
 input{
-    position: relative;
+    position: ab;
     width:100%;
     padding: 0.6rem;
     border: none;
@@ -57,7 +58,6 @@ input{
     background-color: var(--tetriary);
     color: var(--text);
     transition: all 0.1s ease;
-
 }
 
 input:hover{
@@ -97,7 +97,7 @@ input:focus{
 
 #show-password {
     position: absolute;
-    right: -1.5rem;
+    right: -1.3rem;
 }
 
 #show-password:active{
@@ -166,14 +166,6 @@ strong{
     }
 }
 
-@media (max-width: 500px) {
-    .container{
-        font-size: 0.5rem;
-    }
-    p{
-        font-size: 0.5rem;
-    }
-}
 
 .helper-section{
     font-size: 0.85rem;
@@ -227,4 +219,30 @@ strong{
     align-items: start;
     align-content: space-evenly;
     width: 100%;
+}
+
+.form-input-warning{
+    position: absolute;
+    scale: 0.9;
+    font-size: 0.8rem;
+    color:rgba(255, 0, 0, 0.8);
+    right: 10px;
+    transform: translateY(-2rem);
+    pointer-events: none;
+}
+
+
+@media (max-width: 500px) {
+    .container{
+        font-size: 0.5rem;
+    }
+    .placeholder{
+        font-size: 0.55rem;
+    }
+    .form-input-warning{
+        font-size: 0.55rem;
+    }
+    p{
+        font-size: 0.5rem;
+    }
 }
