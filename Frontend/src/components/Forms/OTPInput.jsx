@@ -18,7 +18,7 @@ const OTPInput = ({ otp, setOtp }) => {
         onChange={handleChange}
         maxLength="6"
         placeholder="Enter OTP"
-        style={{ width: "8em", fontSize:"1.8rem", textAlign: "center" }}
+        style={{ width: "8em", fontSize: "1.8rem", textAlign: "center" }}
       />
     </div>
   );

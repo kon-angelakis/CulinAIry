@@ -1,15 +1,13 @@
-import RegisterForm from '../components/RegisterForm';
-import Footer from '../components/PageInfo/Footer'
+import RegisterForm from "../components/RegisterForm";
+import Footer from "../components/PageInfo/Footer";
 
-function Register(){
-    
-
-    return(
+function Register() {
+  return (
     <>
-        <RegisterForm/>
-        <Footer/>
+      <RegisterForm />
+      <Footer />
     </>
-    );
+  );
 }
 
 export default Register;
