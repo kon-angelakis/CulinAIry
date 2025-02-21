@@ -18,7 +18,7 @@
   border-radius: 1.5em;
   padding: 0.5em;
   background-color: color-mix(in srgb, var(--triary) 80%, transparent);
-  box-shadow: 5px 5px 5px 2px rgba(0, 0, 0, 0.897);
+  box-shadow: 5px 5px 5px 2px rgba(0, 0, 0, 0.377);
   transform: scale(1.2);
 }
 
@@ -72,7 +72,7 @@ input:focus {
   border-left: 2px solid var(--secondary);
 }
 
-.form-input:focus-within .icon:not(#show-password) {
+.form-input:focus-within .icon:not(#show-password, .icon.unavailable) {
   color: var(--accent);
 }
 
@@ -181,7 +181,7 @@ strong {
 }
 
 .icon.unavailable {
-  fill: rgb(255, 0, 0);
+  color: rgb(255, 0, 0);
   animation: wobble 1.2s ease-in-out infinite alternate;
 }
 
