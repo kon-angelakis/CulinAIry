@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
+import { LuUser, LuLock } from "react-icons/lu";
 import SubmitButton from "./Forms/SubmitButton";
 import FormInput from "./Forms/FormInput";
-import { FaRegUser } from "react-icons/fa";
 import PasswordInput from "./Forms/PasswordInput";
-import { MdPassword } from "react-icons/md";
 import GoogleButton from "./Forms/GoogleButton";
 import { Link, useNavigate } from "react-router-dom";
+import Splitter from "./Forms/Splitter";
+import AppleButton from "./Forms/AppleButton";
 
 function LoginForm() {
   const navigate = useNavigate();
@@ -56,14 +57,14 @@ function LoginForm() {
               placeholder="Email or Username"
               required={true}
               available={available}
-              icon={FaRegUser}
+              icon={LuUser}
               animationIndex={1}
               onChange={handleChange}
             />
             <PasswordInput
               name="pass"
               placeholder="Password"
-              icon={MdPassword}
+              icon={LuLock}
               animationIndex={2}
               onChange={handleChange}
             />
@@ -82,7 +83,11 @@ function LoginForm() {
               </p>
             </div>
           </div>
-          <GoogleButton />
+          <Splitter text="Or sign in with" />
+          <div className="alt-sign-in-options">
+            <GoogleButton />
+            <AppleButton />
+          </div>
         </div>
       </form>
     </div>

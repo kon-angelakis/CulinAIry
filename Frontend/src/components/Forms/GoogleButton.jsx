@@ -1,6 +1,6 @@
 function GoogleButton() {
   return (
-    <button className="btn google">
+    <button className="secondary-button">
       <svg
         xmlSpace="preserve"
         style={{ enableBackground: "new 0 0 512 512" }}

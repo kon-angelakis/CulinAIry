@@ -1,7 +1,4 @@
-import { FaRegAddressCard } from "react-icons/fa";
-import { FaRegEnvelope } from "react-icons/fa6";
-import { FaRegUser } from "react-icons/fa";
-import { MdPassword } from "react-icons/md";
+import { LuContact, LuUser, LuLock, LuMail } from "react-icons/lu";
 import { GiEnvelope } from "react-icons/gi";
 import { RiVerifiedBadgeFill } from "react-icons/ri";
 
@@ -90,7 +87,7 @@ function RegisterForm() {
                 value={formData.fullname}
                 onChange={handleFormChange}
                 required={false}
-                icon={FaRegAddressCard}
+                icon={LuContact}
                 animationIndex={1}
               />
               <FormInput
@@ -105,7 +102,7 @@ function RegisterForm() {
                 available={fieldsAvailable.email}
                 warning="Already in use"
                 required={true}
-                icon={FaRegEnvelope}
+                icon={LuMail}
                 animationIndex={2}
               />
               <FormInput
@@ -120,7 +117,7 @@ function RegisterForm() {
                 available={fieldsAvailable.username}
                 warning="Already in use"
                 required={true}
-                icon={FaRegUser}
+                icon={LuUser}
                 animationIndex={3}
               />
               <PasswordInput
@@ -128,7 +125,7 @@ function RegisterForm() {
                 value={formData.password}
                 onChange={handleFormChange}
                 placeholder="Password"
-                icon={MdPassword}
+                icon={LuLock}
                 animationIndex={4}
               />
               <PasswordInput
