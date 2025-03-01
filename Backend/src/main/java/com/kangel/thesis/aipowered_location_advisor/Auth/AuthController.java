@@ -21,11 +21,14 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<String> LoginUser(@RequestBody Map<String, String> payload) {
-        User loginedUser = authService.Login(payload.get("user"), payload.get("pass"));
-        if (loginedUser != null)
-            return new ResponseEntity<String>("User login successfully", HttpStatus.OK);
-        else
-            return new ResponseEntity<String>("User login failed", HttpStatus.UNAUTHORIZED);
+        Map<String, Object> userLogined = authService.Login(payload.get("user"), payload.get("pass"));
+        return new ResponseEntity<String>(
+            String.format("User: %s login: %s %nJWT: %s", 
+                payload.get("user"), 
+                userLogined.get("status"), 
+                userLogined.get("token"))
+            , (HttpStatus) userLogined.get("statusCode")
+        );
     }
 
     // First step of registration sends OTP

@@ -1,4 +1,4 @@
-package com.kangel.thesis.aipowered_location_advisor.Config;
+package com.kangel.thesis.aipowered_location_advisor.Security;
 
 import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.context.annotation.Bean;

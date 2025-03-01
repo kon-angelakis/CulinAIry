@@ -1,14 +1,21 @@
 package com.kangel.thesis.aipowered_location_advisor.Auth;
 
 import java.io.IOException;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.kangel.thesis.aipowered_location_advisor.Services.Email.RegistrationEmailSender;
 import com.kangel.thesis.aipowered_location_advisor.Services.OTP.EmailOTP;
 import com.kangel.thesis.aipowered_location_advisor.Users.User;
+
 
 @Service
 public class AuthService {
@@ -17,23 +24,37 @@ public class AuthService {
     private final RegistrationEmailSender rEmailSender;
     private final EmailOTP eOTP;
     private final BCryptPasswordEncoder encoder;
+    private final AuthenticationManager authManager;
+    private final JwtService jwtService;
 
     @Autowired
     public AuthService(AuthRepo authRepo, RegistrationEmailSender rEmailSender, EmailOTP eOTP,
-            BCryptPasswordEncoder encoder) {
+            BCryptPasswordEncoder encoder, AuthenticationManager authManager, JwtService jwtService) {
         this.authRepo = authRepo;
         this.rEmailSender = rEmailSender;
         this.eOTP = eOTP;
         this.encoder = encoder;
+        this.authManager = authManager;
+        this.jwtService = jwtService;
     }
 
-    public User Login(String user, String pass) {
-        // Get the user accordingly via email or username and if the password(newly
-        // encoded) matches the encoded one login else return null
-        User loginedUser = UserExists(user);
-        if (loginedUser != null && encoder.matches(pass, loginedUser.getPassword()))
-            return loginedUser;
-        return null;
+    //Generates and returns a map of the login status and the jwt token
+    public Map<String, Object> Login(String user, String pass) {
+        try {
+            Authentication auth = authManager.authenticate(new UsernamePasswordAuthenticationToken(user, pass));
+                return Map.of(
+                    "status", "Successful",
+                    "token", jwtService.GenerateToken(UserExists(user)),
+                    "statusCode", HttpStatus.OK
+                );
+
+        } catch (AuthenticationException e){
+            return Map.of(
+                "status", "Failed",
+                "token", "-",
+                "statusCode", HttpStatus.UNAUTHORIZED
+            );
+        }
     }
 
     // Send an otp only if the user is not already registered
@@ -64,5 +85,6 @@ public class AuthService {
                 : authRepo.findByUsername(user).orElse(null);
         return loginedUser;
     }
+
 
 }
