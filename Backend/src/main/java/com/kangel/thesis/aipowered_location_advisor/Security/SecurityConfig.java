@@ -27,7 +27,7 @@ public class SecurityConfig {
     @Autowired
     private final CorsConfig corsConfig;
     private final UserService userDetailService;
-    private final JwtAuthFilter JwtAuthFilter;
+    private final JwtAuthFilter jwtAuthFilter;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -36,11 +36,14 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfig.corsConfigurationSource()))
                 .httpBasic(Customizer.withDefaults())
                 .sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(JwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests((requests) -> requests
-                                .requestMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
+                                .requestMatchers("/api/auth/authenticated").authenticated()
+                                .requestMatchers("/api/auth/**").permitAll()
                                 .anyRequest().authenticated()
                 );
+                
+
         return http.build();
     }
 
@@ -48,7 +51,7 @@ public class SecurityConfig {
     @Bean
     public AuthenticationProvider provider() {
         DaoAuthenticationProvider dprovider = new DaoAuthenticationProvider();
-        dprovider.setPasswordEncoder(new PasswordEncoderConfig().PasswordEncoder());
+        dprovider.setPasswordEncoder(new HashingConfig().PasswordEncoder());
         dprovider.setUserDetailsService(userDetailService);
         return dprovider;
     }

@@ -44,7 +44,7 @@ public class RegistrationEmailSender implements IEmailService {
             request.setBody(mail.build());
             Response response = sg.api(request);
 
-            System.out.println("Status Code: " + response.getStatusCode());
+            System.out.println("Sent registration Email with Status Code: " + response.getStatusCode());
         } catch (IOException ex) {
             throw ex;
         }

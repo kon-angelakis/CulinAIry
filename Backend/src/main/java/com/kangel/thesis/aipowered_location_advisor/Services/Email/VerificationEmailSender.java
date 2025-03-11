@@ -24,7 +24,7 @@ public class VerificationEmailSender implements IEmailService {
         Twilio.init(env.get("TWILIO_SID"), env.get("TWILIO_AUTH_TOKEN"));
         Verification verification = Verification.creator(env.get("EMAIL_OTP_SID"), user.getEmail(), "email").create();
 
-        System.out.println(verification.getSid() + String.format(" Email sent to %s", user.getEmail()));
+        System.out.println(verification.getSid() + String.format(" Verification Email sent to %s", user.getEmail()));
     }
 
 }

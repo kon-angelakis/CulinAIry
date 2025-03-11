@@ -29,12 +29,12 @@ public class JwtAuthFilter extends OncePerRequestFilter{
     @Autowired
     private ApplicationContext context;
 
-    //Security filter that prioritizes JWT tokens over the conventional user pw authentication
+    //Security filter that prioritizes JWT tokens over the conventional username passw authentication
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
                 
-        String authHeader = request.getHeader("Authorization");
+        String authHeader = request.getHeader("authorization");
         String receivedToken = null;
         UserJwtDTO userDTO = null;
 

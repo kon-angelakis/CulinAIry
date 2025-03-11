@@ -42,17 +42,20 @@ public class AuthService {
     public Map<String, Object> Login(String user, String pass) {
         try {
             Authentication auth = authManager.authenticate(new UsernamePasswordAuthenticationToken(user, pass));
+            String jwt = jwtService.GenerateToken(UserExists(user));
                 return Map.of(
                     "status", "Successful",
-                    "token", jwtService.GenerateToken(UserExists(user)),
-                    "statusCode", HttpStatus.OK
+                    "token", jwt,
+                    "details", jwtService.extractUser(jwt),
+                    "StatusCode", HttpStatus.OK
                 );
 
         } catch (AuthenticationException e){
             return Map.of(
                 "status", "Failed",
                 "token", "-",
-                "statusCode", HttpStatus.UNAUTHORIZED
+                "details", "-",
+                "StatusCode", HttpStatus.UNAUTHORIZED
             );
         }
     }
@@ -75,10 +78,12 @@ public class AuthService {
             user.setPassword(encoder.encode(user.getPassword()));
             authRepo.save(user);
             rEmailSender.SendEmail(user);
-            return true;
+            return true; 
         }
         return false;
     }
+
+
 
     public User UserExists(String user) {
         User loginedUser = user.contains("@") ? authRepo.findByEmail(user).orElse(null)
