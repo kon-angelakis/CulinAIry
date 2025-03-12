@@ -119,4 +119,6 @@ hr {
   justify-content: center;
   margin-top: 10em;
   margin-bottom: 2em;
+  color: white;
+  mix-blend-mode: exclusion;
 }

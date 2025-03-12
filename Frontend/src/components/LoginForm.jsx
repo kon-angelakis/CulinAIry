@@ -6,12 +6,9 @@ import PasswordInput from "./Forms/PasswordInput";
 import GoogleButton from "./Forms/GoogleButton";
 import { Link, useNavigate } from "react-router-dom";
 import Splitter from "./Forms/Splitter";
-import AppleButton from "./Forms/AppleButton";
 
 function LoginForm() {
   const navigate = useNavigate();
-
-  const [available, setAvailable] = useState(true);
 
   const [verified, setVerified] = useState(null);
 
@@ -33,7 +30,7 @@ function LoginForm() {
         navigate("/home");
       }, 2500);
     } else if (verified === false) {
-      alert("bollocks");
+      alert("Invalid username or password");
     }
   }, [verified, navigate]);
 
@@ -56,7 +53,6 @@ function LoginForm() {
               type="text"
               placeholder="Email or Username"
               required={true}
-              available={available}
               icon={LuUser}
               animationIndex={1}
               onChange={handleChange}
@@ -71,8 +67,11 @@ function LoginForm() {
             <SubmitButton
               text={"Login"}
               data={formData}
-              endpoint="http://192.168.1.70:1010/api/auth/login"
+              endpoint="/api/auth/login"
+              method="post"
               setVerified={setVerified}
+              formAction="Login"
+              isAuthenticatedRequest={false}
             />
             <div className="helper-section">
               <p>
@@ -86,7 +85,6 @@ function LoginForm() {
           <Splitter text="Or sign in with" />
           <div className="alt-sign-in-options">
             <GoogleButton />
-            <AppleButton />
           </div>
         </div>
       </form>

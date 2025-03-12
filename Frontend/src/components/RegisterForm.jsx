@@ -7,16 +7,15 @@ import FullNameInput from "./Forms/FullNameInput";
 import PasswordInput from "./Forms/PasswordInput";
 import OTPInput from "./Forms/OTPInput";
 
-import axios from "axios";
-
 import "./Forms.css";
 import { useState } from "react";
 import SubmitButton from "./Forms/SubmitButton";
 import { Link } from "react-router-dom";
+import authAxios from "../config/axiosConfig";
 
 function RegisterForm() {
-  const [submitted, setSubmitStatus] = useState(false);
-  const [verified, setVerified] = useState(false);
+  const [registered, setRegistered] = useState(false);
+  const [completedRegistration, setCompletedRegistration] = useState(false);
   const [fieldsAvailable, setFieldsAvailable] = useState({
     username: true,
     email: true,
@@ -25,7 +24,7 @@ function RegisterForm() {
   const handleSubmit = (e) => {
     e.preventDefault();
     setTimeout(() => {
-      setSubmitStatus(true);
+      setRegistered(true);
     }, 1500);
   };
 
@@ -51,11 +50,8 @@ function RegisterForm() {
     const updatedFormData = { ...formData, ["user"]: e.target.value };
     //Basically does an api request to check if the user/email are already in use
     setTimeout(() => {
-      axios
-        .post(
-          "http://192.168.1.70:1010/api/auth/register/validate",
-          updatedFormData
-        )
+      authAxios
+        .post("/api/auth/register/validate", updatedFormData)
         .then((response) => {
           console.log("Post Created:", response.data);
           setFieldsAvailable({ ...fieldsAvailable, [e.target.name]: false });
@@ -71,7 +67,7 @@ function RegisterForm() {
 
   return (
     <div className="container">
-      {!submitted ? (
+      {!registered ? ( //Initial state user awaits for the OTP
         <form onSubmit={handleSubmit} method="POST">
           <div className="form-container">
             <div className="form-title">
@@ -139,12 +135,15 @@ function RegisterForm() {
               <SubmitButton
                 text={"Register"}
                 data={formData}
-                endpoint="http://192.168.1.70:1010/api/auth/register"
+                endpoint="/api/auth/register"
+                method="post"
                 disabled={
                   !passwordsMatch ||
                   !fieldsAvailable.email ||
                   !fieldsAvailable.username
                 }
+                formAction="Send OTP"
+                isAuthenticatedRequest={false}
               />
             </div>
             <div className="helper-section">
@@ -156,7 +155,7 @@ function RegisterForm() {
         </form>
       ) : (
         <>
-          {!verified ? (
+          {!completedRegistration ? ( //Show the OTP field
             <form
               className="otp-container"
               onSubmit={handleSubmit}
@@ -178,19 +177,29 @@ function RegisterForm() {
               <SubmitButton
                 text={"Verify"}
                 data={formData}
-                endpoint="http://192.168.1.70:1010/api/auth/verify"
-                setVerified={setVerified}
+                endpoint="/api/auth/verify"
+                method="post"
+                setVerified={setCompletedRegistration}
+                formAction="Verify OTP and Register"
+                isAuthenticatedRequest={false}
               />
               <SubmitButton
                 text={"Resend Verification Email"}
                 data={formData}
-                endpoint="http://192.168.1.70:1010/api/auth/register"
+                endpoint="/api/auth/register"
+                method="post"
+                formAction="Resend OTP"
+                isAuthenticatedRequest={false}
               />
             </form>
           ) : (
+            //Final state: completed registration and can redirect to login page
             <div className="otp-container">
               <RiVerifiedBadgeFill className="otp-success-icon" />
-              <h3>Activation successful! You can now login to your account</h3>
+              <h3>
+                Activation successful! You can now{" "}
+                <Link to="/login">Login </Link> to your account
+              </h3>
             </div>
           )}
         </>
