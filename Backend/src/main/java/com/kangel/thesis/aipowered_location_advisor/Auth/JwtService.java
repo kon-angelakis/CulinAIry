@@ -90,7 +90,7 @@ public class JwtService {
                     .parseClaimsJws(receivedToken);
 
             String username = claimsJws.getBody().getSubject();
-            return username.equals(userDetails.getUsername()) && !isTokenExpired(claimsJws.getBody());
+            return !isTokenExpired(claimsJws.getBody()) && username.equals(userDetails.getUsername());
         } catch (JwtException e) {
             return false;
         }

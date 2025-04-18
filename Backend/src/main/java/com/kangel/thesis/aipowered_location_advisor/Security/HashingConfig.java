@@ -12,6 +12,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 public class HashingConfig {
 
     private final int encoderStrength = 8;
+    private final  SecureRandom secureRandom = new SecureRandom();
 
     @Bean
     public BCryptPasswordEncoder PasswordEncoder() {
@@ -19,8 +20,7 @@ public class HashingConfig {
     }
 
     public String GenerateRandomUsername(int length){
-        SecureRandom secureRandom = new SecureRandom();
-        
+       
         byte[] hash = new byte[length];
         secureRandom.nextBytes(hash);
         String base64Hash = Base64.getEncoder().encodeToString(hash);
