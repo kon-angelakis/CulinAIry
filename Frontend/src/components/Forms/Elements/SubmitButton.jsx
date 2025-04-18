@@ -1,7 +1,8 @@
 import axios from "axios";
-import authAxios from "../../config/axiosConfig";
+import authAxios from "../../../config/axiosConfig";
 
 function SubmitButton({
+  primary = true, //primary or secondary button
   text, //buttons name
   data, //form data
   endpoint, //backend api clalcall
@@ -10,6 +11,7 @@ function SubmitButton({
   setVerified, //condition indicating successful call and response
   formAction, //string containing a name for the buttons action ie(Login/Register/Send OTP)
   isAuthenticatedRequest, //handles authenticated or not requests
+  width,
 }) {
   //Handles requests where the user MUST be authenticated to retrieve or post data
   const handleAuthRequest = (method, endpoint, data, action) => {
@@ -39,7 +41,7 @@ function SubmitButton({
 
   function PostData(e) {
     if (isAuthenticatedRequest) {
-      handleAuthRequest(method, formAction, endpoint, data, formAction);
+      handleAuthRequest(method, endpoint, data, formAction);
     } else {
       switch (formAction) {
         case "Login": //On login save the auth token and user details in the browsers local storage
@@ -74,7 +76,12 @@ function SubmitButton({
 
   return (
     <>
-      <button className="primary-button" onClick={PostData} disabled={disabled}>
+      <button
+        className={primary ? "primary-button" : "secondary-button"}
+        onClick={PostData}
+        disabled={disabled}
+        style={{ width: width }}
+      >
         {text}
       </button>
     </>

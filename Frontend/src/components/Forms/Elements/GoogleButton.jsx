@@ -1,8 +1,8 @@
 import { useGoogleLogin } from "@react-oauth/google";
-import authAxios from "../../config/axiosConfig";
+import authAxios from "../../../config/axiosConfig";
 import { useNavigate } from "react-router-dom";
 
-function GoogleButton() {
+function GoogleButton({ width }) {
   const navigate = useNavigate();
 
   //Passes the google auth code to the backend, and retrieves the jwt and userdetails
@@ -35,7 +35,11 @@ function GoogleButton() {
   });
 
   return (
-    <button className="secondary-button" onClick={() => login()}>
+    <button
+      className="secondary-button"
+      style={{ width: width }}
+      onClick={() => login()}
+    >
       <svg
         xmlSpace="preserve"
         style={{ enableBackground: "new 0 0 512 512" }}

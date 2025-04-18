@@ -2,16 +2,16 @@ import { LuContact, LuUser, LuLock, LuMail } from "react-icons/lu";
 import { GiEnvelope } from "react-icons/gi";
 import { RiVerifiedBadgeFill } from "react-icons/ri";
 
-import FormInput from "./Forms/FormInput";
-import FullNameInput from "./Forms/FullNameInput";
-import PasswordInput from "./Forms/PasswordInput";
-import OTPInput from "./Forms/OTPInput";
+import FormInput from "./Elements/FormInput";
+import FullNameInput from "./Elements/FullNameInput";
+import PasswordInput from "./Elements/PasswordInput";
+import OTPInput from "./Elements/OTPInput";
 
 import "./Forms.css";
 import { useState } from "react";
-import SubmitButton from "./Forms/SubmitButton";
+import SubmitButton from "./Elements/SubmitButton";
 import { Link } from "react-router-dom";
-import authAxios from "../config/axiosConfig";
+import authAxios from "../../config/axiosConfig";
 
 function RegisterForm() {
   const [registered, setRegistered] = useState(false);
@@ -144,6 +144,7 @@ function RegisterForm() {
                 }
                 formAction="Send OTP"
                 isAuthenticatedRequest={false}
+                width={"100%"}
               />
             </div>
             <div className="helper-section">
@@ -184,6 +185,7 @@ function RegisterForm() {
                 isAuthenticatedRequest={false}
               />
               <SubmitButton
+                primary={false}
                 text={"Resend Verification Email"}
                 data={formData}
                 endpoint="/api/auth/register"

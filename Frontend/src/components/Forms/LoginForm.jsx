@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { LuUser, LuLock } from "react-icons/lu";
-import SubmitButton from "./Forms/SubmitButton";
-import FormInput from "./Forms/FormInput";
-import PasswordInput from "./Forms/PasswordInput";
-import GoogleButton from "./Forms/GoogleButton";
+import SubmitButton from "./Elements/SubmitButton";
+import FormInput from "./Elements/FormInput";
+import PasswordInput from "./Elements/PasswordInput";
+import GoogleButton from "./Elements/GoogleButton";
 import { Link, useNavigate } from "react-router-dom";
-import Splitter from "./Forms/Splitter";
+import Splitter from "./Elements/Splitter";
 
 function LoginForm() {
   const navigate = useNavigate();
@@ -53,6 +53,7 @@ function LoginForm() {
               type="text"
               placeholder="Email or Username"
               required={true}
+              available={true}
               icon={LuUser}
               animationIndex={1}
               onChange={handleChange}
@@ -72,6 +73,7 @@ function LoginForm() {
               setVerified={setVerified}
               formAction="Login"
               isAuthenticatedRequest={false}
+              width={"100%"}
             />
             <div className="helper-section">
               <p>
@@ -84,7 +86,7 @@ function LoginForm() {
           </div>
           <Splitter text="Or sign in with" />
           <div className="alt-sign-in-options">
-            <GoogleButton />
+            <GoogleButton width={"100%"} />
           </div>
         </div>
       </form>

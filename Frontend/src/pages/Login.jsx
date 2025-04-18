@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import LoginForm from "../components/LoginForm";
+import LoginForm from "../components/Forms/LoginForm";
 import Footer from "../components/PageInfo/Footer";
 import authAxios from "../config/axiosConfig";
 import { useNavigate } from "react-router-dom";
