@@ -33,13 +33,13 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
-			<version>3.4.4</version>
+			<version>3.4.7</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.apache.tomcat.embed</groupId>
 			<artifactId>tomcat-embed-core</artifactId>
-			<version>11.0.5</version>
+			<version>11.0.9</version>
 		</dependency>
 
 		<dependency>
