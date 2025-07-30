@@ -59,9 +59,6 @@ function ItemCard({ name, logo, type, stars, reviewCount, backgroundPics }) {
           </div>
         </div>
         <div className="card-place-summary">
-          <div className="place-logo">
-            <img src={logo} alt=""></img>
-          </div>
           <div className="place-details">
             <div className="place-name">{name}</div>
             <div className="place-type">{type}</div>

@@ -75,7 +75,7 @@ function Home() {
       ],
     },
   ];
-  cards = [];
+  // cards = [];
   return (
     <>
       <div
