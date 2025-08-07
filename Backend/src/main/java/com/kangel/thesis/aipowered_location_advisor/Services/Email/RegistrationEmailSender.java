@@ -1,6 +1,5 @@
 package com.kangel.thesis.aipowered_location_advisor.Services.Email;
 
-import com.kangel.thesis.aipowered_location_advisor.Users.User;
 import java.io.IOException;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +9,8 @@ import com.sendgrid.helpers.mail.Mail;
 import com.sendgrid.helpers.mail.objects.Email;
 import com.sendgrid.helpers.mail.objects.Personalization;
 import io.github.cdimascio.dotenv.Dotenv;
+
+import com.kangel.thesis.aipowered_location_advisor.Models.User;
 import com.sendgrid.*;
 
 @Service

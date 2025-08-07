@@ -3,7 +3,7 @@ package com.kangel.thesis.aipowered_location_advisor.Services.Email;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.kangel.thesis.aipowered_location_advisor.Users.User;
+import com.kangel.thesis.aipowered_location_advisor.Models.User;
 import com.twilio.Twilio;
 import com.twilio.rest.verify.v2.service.Verification;
 
