@@ -10,8 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import com.kangel.thesis.aipowered_location_advisor.Models.User;
 
-
-public class UserPrincipal implements UserDetails{
+public class UserPrincipal implements UserDetails {
 
     @Autowired
     User user;

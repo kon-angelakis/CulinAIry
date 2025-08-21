@@ -1,9 +1,7 @@
 package com.kangel.thesis.aipowered_location_advisor.Services.Email;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.kangel.thesis.aipowered_location_advisor.Models.User;
 import com.twilio.Twilio;
 import com.twilio.rest.verify.v2.service.Verification;
 
@@ -14,17 +12,16 @@ public class VerificationEmailSender implements IEmailService {
 
     private final Dotenv env;
 
-    @Autowired
     public VerificationEmailSender(Dotenv env) {
         this.env = env;
     }
 
     @Override
-    public void SendEmail(User user) {
+    public void SendEmail(String emailTo) {
         Twilio.init(env.get("TWILIO_SID"), env.get("TWILIO_AUTH_TOKEN"));
-        Verification verification = Verification.creator(env.get("EMAIL_OTP_SID"), user.getEmail(), "email").create();
+        Verification verification = Verification.creator(env.get("EMAIL_OTP_SID"), emailTo, "email").create();
 
-        System.out.println(verification.getSid() + String.format(" Verification Email sent to %s", user.getEmail()));
+        System.out.println(verification.getSid() + String.format(" Verification Email sent to %s", emailTo));
     }
 
 }

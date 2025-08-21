@@ -1,11 +1,8 @@
 package com.kangel.thesis.aipowered_location_advisor.Models;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.data.mongodb.core.index.GeoSpatialIndexType;
@@ -37,6 +34,5 @@ public class Place {
     private List<String> photos = List.of();
     private List<Review> reviews = List.of();
 
-    @CreatedDate
-    private final LocalDateTime dateUpdated = LocalDateTime.now();
+    private LocalDateTime dateUpdated;
 }

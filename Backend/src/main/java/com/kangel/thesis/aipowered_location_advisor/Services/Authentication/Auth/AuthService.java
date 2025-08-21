@@ -3,11 +3,9 @@ package com.kangel.thesis.aipowered_location_advisor.Services.Authentication.Aut
 import java.io.IOException;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -15,7 +13,6 @@ import org.springframework.stereotype.Service;
 import com.kangel.thesis.aipowered_location_advisor.Models.User;
 import com.kangel.thesis.aipowered_location_advisor.Repositories.AuthRepo;
 import com.kangel.thesis.aipowered_location_advisor.Services.Email.RegistrationEmailSender;
-
 
 @Service
 public class AuthService {
@@ -27,7 +24,6 @@ public class AuthService {
     private final AuthenticationManager authManager;
     private final JwtService jwtService;
 
-    @Autowired
     public AuthService(AuthRepo authRepo, RegistrationEmailSender rEmailSender, EmailOTP eOTP,
             BCryptPasswordEncoder encoder, AuthenticationManager authManager, JwtService jwtService) {
         this.authRepo = authRepo;
@@ -38,35 +34,33 @@ public class AuthService {
         this.jwtService = jwtService;
     }
 
-    //Generates and returns a map of the login status and the jwt token
+    // Generates and returns a map of the login status and the jwt token
     public Map<String, Object> Login(String user, String pass) {
         try {
-            Authentication auth = authManager.authenticate(new UsernamePasswordAuthenticationToken(user, pass));
+            authManager.authenticate(new UsernamePasswordAuthenticationToken(user, pass));
             String jwt = jwtService.GenerateToken(UserExists(user));
-                return Map.of(
+            return Map.of(
                     "status", "Successful",
                     "token", jwt,
                     "details", jwtService.extractUser(jwt),
-                    "StatusCode", HttpStatus.OK
-                );
+                    "StatusCode", HttpStatus.OK);
 
-        } catch (AuthenticationException e){
+        } catch (AuthenticationException e) {
             return Map.of(
-                "status", "Failed",
-                "token", "-",
-                "details", "-",
-                "StatusCode", HttpStatus.UNAUTHORIZED
-            );
+                    "status", "Failed",
+                    "token", "-",
+                    "details", "-",
+                    "StatusCode", HttpStatus.UNAUTHORIZED);
         }
     }
 
     // Send an otp only if the user is not already registered
-    public boolean SendOTP(User user) {
-        if (authRepo.findByEmail(user.getEmail()).isPresent()
-                || authRepo.findByUsername(user.getUsername()).isPresent()) {
+    public boolean SendOTP(String username, String email) {
+        if (authRepo.findByEmail(email).isPresent()
+                || authRepo.findByUsername(username).isPresent()) {
             return false;
         } else {
-            eOTP.SendOTP(user);
+            eOTP.SendOTP(email);
             return true;
         }
     }
@@ -78,18 +72,15 @@ public class AuthService {
             user.setPassword(encoder.encode(user.getPassword()));
             authRepo.save(user);
             rEmailSender.SendEmail(user);
-            return true; 
+            return true;
         }
         return false;
     }
-
-
 
     public User UserExists(String user) {
         User loginedUser = user.contains("@") ? authRepo.findByEmail(user).orElse(null)
                 : authRepo.findByUsername(user).orElse(null);
         return loginedUser;
     }
-
 
 }

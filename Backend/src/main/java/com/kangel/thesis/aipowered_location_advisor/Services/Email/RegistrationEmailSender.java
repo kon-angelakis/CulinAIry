@@ -2,23 +2,24 @@ package com.kangel.thesis.aipowered_location_advisor.Services.Email;
 
 import java.io.IOException;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.kangel.thesis.aipowered_location_advisor.Models.User;
+import com.sendgrid.Method;
+import com.sendgrid.Request;
+import com.sendgrid.Response;
+import com.sendgrid.SendGrid;
 import com.sendgrid.helpers.mail.Mail;
 import com.sendgrid.helpers.mail.objects.Email;
 import com.sendgrid.helpers.mail.objects.Personalization;
-import io.github.cdimascio.dotenv.Dotenv;
 
-import com.kangel.thesis.aipowered_location_advisor.Models.User;
-import com.sendgrid.*;
+import io.github.cdimascio.dotenv.Dotenv;
 
 @Service
 public class RegistrationEmailSender implements IEmailService {
 
     private final Dotenv env;
 
-    @Autowired
     public RegistrationEmailSender(Dotenv env) {
         this.env = env;
     }

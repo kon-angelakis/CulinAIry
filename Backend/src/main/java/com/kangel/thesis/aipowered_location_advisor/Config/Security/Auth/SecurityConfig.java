@@ -38,17 +38,15 @@ public class SecurityConfig {
                 .sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests((requests) -> requests
-                                .requestMatchers("/api/auth/authenticated").authenticated()
-                                .requestMatchers("/api/auth/**").permitAll()
-                                .requestMatchers("/v1/api/test/*").permitAll()
-                                .anyRequest().authenticated()
-                );
-                
+                        .requestMatchers("/api/auth/authenticated").authenticated()
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/v1/api/test/*").permitAll()
+                        .anyRequest().authenticated());
 
         return http.build();
     }
 
-    //Used for custom secure login
+    // Used for custom secure login
     @Bean
     public AuthenticationProvider provider() {
         DaoAuthenticationProvider dprovider = new DaoAuthenticationProvider();

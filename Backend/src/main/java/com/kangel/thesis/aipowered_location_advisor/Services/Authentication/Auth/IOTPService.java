@@ -4,7 +4,7 @@ import com.kangel.thesis.aipowered_location_advisor.Models.User;
 
 public interface IOTPService {
 
-    void SendOTP(User user);
+    void SendOTP(String emailTo);
 
     boolean VerifyOTP(User user, String otpCode);
 }

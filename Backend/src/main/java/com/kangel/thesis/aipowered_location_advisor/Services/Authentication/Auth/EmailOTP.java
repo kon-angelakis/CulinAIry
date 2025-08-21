@@ -1,6 +1,5 @@
 package com.kangel.thesis.aipowered_location_advisor.Services.Authentication.Auth;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.kangel.thesis.aipowered_location_advisor.Models.User;
@@ -16,15 +15,14 @@ public class EmailOTP implements IOTPService {
     private final Dotenv env;
     private final VerificationEmailSender vEmailSender;
 
-    @Autowired
     public EmailOTP(Dotenv env, VerificationEmailSender vEmailSender) {
         this.env = env;
         this.vEmailSender = vEmailSender;
     }
 
     @Override
-    public void SendOTP(User user) {
-        vEmailSender.SendEmail(user);
+    public void SendOTP(String emailTo) {
+        vEmailSender.SendEmail(emailTo);
     }
 
     @Override

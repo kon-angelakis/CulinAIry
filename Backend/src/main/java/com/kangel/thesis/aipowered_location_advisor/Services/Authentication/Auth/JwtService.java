@@ -5,12 +5,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import com.kangel.thesis.aipowered_location_advisor.Models.User;
-import com.kangel.thesis.aipowered_location_advisor.Models.UserJwtDTO;
+import com.kangel.thesis.aipowered_location_advisor.Models.Records.UserDTO;
 
 import io.github.cdimascio.dotenv.Dotenv;
 import io.jsonwebtoken.Claims;
@@ -25,7 +24,6 @@ public class JwtService {
     private final Key SignedSecretKey;
     private final Dotenv env;
 
-    @Autowired
     public JwtService(Dotenv env) {
         this.env = env;
         String jwtSecret = this.env.get("JWT_SECRET");
@@ -35,14 +33,13 @@ public class JwtService {
     // Generate a JWT token for some of the users details using a user DT object
     public String GenerateToken(User user) {
         Map<String, Object> claims = new HashMap<>();
-        UserJwtDTO userDTO = new UserJwtDTO
-        (   
-            user.getFirstName(), 
-            user.getLastName(), 
-            user.getEmail(), 
-            user.getUsername(), 
-            user.getPfp()
-        );
+        UserDTO userDTO = new UserDTO(
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmail(),
+                user.getUsername(),
+                null,
+                user.getPfp());
         claims.put("User", userDTO);
 
         return Jwts.builder()
@@ -55,7 +52,7 @@ public class JwtService {
     }
 
     // Extract the user details from the received JWT token
-    public UserJwtDTO extractUser(String receivedToken) {
+    public UserDTO extractUser(String receivedToken) {
         try {
             Claims claims = Jwts.parserBuilder()
                     .setSigningKey(SignedSecretKey)
@@ -69,13 +66,13 @@ public class JwtService {
                 return null;
             }
 
-            return new UserJwtDTO(
+            return new UserDTO(
                     (String) userClaims.get("firstName"),
                     (String) userClaims.get("lastName"),
                     (String) userClaims.get("email"),
                     (String) userClaims.get("username"),
-                    (String) userClaims.get("pfp")
-            );
+                    null,
+                    (String) userClaims.get("pfp"));
         } catch (JwtException | ClassCastException e) {
             return null;
         }

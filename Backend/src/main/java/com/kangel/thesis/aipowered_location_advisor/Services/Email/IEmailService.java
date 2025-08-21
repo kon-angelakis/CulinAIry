@@ -6,5 +6,11 @@ import com.kangel.thesis.aipowered_location_advisor.Models.User;
 
 public interface IEmailService {
 
-    void SendEmail(User user) throws IOException;
+    default void SendEmail(String emailTo) throws IOException {
+        throw new UnsupportedOperationException("Not implemented");
+    };
+
+    default void SendEmail(User user) throws IOException {
+        throw new UnsupportedOperationException("Not implemented");
+    };
 }
