@@ -47,7 +47,7 @@ public class AIService {
 
         String response = webClient
                 .post()
-                .uri(uriBuilder -> uriBuilder.path(String.format("/%s/messages", threadId)).build())
+                .uri(uriBuilder -> uriBuilder.path("/{threadId}/messages").build(threadId))
                 .bodyValue(requestBody)
                 .retrieve()
                 .bodyToMono(String.class)
@@ -65,7 +65,7 @@ public class AIService {
 
         Map<String, Object> response = webClient
                 .post()
-                .uri(uriBuilder -> uriBuilder.path(String.format("/%s/runs", threadId)).build())
+                .uri(uriBuilder -> uriBuilder.path("/{threadId}/runs").build(threadId))
                 .bodyValue(requestBody)
                 .retrieve()
                 .bodyToMono(Map.class)
@@ -77,8 +77,8 @@ public class AIService {
     public Boolean GetAssistantRunStatus(String threadId, String runId) {
         Map<String, Object> response = webClient
                 .get()
-                .uri(uriBuilder -> uriBuilder.path(String.format("/%s/runs/%s", threadId, runId))
-                        .build())
+                .uri(uriBuilder -> uriBuilder.path("/{threadId}/runs/{runId}")
+                        .build(threadId, runId))
                 .retrieve()
                 .bodyToMono(Map.class)
                 .block();
@@ -90,7 +90,7 @@ public class AIService {
             throws JsonMappingException, JsonProcessingException {
         String response = webClient
                 .get()
-                .uri(uriBuilder -> uriBuilder.path(String.format("/%s/messages", threadId)).build())
+                .uri(uriBuilder -> uriBuilder.path("/{threadId}/messages").build(threadId))
                 .retrieve()
                 .bodyToMono(String.class)
                 .block();
@@ -115,7 +115,7 @@ public class AIService {
     public void DeleteThread(String threadId) {
         String response = webClient
                 .delete()
-                .uri(uriBuilder -> uriBuilder.path(String.format("/%s", threadId)).build())
+                .uri(uriBuilder -> uriBuilder.path("/{threadId}").build(threadId))
                 .retrieve()
                 .bodyToMono(String.class)
                 .block();

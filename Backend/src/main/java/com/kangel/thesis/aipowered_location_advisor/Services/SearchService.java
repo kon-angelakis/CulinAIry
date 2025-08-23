@@ -2,6 +2,7 @@ package com.kangel.thesis.aipowered_location_advisor.Services;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -18,6 +19,8 @@ import com.kangel.thesis.aipowered_location_advisor.Models.Records.NearbySearchR
 import com.kangel.thesis.aipowered_location_advisor.Models.Records.SearchRequest;
 import com.kangel.thesis.aipowered_location_advisor.Repositories.PlacesRepo;
 
+import jakarta.validation.Valid;
+
 @Service
 public class SearchService {
 
@@ -31,7 +34,7 @@ public class SearchService {
         this.placesRepo = placesRepo;
     }
 
-    public List<Place> SearchPlaces(SearchRequest request) throws JsonProcessingException, InterruptedException {
+    public List<Place> SearchPlaces(@Valid SearchRequest request) throws JsonProcessingException, InterruptedException {
         // AiAgent figures out which type of restaurant types the user might be
         // interested in
         // It also figures out the intent being demanding (eg a restaurant thats both
@@ -52,8 +55,8 @@ public class SearchService {
             recommendedPlaces = placesRepo.findNearbyPlacesDemanding(coordinates.longitude(), coordinates.latitude(),
                     request.radius(), restTypes);
 
-        Map<String, Place> recommendedPlacesMap = recommendedPlaces.stream()
-                .collect(Collectors.toMap(Place::getId, Function.identity()));
+        Map<String, Place> recommendedPlacesMap = recommendedPlaces.size() != 0 ? recommendedPlaces.stream()
+                .collect(Collectors.toMap(Place::getId, Function.identity())) : new HashMap<>();
         LocalDateTime now = LocalDateTime.now();
         // Update existing entries if they havent been updated in more than 2 weeks
         for (Place place : recommendedPlaces) {
@@ -77,8 +80,8 @@ public class SearchService {
                     placesRepo.save(place);
                 }
             }
+            recommendedPlaces = new ArrayList<>(recommendedPlacesMap.values());
         }
-
         return recommendedPlaces;
     }
 }
