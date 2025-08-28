@@ -7,27 +7,32 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import com.kangel.thesis.aipowered_location_advisor.Models.User;
-import com.kangel.thesis.aipowered_location_advisor.Repositories.AuthRepo;
-import com.kangel.thesis.aipowered_location_advisor.Services.Authentication.Auth.AuthService;
+import com.kangel.thesis.aipowered_location_advisor.Models.Enums.EmailTemplate;
+import com.kangel.thesis.aipowered_location_advisor.Repositories.UserRepo;
+import com.kangel.thesis.aipowered_location_advisor.Services.UserService;
 import com.kangel.thesis.aipowered_location_advisor.Services.Authentication.Auth.JwtService;
-import com.kangel.thesis.aipowered_location_advisor.Services.Email.RegistrationEmailSender;
+import com.kangel.thesis.aipowered_location_advisor.Services.Messaging.Email.EmailFactory;
+import com.kangel.thesis.aipowered_location_advisor.Services.Messaging.Email.SpringEmailService;
 
 import jakarta.servlet.http.HttpServletResponse;
 
 //Abstract class used for oauth2 services
 @Component
 public abstract class OAuth2Service {
-    private final AuthRepo authRepo;
-    private final AuthService authService;
-    private final RegistrationEmailSender rEmailSender;
+    private final UserRepo userRepo;
+    private final UserService userService;
+    private final SpringEmailService emailService;
+    private final EmailFactory emailFactory;
     private final JwtService jwtService;
     private final String name;
 
-    public OAuth2Service(AuthRepo authRepo, AuthService authService, RegistrationEmailSender rEmailSender,
+    public <RegistrationEmailSender> OAuth2Service(UserRepo userRepo, UserService userService,
+            SpringEmailService emailService, EmailFactory emailFactory,
             JwtService jwtService, String name) {
-        this.authRepo = authRepo;
-        this.authService = authService;
-        this.rEmailSender = rEmailSender;
+        this.userRepo = userRepo;
+        this.userService = userService;
+        this.emailService = emailService;
+        this.emailFactory = emailFactory;
         this.jwtService = jwtService;
         this.name = name;
     }
@@ -41,8 +46,9 @@ public abstract class OAuth2Service {
     // Registers the user to the database
     public void Register(User user) throws IOException {
         try {
-            authRepo.save(user);
-            rEmailSender.SendEmail(user);
+            userRepo.save(user);
+            emailService.SendMail(
+                    emailFactory.Create(EmailTemplate.THANKYOU, user.getEmail(), Map.of("name", user.getFirstName())));
             System.out
                     .println(String.format("OAuth2: %s%nUser: %s%nRegistration: SUCCESS", this.name, user.getEmail()));
         } catch (Exception e) {
@@ -54,12 +60,12 @@ public abstract class OAuth2Service {
     // Generates a login status if the authentication is successful also registers
     // the user if not in the db
     public Map<String, Object> Login(User user, HttpServletResponse response) throws IOException {
-        if (authService.UserExists(user.getEmail()) == null)
+        if (userService.GetUser(user.getEmail()) == null)
             Register(user);
 
         Map<String, Object> responseMap;
         try {
-            String jwtToken = jwtService.GenerateToken(authService.UserExists(user.getEmail()));
+            String jwtToken = jwtService.GenerateToken(userService.GetUser(user.getEmail()));
             response.setHeader("authorization", "Bearer " + jwtToken);
             responseMap = Map.of(
                     "UserDetails", jwtService.extractUser(jwtToken),

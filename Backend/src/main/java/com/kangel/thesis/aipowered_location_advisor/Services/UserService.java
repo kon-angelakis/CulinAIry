@@ -25,4 +25,14 @@ public class UserService implements UserDetailsService {
         return new UserPrincipal(loginedUser);
     }
 
+    public boolean UserExists(String user) {
+        return user.contains("@") ? userRepo.findByEmail(user).isPresent()
+                : userRepo.findByUsername(user).isPresent();
+    }
+
+    public User GetUser(String user) {
+        return user.contains("@") ? userRepo.findByEmail(user).orElse(null)
+                : userRepo.findByUsername(user).orElse(null);
+    }
+
 }

@@ -1,9 +1,7 @@
 package com.kangel.thesis.aipowered_location_advisor.Services.Authentication.Auth;
 
-import java.io.IOException;
-import java.util.Map;
+import java.util.Optional;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
@@ -11,76 +9,86 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.kangel.thesis.aipowered_location_advisor.Models.User;
-import com.kangel.thesis.aipowered_location_advisor.Repositories.AuthRepo;
-import com.kangel.thesis.aipowered_location_advisor.Services.Email.RegistrationEmailSender;
+import com.kangel.thesis.aipowered_location_advisor.Models.Records.ApiResponse;
+import com.kangel.thesis.aipowered_location_advisor.Models.Records.LoginRequest;
+import com.kangel.thesis.aipowered_location_advisor.Models.Records.LoginResponse;
+import com.kangel.thesis.aipowered_location_advisor.Models.Records.RegisterRequest;
+import com.kangel.thesis.aipowered_location_advisor.Models.Records.UserDTO;
+import com.kangel.thesis.aipowered_location_advisor.Models.Records.ValidationRequest;
+import com.kangel.thesis.aipowered_location_advisor.Models.Records.ValidationResponse;
+import com.kangel.thesis.aipowered_location_advisor.Repositories.UserRepo;
+import com.kangel.thesis.aipowered_location_advisor.Services.UserService;
 
 @Service
 public class AuthService {
 
-    private final AuthRepo authRepo;
-    private final RegistrationEmailSender rEmailSender;
-    private final EmailOTP eOTP;
+    private final UserRepo userRepo;
+    private final UserService userService;
+    private final VerificationService verificationService;
     private final BCryptPasswordEncoder encoder;
     private final AuthenticationManager authManager;
     private final JwtService jwtService;
 
-    public AuthService(AuthRepo authRepo, RegistrationEmailSender rEmailSender, EmailOTP eOTP,
-            BCryptPasswordEncoder encoder, AuthenticationManager authManager, JwtService jwtService) {
-        this.authRepo = authRepo;
-        this.rEmailSender = rEmailSender;
-        this.eOTP = eOTP;
+    public AuthService(UserRepo userRepo, BCryptPasswordEncoder encoder, AuthenticationManager authManager,
+            JwtService jwtService, VerificationService verificationService, UserService userService) {
+        this.userRepo = userRepo;
+        this.userService = userService;
+        this.verificationService = verificationService;
         this.encoder = encoder;
         this.authManager = authManager;
         this.jwtService = jwtService;
     }
 
-    // Generates and returns a map of the login status and the jwt token
-    public Map<String, Object> Login(String user, String pass) {
+    public ApiResponse<Void> Register(RegisterRequest request) {
+        User user = Optional.ofNullable(userService.GetUser(request.username()))
+                .orElse(userService.GetUser(request.email()));
+        if (user == null) {
+            user = new User(
+                    request.firstName(),
+                    request.lastName(),
+                    request.email(),
+                    request.username(),
+                    encoder.encode(request.password()),
+                    request.pfp(),
+                    "LEGACY");
+            user.setVerified(false);
+            user.setVerificationCode(jwtService.GenerateToken(user));
+            userRepo.save(user);
+            verificationService.SendCode(user.getEmail());
+            return new ApiResponse<>(true, String.format("Sent verification code to %s", user.getEmail()), null);
+        }
+        // user exists or token not expired
+        if (user.isVerified() || !jwtService.isTokenExpired(user.getVerificationCode())) {
+            String msg = user.isVerified() ? "User already registered"
+                    : "User already registered and awaiting verification";
+            return new ApiResponse<>(false, msg, null);
+        }
+
+        // expired token?
+        user.setVerificationCode(jwtService.GenerateToken(user));
+        userRepo.save(user);
+        verificationService.SendCode(user.getEmail());
+        return new ApiResponse<>(true, String.format("Sent verification code to %s", user.getEmail()), null);
+    }
+
+    public ApiResponse<LoginResponse> Login(LoginRequest request) {
+        User tmpAuthUser = userService.GetUser(request.user());
+        if (tmpAuthUser == null || !tmpAuthUser.isVerified())
+            return new ApiResponse<>(false, "User not found or is not verified", null);
         try {
-            authManager.authenticate(new UsernamePasswordAuthenticationToken(user, pass));
-            String jwt = jwtService.GenerateToken(UserExists(user));
-            return Map.of(
-                    "status", "Successful",
-                    "token", jwt,
-                    "details", jwtService.extractUser(jwt),
-                    "StatusCode", HttpStatus.OK);
-
+            authManager.authenticate(new UsernamePasswordAuthenticationToken(request.user(), request.pass()));
+            String jwt = jwtService.GenerateToken(tmpAuthUser);
+            return new ApiResponse<>(true, "User logined",
+                    new LoginResponse(tmpAuthUser.ToUserDTO(), jwt));
         } catch (AuthenticationException e) {
-            return Map.of(
-                    "status", "Failed",
-                    "token", "-",
-                    "details", "-",
-                    "StatusCode", HttpStatus.UNAUTHORIZED);
+            throw e;
         }
     }
 
-    // Send an otp only if the user is not already registered
-    public boolean SendOTP(String username, String email) {
-        if (authRepo.findByEmail(email).isPresent()
-                || authRepo.findByUsername(username).isPresent()) {
-            return false;
-        } else {
-            eOTP.SendOTP(email);
-            return true;
-        }
-    }
-
-    // Verify the otp via email and save the user in the database
-    public boolean VerifyAndRegister(User user, String otp) throws IOException {
-        if (eOTP.VerifyOTP(user, otp)) {
-            // Encode the users password using the BCryptPasswordEncoder before saving
-            user.setPassword(encoder.encode(user.getPassword()));
-            authRepo.save(user);
-            rEmailSender.SendEmail(user);
-            return true;
-        }
-        return false;
-    }
-
-    public User UserExists(String user) {
-        User loginedUser = user.contains("@") ? authRepo.findByEmail(user).orElse(null)
-                : authRepo.findByUsername(user).orElse(null);
-        return loginedUser;
+    public ApiResponse<ValidationResponse> ValidateFields(ValidationRequest request) {
+        boolean eitherExist = userService.UserExists(request.email()) || userService.UserExists(request.username());
+        return new ApiResponse<>(eitherExist, "Validation", new ValidationResponse(
+                userService.UserExists(request.email()), userService.UserExists(request.username())));
     }
 
 }

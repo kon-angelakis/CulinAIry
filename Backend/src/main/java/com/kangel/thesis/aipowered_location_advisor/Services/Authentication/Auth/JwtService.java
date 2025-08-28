@@ -31,6 +31,7 @@ public class JwtService {
     }
 
     // Generate a JWT token for some of the users details using a user DT object
+    // Maybe parameterise the expiration date in the future
     public String GenerateToken(User user) {
         Map<String, Object> claims = new HashMap<>();
         UserDTO userDTO = new UserDTO(
@@ -38,7 +39,6 @@ public class JwtService {
                 user.getLastName(),
                 user.getEmail(),
                 user.getUsername(),
-                null,
                 user.getPfp());
         claims.put("User", userDTO);
 
@@ -71,7 +71,6 @@ public class JwtService {
                     (String) userClaims.get("lastName"),
                     (String) userClaims.get("email"),
                     (String) userClaims.get("username"),
-                    null,
                     (String) userClaims.get("pfp"));
         } catch (JwtException | ClassCastException e) {
             return null;
@@ -95,5 +94,18 @@ public class JwtService {
 
     private boolean isTokenExpired(Claims claims) {
         return claims.getExpiration().before(new Date());
+    }
+
+    public boolean isTokenExpired(String token) {
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(SignedSecretKey)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+            return isTokenExpired(claims);
+        } catch (JwtException e) {
+            return true;
+        }
     }
 }

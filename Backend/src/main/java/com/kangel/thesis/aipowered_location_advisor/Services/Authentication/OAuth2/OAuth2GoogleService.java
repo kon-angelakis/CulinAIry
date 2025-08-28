@@ -8,10 +8,11 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import com.kangel.thesis.aipowered_location_advisor.Config.Security.Auth.HashingConfig;
 import com.kangel.thesis.aipowered_location_advisor.Models.User;
-import com.kangel.thesis.aipowered_location_advisor.Repositories.AuthRepo;
-import com.kangel.thesis.aipowered_location_advisor.Services.Authentication.Auth.AuthService;
+import com.kangel.thesis.aipowered_location_advisor.Repositories.UserRepo;
+import com.kangel.thesis.aipowered_location_advisor.Services.UserService;
 import com.kangel.thesis.aipowered_location_advisor.Services.Authentication.Auth.JwtService;
-import com.kangel.thesis.aipowered_location_advisor.Services.Email.RegistrationEmailSender;
+import com.kangel.thesis.aipowered_location_advisor.Services.Messaging.Email.EmailFactory;
+import com.kangel.thesis.aipowered_location_advisor.Services.Messaging.Email.SpringEmailService;
 
 import io.github.cdimascio.dotenv.Dotenv;
 
@@ -21,9 +22,10 @@ public class OAuth2GoogleService extends OAuth2Service {
     private final HashingConfig hashingConfig;
     private final Dotenv env;
 
-    public OAuth2GoogleService(AuthRepo authRepo, AuthService authService, RegistrationEmailSender rEmailSender,
+    public OAuth2GoogleService(UserRepo userRepo, UserService userService, SpringEmailService emailService,
+            EmailFactory emailFactory,
             JwtService jwtService, HashingConfig hashingConfig, Dotenv env) {
-        super(authRepo, authService, rEmailSender, jwtService, "GOOGLE");
+        super(userRepo, userService, emailService, emailFactory, jwtService, "GOOGLE");
         this.hashingConfig = hashingConfig;
         this.env = env;
     }

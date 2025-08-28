@@ -3,8 +3,6 @@ package com.kangel.thesis.aipowered_location_advisor.Services;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.IntStream;
 
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.stereotype.Service;
@@ -15,17 +13,11 @@ import com.kangel.thesis.aipowered_location_advisor.Models.Review;
 import com.kangel.thesis.aipowered_location_advisor.Models.Records.NearbySearchRequest;
 import com.kangel.thesis.aipowered_location_advisor.Models.Records.NearbySearchResponse;
 import com.kangel.thesis.aipowered_location_advisor.Models.Records.PlaceDetails;
-import com.kangel.thesis.aipowered_location_advisor.Models.Records.PlaceImageResponse;
 import com.kangel.thesis.aipowered_location_advisor.Models.Records.PlaceDetails.PhotoDTO;
 import com.kangel.thesis.aipowered_location_advisor.Models.Records.PlaceDetails.ReviewDTO;
+import com.kangel.thesis.aipowered_location_advisor.Models.Records.PlaceImageResponse;
 
 import io.github.cdimascio.dotenv.Dotenv;
-import io.imagekit.sdk.exceptions.BadRequestException;
-import io.imagekit.sdk.exceptions.ForbiddenException;
-import io.imagekit.sdk.exceptions.InternalServerException;
-import io.imagekit.sdk.exceptions.TooManyRequestsException;
-import io.imagekit.sdk.exceptions.UnauthorizedException;
-import io.imagekit.sdk.exceptions.UnknownException;
 import jakarta.validation.Valid;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -122,11 +114,13 @@ public class NearbySearchService {
                 .retrieve()
                 .bodyToMono(PlaceImageResponse.class)
                 .flatMap(response -> Mono
-                        .fromCallable(() -> imagekitService.UploadImage(response.photoUri(), placeId, photoNum)))
+                        .fromCallable(() -> imagekitService.UploadImage(response.photoUri(),
+                                placeId, photoNum)))
                 .map(uploaded -> imagekitService.RequestImage(placeId, photoNum));
     }
 
-    private Place ExtractPlaceData(PlaceDetails placeDTO) { // From google's nearby search api response extract and keep
+    private Place ExtractPlaceData(PlaceDetails placeDTO) { // From google's nearby search api response extract and
+                                                            // keep
                                                             // valuable fields as a Place object
         GeoJsonPoint location = new GeoJsonPoint(
                 placeDTO.location().longitude(),
@@ -142,7 +136,8 @@ public class NearbySearchService {
 
         // Contains imagekit links for image retrieval
         List<String> photosRefined = Flux.fromIterable(photosRaw)
-                .flatMap(photoId -> ExtractAndUploadPlaceImageAsync(placeDTO.id(), photoId, photosRaw.indexOf(photoId)))
+                .flatMap(photoId -> ExtractAndUploadPlaceImageAsync(placeDTO.id(), photoId,
+                        photosRaw.indexOf(photoId)))
                 .collectList()
                 .block(); // Only block once for the whole list
 

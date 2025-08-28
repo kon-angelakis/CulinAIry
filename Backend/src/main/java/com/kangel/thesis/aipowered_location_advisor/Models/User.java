@@ -8,6 +8,8 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.kangel.thesis.aipowered_location_advisor.Models.Records.UserDTO;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,6 +22,8 @@ public class User {
 
     @Id
     private ObjectId id;
+    private boolean isVerified;
+    private String verificationCode;
 
     private String firstName;
     private String lastName;
@@ -61,6 +65,10 @@ public class User {
         this.username = username;
         this.pfp = pfp;
         this.registration_method = registration_method;
+    }
+
+    public UserDTO ToUserDTO() {
+        return new UserDTO(firstName, lastName, email, username, pfp);
     }
 
 }

@@ -9,6 +9,5 @@ public record UserDTO(
         @NotBlank String lastName,
         @NotBlank @Email String email,
         @NotBlank String username,
-        String password,
         String pfp) {
 }
