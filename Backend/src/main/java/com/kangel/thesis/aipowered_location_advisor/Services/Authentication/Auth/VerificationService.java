@@ -10,7 +10,6 @@ import com.kangel.thesis.aipowered_location_advisor.Models.User;
 import com.kangel.thesis.aipowered_location_advisor.Models.Enums.EmailTemplate;
 import com.kangel.thesis.aipowered_location_advisor.Models.Records.ApiResponse;
 import com.kangel.thesis.aipowered_location_advisor.Models.Records.UserDTO;
-import com.kangel.thesis.aipowered_location_advisor.Repositories.UserRepo;
 import com.kangel.thesis.aipowered_location_advisor.Services.UserService;
 import com.kangel.thesis.aipowered_location_advisor.Services.Messaging.Email.EmailFactory;
 import com.kangel.thesis.aipowered_location_advisor.Services.Messaging.Email.SpringEmailService;
@@ -20,15 +19,13 @@ public class VerificationService {
 
     private final EmailFactory emailFactory;
     private final SpringEmailService emailService;
-    private final UserRepo userRepo;
     private final UserService userService;
     private final JwtService jwtService;
 
-    public VerificationService(EmailFactory emailFactory, SpringEmailService emailService, UserRepo userRepo,
+    public VerificationService(EmailFactory emailFactory, SpringEmailService emailService,
             UserService userService, JwtService jwtService) {
         this.emailFactory = emailFactory;
         this.emailService = emailService;
-        this.userRepo = userRepo;
         this.userService = userService;
         this.jwtService = jwtService;
     }
@@ -48,7 +45,7 @@ public class VerificationService {
         }
         user.setVerified(true);
         user.setVerificationCode(null);
-        userRepo.save(user);
+        userService.SaveUser(user);
         return new ApiResponse<>(true, "User verified successfully", null);
     }
 

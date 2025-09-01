@@ -13,25 +13,21 @@ import com.kangel.thesis.aipowered_location_advisor.Models.Records.ApiResponse;
 import com.kangel.thesis.aipowered_location_advisor.Models.Records.LoginRequest;
 import com.kangel.thesis.aipowered_location_advisor.Models.Records.LoginResponse;
 import com.kangel.thesis.aipowered_location_advisor.Models.Records.RegisterRequest;
-import com.kangel.thesis.aipowered_location_advisor.Models.Records.UserDTO;
 import com.kangel.thesis.aipowered_location_advisor.Models.Records.ValidationRequest;
 import com.kangel.thesis.aipowered_location_advisor.Models.Records.ValidationResponse;
-import com.kangel.thesis.aipowered_location_advisor.Repositories.UserRepo;
 import com.kangel.thesis.aipowered_location_advisor.Services.UserService;
 
 @Service
 public class AuthService {
 
-    private final UserRepo userRepo;
     private final UserService userService;
     private final VerificationService verificationService;
     private final BCryptPasswordEncoder encoder;
     private final AuthenticationManager authManager;
     private final JwtService jwtService;
 
-    public AuthService(UserRepo userRepo, BCryptPasswordEncoder encoder, AuthenticationManager authManager,
-            JwtService jwtService, VerificationService verificationService, UserService userService) {
-        this.userRepo = userRepo;
+    public AuthService(UserService userService, BCryptPasswordEncoder encoder, AuthenticationManager authManager,
+            JwtService jwtService, VerificationService verificationService) {
         this.userService = userService;
         this.verificationService = verificationService;
         this.encoder = encoder;
@@ -53,12 +49,12 @@ public class AuthService {
                     "LEGACY");
             user.setVerified(false);
             user.setVerificationCode(jwtService.GenerateToken(user));
-            userRepo.save(user);
+            user = userService.SaveUser(user);
             verificationService.SendCode(user.getEmail());
             return new ApiResponse<>(true, String.format("Sent verification code to %s", user.getEmail()), null);
         }
         // user exists or token not expired
-        if (user.isVerified() || !jwtService.isTokenExpired(user.getVerificationCode())) {
+        if (user.isVerified() || !jwtService.validateToken(user.getVerificationCode())) {
             String msg = user.isVerified() ? "User already registered"
                     : "User already registered and awaiting verification";
             return new ApiResponse<>(false, msg, null);
@@ -66,7 +62,7 @@ public class AuthService {
 
         // expired token?
         user.setVerificationCode(jwtService.GenerateToken(user));
-        userRepo.save(user);
+        user = userService.SaveUser(user);
         verificationService.SendCode(user.getEmail());
         return new ApiResponse<>(true, String.format("Sent verification code to %s", user.getEmail()), null);
     }

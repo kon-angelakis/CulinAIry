@@ -1,8 +1,5 @@
 package com.kangel.thesis.aipowered_location_advisor.Services;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.springframework.stereotype.Service;
 
 import io.github.cdimascio.dotenv.Dotenv;
@@ -47,7 +44,7 @@ public class ImagekitService {
     }
 
     public String RequestImage(String placeId, int photoNum) {
-        return String.format("%s/places/%s/%d", urlString, placeId, photoNum);
+        return String.format("%s/places/%s/%d.jpg", urlString, placeId, photoNum);
     }
 
 }

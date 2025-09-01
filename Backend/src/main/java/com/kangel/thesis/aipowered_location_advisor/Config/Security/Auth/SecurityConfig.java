@@ -41,7 +41,7 @@ public class SecurityConfig {
                         .requestMatchers("/auth/authenticated").authenticated()
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/verify/**").permitAll()
-                        .requestMatchers("/test/**").permitAll()
+                        // .requestMatchers("/test/**").permitAll()
                         .anyRequest().authenticated());
 
         return http.build();

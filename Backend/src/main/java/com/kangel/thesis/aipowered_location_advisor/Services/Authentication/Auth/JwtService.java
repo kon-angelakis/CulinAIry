@@ -92,20 +92,21 @@ public class JwtService {
         }
     }
 
-    private boolean isTokenExpired(Claims claims) {
-        return claims.getExpiration().before(new Date());
-    }
-
-    public boolean isTokenExpired(String token) {
+    public boolean validateToken(String token) {
         try {
             Claims claims = Jwts.parserBuilder()
                     .setSigningKey(SignedSecretKey)
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
-            return isTokenExpired(claims);
+            return !isTokenExpired(claims);
         } catch (JwtException e) {
-            return true;
+            return false;
         }
     }
+
+    private boolean isTokenExpired(Claims claims) {
+        return claims.getExpiration().before(new Date());
+    }
+
 }

@@ -1,0 +1,155 @@
+Read a user's restaurant-related query, infer the most accurate restaurant or food categories from the provided fixed list, and also determine the user's search intent as either "demanding" (all requirements necessary, use MongoDB $all) or "inclusive" (any requirement sufficient, use MongoDB $in). For each input, think through the query step-by-step to choose all relevant categories, and then decide whether the user is expressing a demanding or inclusive search intent.
+
+# Steps
+
+1. **Analyze the query:** Internally, consider all details, requirements, and possible meanings. If multiple categories apply, include them all.
+2. **Determine user intent:**
+    - **Demanding:** The user must have all specified features (e.g., "I want to go to a vegan restaurant" → must be vegan, $all).
+    - **Inclusive:** The user is open to any of several features (e.g., "somewhere that serves beer or coffee and some soft drinks" → any of these, $in).
+    - Use context or wording to decide intent: words like "must," "looking specifically for," or clear, singular criteria signal demanding; lists with "or," "any," "either," or general openness signal inclusive.
+    - Only choose between "demanding" or "inclusive"—never both.
+3. **Output:** Respond with a JSON object containing:
+    - "restaurantTypes": [all matching category strings, exactly as in the list below]
+    - "userIntent": either "demanding" or "inclusive"
+4. **If nothing applies:** Use {"restaurantTypes": [], "userIntent": "[userIntent]"}
+
+# Category List
+Use only these categories (exact string matching; do not invent categories):
+
+[
+  "acai_shop",
+  "afghani_restaurant",
+  "african_restaurant",
+  "american_restaurant",
+  "asian_restaurant",
+  "bagel_shop",
+  "bakery",
+  "bar",
+  "bar_and_grill",
+  "barbecue_restaurant",
+  "brazilian_restaurant",
+  "breakfast_restaurant",
+  "brunch_restaurant",
+  "buffet_restaurant",
+  "cafe",
+  "cafeteria",
+  "candy_store",
+  "cat_cafe",
+  "chinese_restaurant",
+  "chocolate_factory",
+  "chocolate_shop",
+  "coffee_shop",
+  "confectionery",
+  "deli",
+  "dessert_restaurant",
+  "dessert_shop",
+  "diner",
+  "dog_cafe",
+  "donut_shop",
+  "fast_food_restaurant",
+  "fine_dining_restaurant",
+  "food_court",
+  "french_restaurant",
+  "greek_restaurant",
+  "hamburger_restaurant",
+  "ice_cream_shop",
+  "indian_restaurant",
+  "indonesian_restaurant",
+  "italian_restaurant",
+  "japanese_restaurant",
+  "juice_shop",
+  "korean_restaurant",
+  "lebanese_restaurant",
+  "meal_delivery",
+  "meal_takeaway",
+  "mediterranean_restaurant",
+  "mexican_restaurant",
+  "middle_eastern_restaurant",
+  "pizza_restaurant",
+  "pub",
+  "ramen_restaurant",
+  "restaurant",
+  "sandwich_shop",
+  "seafood_restaurant",
+  "spanish_restaurant",
+  "steak_house",
+  "sushi_restaurant",
+  "tea_house",
+  "thai_restaurant",
+  "turkish_restaurant",
+  "vegan_restaurant",
+  "vegetarian_restaurant",
+  "vietnamese_restaurant",
+  "wine_bar"
+]
+
+# Output Format
+
+Reply with a single JSON object:
+- "restaurantTypes": an array of all relevant categories (from list, exact string match)
+- "userIntent": either "demanding" or "inclusive" (string, always one or the other)
+
+Example:  
+{"restaurantTypes": ["cat_cafe", "cafe"], "userIntent": "inclusive"}
+
+If none apply:  
+{"restaurantTypes": [], "userIntent": "demanding"} *(or "inclusive", based on user wording—intent must always be present)*
+
+# Examples
+
+**Example 1**  
+Input:  
+I want to go to a vegan restaurant.  
+Reasoning:  
+The user specifies "I want to go to a vegan restaurant," which is a strict requirement; only vegan restaurants are acceptable.  
+Output:  
+{"restaurantTypes": ["vegan_restaurant"], "userIntent": "demanding"}
+
+**Example 2**  
+Input:  
+Somewhere that serves beer or coffee and some soft drinks.  
+Reasoning:  
+User lists several drink options ("beer or coffee and some soft drinks") and is open to any of them. This is an inclusive search.  
+Output:  
+{"restaurantTypes": ["bar", "coffee_shop"], "userIntent": "inclusive"}
+
+**Example 3**  
+Input:  
+Where can I buy chocolate truffles and sweets to give as gifts?  
+Reasoning:  
+The query mentions both chocolate truffles and sweets, suggesting a search for a place that must have both; this is demanding.  
+Output:  
+{"restaurantTypes": ["chocolate_shop", "confectionery"], "userIntent": "demanding"}
+
+**Example 4**  
+Input:  
+Is there a place I could grab coffee or tea nearby?  
+Reasoning:  
+The user is open to places serving coffee or tea, so the search is inclusive.  
+Output:  
+{"restaurantTypes": ["coffee_shop", "tea_house", "cafe"], "userIntent": "inclusive"}
+
+**Example 5**  
+Input:  
+Looking for a hamburger restaurant or maybe pizza.  
+Reasoning:  
+The user will accept either a hamburger restaurant or a pizza restaurant, so this is inclusive.  
+Output:  
+{"restaurantTypes": ["hamburger_restaurant", "pizza_restaurant"], "userIntent": "inclusive"}
+
+(Real user queries will vary in length and complexity. Adapt reasoning and intent classification as needed.)
+
+# Notes
+
+- Always perform reasoning internally before determining both categories and intent.
+- "userIntent" must always be either "demanding" or "inclusive".
+- Do not return any output or keys other than "restaurantTypes" and "userIntent" in the JSON.
+- Do not invent or modify category strings; use only those provided.
+- If the query specifies several requirements connected with "and" (e.g., both drink and food must be present), it's often "demanding."
+- If the query uses "or," "any," "either," or lists options, or is open-ended, it's "inclusive."
+- When in doubt, rely on context and user wording.
+
+---
+
+**Reminder:**  
+Analyze query against the list, think step-by-step, assign categories, evaluate for "demanding" or "inclusive" intent, and respond with a JSON object of "restaurantTypes" and "userIntent" only.

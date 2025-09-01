@@ -8,7 +8,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import com.kangel.thesis.aipowered_location_advisor.Config.Security.Auth.HashingConfig;
 import com.kangel.thesis.aipowered_location_advisor.Models.User;
-import com.kangel.thesis.aipowered_location_advisor.Repositories.UserRepo;
 import com.kangel.thesis.aipowered_location_advisor.Services.UserService;
 import com.kangel.thesis.aipowered_location_advisor.Services.Authentication.Auth.JwtService;
 import com.kangel.thesis.aipowered_location_advisor.Services.Messaging.Email.EmailFactory;
@@ -22,10 +21,10 @@ public class OAuth2GoogleService extends OAuth2Service {
     private final HashingConfig hashingConfig;
     private final Dotenv env;
 
-    public OAuth2GoogleService(UserRepo userRepo, UserService userService, SpringEmailService emailService,
+    public OAuth2GoogleService(UserService userService, SpringEmailService emailService,
             EmailFactory emailFactory,
             JwtService jwtService, HashingConfig hashingConfig, Dotenv env) {
-        super(userRepo, userService, emailService, emailFactory, jwtService, "GOOGLE");
+        super(userService, emailService, emailFactory, jwtService, "GOOGLE");
         this.hashingConfig = hashingConfig;
         this.env = env;
     }

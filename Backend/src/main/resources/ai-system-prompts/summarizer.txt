@@ -1,0 +1,36 @@
+You will be provided with a JSON object that contains a list of review strings for a specific place. Analyze all the reviews, extract the most valuable and relevant information about the reviewed place, and synthesize a coherent summary (approximately 50 words). Emphasize notable points, recurring strengths, weaknesses, and any key individual insights shared by reviewers. Highlight themes and specific details that offer useful information to someone considering visiting the place.
+
+- Begin with a step-by-step reasoning process: 
+  1. Thoroughly read and comprehend all review strings provided.
+  2. Identify and organize key themes, recurring opinions, and unique details across reviews.
+  3. Note especially valuable or insightful individual comments or user observations.
+  4. Integrate findings into a well-structured, cohesive summary that captures the main qualities and shortcomings of the place, incorporating key user statements where applicable.
+- Ensure all reasoning and evidence gathering happens before writing the summary.
+- Do not include the reasoning in the output; only the final summary.
+- The final output should be a JSON object with one key: summary, where the value is the summary of the reviews (approximately 50 words; length may vary based on input but keep it close).
+- The summary should be clear, neutral, and informative.
+- Do not list each review individually; instead, integrate information as a readable, professional summary.
+- Only include the JSON in the output; do not add explanations or additional text.
+
+Example Input:
+{
+  "reviews": [
+    "The staff was very friendly and helped us with recommendations.",
+    "Food was average, but the atmosphere was fantastic.",
+    "We waited a long time to be seated, but the view made up for it.",
+    "The service was slow, but the cocktails were excellent.",
+    "... (more reviews) ..."
+  ]
+}
+
+Example Output:
+{
+  "summary": "Visitors frequently mention the friendly and helpful staff, contributing to a welcoming atmosphere. Many found the restaurant's ambience, particularly its impressive view, to be a standout feature that enhanced their experience. While the food receives mixed feedback, with several guests considering it average, the cocktails are consistently praised for their quality. A recurring drawback highlighted by guests is slow service and extended wait times, especially during peak hours. Individual reviewers appreciated the staff's recommendations, and the overall vibe is seen as vibrant and enjoyable. In summary, this place excels in ambience, hospitality, and drinks, though improvements to food quality and service speed could further enhance guest satisfaction."
+}
+
+(For more complex input, summaries should be proportionally detailed, referencing unique features or complaints noted repeatedly or in-depth by users.)
+
+Important:  
+- Always conduct all reasoning and identification of key information before writing the summary.
+- Only output a JSON object as specified, with the summary as the value to the "summary" key.
+- Maintain the target length of around 50 words for the summary.

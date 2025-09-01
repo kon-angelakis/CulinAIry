@@ -2,86 +2,123 @@ package com.kangel.thesis.aipowered_location_advisor.Services;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kangel.thesis.aipowered_location_advisor.Models.AIAgent;
 import com.kangel.thesis.aipowered_location_advisor.Models.Place;
+import com.kangel.thesis.aipowered_location_advisor.Models.Enums.AiProvider;
+import com.kangel.thesis.aipowered_location_advisor.Models.Records.AiClassificationResponse;
+import com.kangel.thesis.aipowered_location_advisor.Models.Records.AiRequest;
+import com.kangel.thesis.aipowered_location_advisor.Models.Records.ApiResponse;
 import com.kangel.thesis.aipowered_location_advisor.Models.Records.Location;
 import com.kangel.thesis.aipowered_location_advisor.Models.Records.NearbySearchRequest;
+import com.kangel.thesis.aipowered_location_advisor.Models.Records.PlaceDTO;
 import com.kangel.thesis.aipowered_location_advisor.Models.Records.SearchRequest;
-import com.kangel.thesis.aipowered_location_advisor.Repositories.PlacesRepo;
 
 import jakarta.validation.Valid;
 
 @Service
 public class SearchService {
 
-    private final AIService aiService;
+    private final AiManager aiManager;
     private final NearbySearchService nearSearchService;
-    private final PlacesRepo placesRepo;
+    private final PlaceService placeService;
 
-    public SearchService(AIService aiService, NearbySearchService nearSearchService, PlacesRepo placesRepo) {
-        this.aiService = aiService;
+    public SearchService(AiManager aiManager, NearbySearchService nearSearchService, PlaceService placeService) {
+        this.aiManager = aiManager;
         this.nearSearchService = nearSearchService;
-        this.placesRepo = placesRepo;
+        this.placeService = placeService;
     }
 
-    public List<Place> SearchPlaces(@Valid SearchRequest request) throws JsonProcessingException, InterruptedException {
-        // AiAgent figures out which type of restaurant types the user might be
-        // interested in
-        // It also figures out the intent being demanding (eg a restaurant thats both
-        // italian and vegan) or inclusive (eg a cafe or bar or both)
-        AIAgent queryClassifier = new AIAgent("asst_cfRdFvTm15gzE1z6pQcsT5Tx", request.user_input(), aiService);
-        Map<String, Object> agentResponse = queryClassifier.Run();
-        List<String> restTypes = (List<String>) agentResponse.get("types");
-        String userIntent = (String) agentResponse.get("intent");
+    public ApiResponse<LinkedHashSet<PlaceDTO>> SearchPlaces(@Valid SearchRequest request)
+            throws JsonProcessingException, InterruptedException {
+        try {
 
-        Location coordinates = request.location();
+            AiClassificationResponse aiResponse = ClassifyUserInput(request.userInput()).data();
+            List<String> restaurantTypes = aiResponse.restaurantTypes();
+            String userIntent = aiResponse.userIntent();
+            Location coordinates = request.location();
 
-        List<Place> recommendedPlaces = new ArrayList<>();
+            Set<Place> recommendedPlaces = FetchPlacesFromDB(coordinates, request.radius(), restaurantTypes,
+                    userIntent);
+            List<Place> placesToUpdate = UpdateStalePlaces(recommendedPlaces);
 
-        if (userIntent.equals("inclusive"))
-            recommendedPlaces = placesRepo.findNearbyPlacesInclusive(coordinates.longitude(), coordinates.latitude(),
-                    request.radius(), restTypes);
-        else // demanding intent
-            recommendedPlaces = placesRepo.findNearbyPlacesDemanding(coordinates.longitude(), coordinates.latitude(),
-                    request.radius(), restTypes);
-
-        Map<String, Place> recommendedPlacesMap = recommendedPlaces.size() != 0 ? recommendedPlaces.stream()
-                .collect(Collectors.toMap(Place::getId, Function.identity())) : new HashMap<>();
-        LocalDateTime now = LocalDateTime.now();
-        // Update existing entries if they havent been updated in more than 2 weeks
-        for (Place place : recommendedPlaces) {
-            if (place.getDateUpdated().isBefore(now.minusWeeks(2))) {
-                System.out.println(String.format("Place with id %s time updated", place.getId()));
-                placesRepo.save(nearSearchService.SearchPlaceDetails(place.getId()));
+            // Fetch additional places if less than 20
+            if (recommendedPlaces.size() < 20) {
+                FetchAdditionalPlaces(recommendedPlaces, placesToUpdate, restaurantTypes, coordinates,
+                        request.radius());
             }
+
+            // Save all updated/new places
+            placeService.SavePlaces(placesToUpdate);
+            // Dont return the whole place object to the frontend just the DTO, to get the
+            // whole object info the user must call the PlaceController
+            return new ApiResponse<LinkedHashSet<PlaceDTO>>(true, "Retrieved places", ConvertToDTOs(recommendedPlaces));
+        } catch (Exception e) {
+            return new ApiResponse<LinkedHashSet<PlaceDTO>>(false, "Could not retrieve places", null);
         }
-        // Check arraylist size if < 20 then do a gmap api call
-        if (recommendedPlaces.size() < 20) {
-            int numofPlaces = 20 - recommendedPlaces.size();
-            List<Place> nearbySearchResults = nearSearchService.NearbySearch(new NearbySearchRequest(
-                    new ObjectMapper().writeValueAsString(restTypes), numofPlaces, coordinates, request.radius()));
-            // Assuming the recommendedPlacesMap has every result matching the user query
-            // (<20)
-            // If any id of the nearbySearchResults places is already in the map don't save
-            // it in the db else save it
-            for (Place place : nearbySearchResults) {
-                if (!recommendedPlacesMap.containsKey(place.getId())) {
-                    recommendedPlacesMap.put(place.getId(), place);
-                    placesRepo.save(place);
-                }
-            }
-            recommendedPlaces = new ArrayList<>(recommendedPlacesMap.values());
+
+    }
+
+    private ApiResponse<AiClassificationResponse> ClassifyUserInput(String userInput)
+            throws InterruptedException, JsonProcessingException {
+        AiRequest<AiClassificationResponse> aiRequest = new AiRequest<>(userInput, "classifier",
+                AiClassificationResponse.class);
+        return aiManager.Call(AiProvider.OPENAI, aiRequest);
+    }
+
+    private Set<Place> FetchPlacesFromDB(Location coordinates, int radius, List<String> types, String intent) {
+        // inclusive: cafe OR italian -> shows either or both
+        // demanding: italian AND vegan -> shows only both
+        return intent.equals("inclusive")
+                ? new HashSet<>(
+                        placeService.FindPlaceInclusive(coordinates.longitude(), coordinates.latitude(), radius, types))
+                : new HashSet<>(placeService.FindPlacesDemanding(coordinates.longitude(), coordinates.latitude(),
+                        radius, types));
+    }
+
+    // Each 2 weeks update the stale place data
+    private List<Place> UpdateStalePlaces(Set<Place> places) throws InterruptedException {
+        List<Place> updatedPlaces = new ArrayList<>();
+        LocalDateTime twoWeeksAgo = LocalDateTime.now().minusWeeks(2);
+
+        List<Place> stalePlaces = places.stream()
+                .filter(p -> p.getDateUpdated().isBefore(twoWeeksAgo))
+                .toList();
+
+        for (Place stale : stalePlaces) {
+            places.remove(stale);
+            Place updated = nearSearchService.SearchPlaceDetails(stale.getId());
+            places.add(updated);
+            updatedPlaces.add(updated);
         }
-        return recommendedPlaces;
+
+        return updatedPlaces;
+    }
+
+    // If too few entries in the db < 20 call the google maps api to retrieve
+    // more(might still be <20)
+    private void FetchAdditionalPlaces(Set<Place> recommendedPlaces, List<Place> placesToUpdate,
+            List<String> types, Location coordinates, int radius) throws JsonProcessingException, InterruptedException {
+        int remaining = 20 - recommendedPlaces.size();
+        List<Place> apiResults = nearSearchService.NearbySearch(
+                new NearbySearchRequest(new ObjectMapper().writeValueAsString(types), remaining, coordinates, radius));
+
+        apiResults.stream()
+                .filter(recommendedPlaces::add)
+                .forEach(placesToUpdate::add);
+    }
+
+    private LinkedHashSet<PlaceDTO> ConvertToDTOs(Set<Place> places) {
+        return places.stream()
+                .map(Place::ToPlaceDTO)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 }

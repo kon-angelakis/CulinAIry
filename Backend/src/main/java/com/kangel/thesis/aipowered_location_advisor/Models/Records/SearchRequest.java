@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
 public record SearchRequest(
-        @NotNull String user_input,
+        @NotNull String userInput,
         @NotNull Location location,
         @NotNull @Positive @Max(20000) int radius) {
 }

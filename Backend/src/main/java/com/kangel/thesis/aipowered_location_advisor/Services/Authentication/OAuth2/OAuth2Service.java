@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 
 import com.kangel.thesis.aipowered_location_advisor.Models.User;
 import com.kangel.thesis.aipowered_location_advisor.Models.Enums.EmailTemplate;
-import com.kangel.thesis.aipowered_location_advisor.Repositories.UserRepo;
 import com.kangel.thesis.aipowered_location_advisor.Services.UserService;
 import com.kangel.thesis.aipowered_location_advisor.Services.Authentication.Auth.JwtService;
 import com.kangel.thesis.aipowered_location_advisor.Services.Messaging.Email.EmailFactory;
@@ -19,17 +18,15 @@ import jakarta.servlet.http.HttpServletResponse;
 //Abstract class used for oauth2 services
 @Component
 public abstract class OAuth2Service {
-    private final UserRepo userRepo;
     private final UserService userService;
     private final SpringEmailService emailService;
     private final EmailFactory emailFactory;
     private final JwtService jwtService;
     private final String name;
 
-    public <RegistrationEmailSender> OAuth2Service(UserRepo userRepo, UserService userService,
-            SpringEmailService emailService, EmailFactory emailFactory,
+    public <RegistrationEmailSender> OAuth2Service(UserService userService, SpringEmailService emailService,
+            EmailFactory emailFactory,
             JwtService jwtService, String name) {
-        this.userRepo = userRepo;
         this.userService = userService;
         this.emailService = emailService;
         this.emailFactory = emailFactory;
@@ -46,7 +43,7 @@ public abstract class OAuth2Service {
     // Registers the user to the database
     public void Register(User user) throws IOException {
         try {
-            userRepo.save(user);
+            userService.SaveUser(user);
             emailService.SendMail(
                     emailFactory.Create(EmailTemplate.THANKYOU, user.getEmail(), Map.of("name", user.getFirstName())));
             System.out
