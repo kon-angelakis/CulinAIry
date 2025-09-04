@@ -77,7 +77,7 @@ public class AuthService {
             return new ApiResponse<>(true, "User logined",
                     new LoginResponse(tmpAuthUser.ToUserDTO(), jwt));
         } catch (AuthenticationException e) {
-            throw e;
+            return new ApiResponse<>(false, "Couldn't authenticate user", null);
         }
     }
 
