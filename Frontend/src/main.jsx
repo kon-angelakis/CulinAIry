@@ -1,32 +1,27 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import "./styles/global.css";
-import Login from "./pages/Login.jsx";
-import Register from "./pages/Register.jsx";
-import Home from "./pages/Home.jsx";
-import ProtectedRoute from "./config/ProtectedRoute.jsx";
-import { GoogleOAuthProvider } from "@react-oauth/google";
+import "./index.css";
+import { createTheme, ThemeProvider } from "@mui/material";
+import { BrowserRouter as Router } from "react-router";
+import App from "./App.jsx";
+
+const customTheme = createTheme({
+  palette: {
+    primary: {
+      main: "#D62929",
+    },
+    secondary: {
+      main: "#FFAB03",
+    },
+  },
+});
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <GoogleOAuthProvider clientId="862654135638-ihdkg67htd7spqhla2qf3bk40ee0cdrk.apps.googleusercontent.com">
+    <ThemeProvider theme={customTheme}>
       <Router>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/*" element={<Register />} />{" "}
-          {/* Make a default error page */}
-          <Route
-            path="/home"
-            element={
-              <ProtectedRoute>
-                <Home />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
+        <App />
       </Router>
-    </GoogleOAuthProvider>
+    </ThemeProvider>
   </StrictMode>
 );

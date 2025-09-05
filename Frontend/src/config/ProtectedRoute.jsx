@@ -1,14 +1,13 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import authAxios from "./axiosConfig";
+import { Navigate, Outlet } from "react-router";
+import authAxios from "./authAxiosConfig";
 
-const ProtectedRoute = ({ children }) => {
+const ProtectedRoute = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
-  const navigate = useNavigate();
 
   useEffect(() => {
     authAxios
-      .get("/api/auth/authenticated")
+      .get("/auth/authenticated")
       .then((response) => {
         console.log("User authenticated:", response.data);
         setIsAuthenticated(true);
@@ -19,16 +18,17 @@ const ProtectedRoute = ({ children }) => {
       });
   }, []);
 
+  //filter out unauthenticated requests
   if (isAuthenticated === null) {
-    return <p>Loading...</p>; //Replace with a navigation page in the future
-  }
-
-  if (isAuthenticated === false) {
-    navigate("/login");
     return null;
   }
 
-  return children; //Show the protected page if auth is granted
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  //Render auth content
+  return <Outlet />;
 };
 
 export default ProtectedRoute;

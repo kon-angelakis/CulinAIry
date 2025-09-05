@@ -1,8 +1,8 @@
 import axios from "axios";
 
-const API_BASE_URL = "http://localhost:1010";
+const API_BASE_URL = "http://192.168.1.70:1010/v1/api";
 
-// Axios config file that automatically adds the authorization header to all requests
+// Axios implementation for authenticated request intercepting
 const authAxios = axios.create({
   baseURL: API_BASE_URL,
 });
