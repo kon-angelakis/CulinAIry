@@ -46,6 +46,8 @@ public class VerificationService {
         user.setVerified(true);
         user.setVerificationCode(null);
         userService.SaveUser(user);
+        emailService.SendMail(
+                emailFactory.Create(EmailTemplate.THANKYOU, user.getEmail(), Map.of("name", user.getFirstName())));
         return new ApiResponse<>(true, "User verified successfully", null);
     }
 
