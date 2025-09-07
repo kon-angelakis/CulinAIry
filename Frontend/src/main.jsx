@@ -5,6 +5,9 @@ import { createTheme, ThemeProvider } from "@mui/material";
 import { BrowserRouter as Router } from "react-router";
 import App from "./App.jsx";
 
+import "@fontsource-variable/outfit";
+import "@fontsource/paytone-one";
+
 const customTheme = createTheme({
   palette: {
     primary: {
@@ -13,6 +16,15 @@ const customTheme = createTheme({
     secondary: {
       main: "#FFAB03",
     },
+  },
+  typography: {
+    fontFamily: "'Outfit Variable', sans-serif",
+    h1: { fontFamily: "'Paytone One', sans-serif", letterSpacing: "-2px" },
+    h2: { fontFamily: "'Paytone One', sans-serif", letterSpacing: "-2px" },
+    h3: { fontFamily: "'Paytone One', sans-serif", letterSpacing: "-2px" },
+    h4: { fontFamily: "'Paytone One', sans-serif", letterSpacing: "-2px" },
+    h5: { fontFamily: "'Paytone One', sans-serif", letterSpacing: "-2px" },
+    h6: { fontFamily: "'Paytone One', sans-serif", letterSpacing: "-2px" },
   },
 });
 

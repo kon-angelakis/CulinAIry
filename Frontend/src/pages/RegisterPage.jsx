@@ -1,16 +1,16 @@
 import {
-  Box,
-  Container,
-  Paper,
-  Typography,
-  TextField,
-  Button,
-  Link,
   Alert,
+  Box,
+  Button,
+  Container,
+  Link,
+  Paper,
   Snackbar,
+  TextField,
+  Typography,
 } from "@mui/material";
-import apiAxios from "../config/apiAxiosConfig.js";
 import { useState } from "react";
+import apiAxios from "../config/apiAxiosConfig.js";
 
 export default function RegisterPage() {
   const [alert, setAlert] = useState({

@@ -1,4 +1,4 @@
-import { Box, Paper, Skeleton, Tooltip, Typography } from "@mui/material";
+import { Box, Paper, Skeleton, Typography } from "@mui/material";
 export default function PlaceCard() {
   return (
     <Paper

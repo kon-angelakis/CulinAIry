@@ -27,12 +27,13 @@ export default function PlaceCard({
       elevation={elevation}
       data-id={id}
       sx={{
-        scale: { xs: "0.85", sm: "1" },
         position: "relative",
         borderRadius: 2,
         flex: 1,
-        width: 400,
-        height: 250,
+        width: "100%",
+        aspectRatio: "16/10",
+        maxWidth: 400,
+        minWidth: 275,
 
         transition: "transform 0.3s ease, box-shadow 0.3s ease",
         "&:hover": {
@@ -64,6 +65,7 @@ export default function PlaceCard({
       <Box
         className="thumbnail"
         component="img"
+        loading="lazy"
         src={thumbnail}
         alt={name + " thumbnail"}
         sx={{
@@ -74,7 +76,7 @@ export default function PlaceCard({
           borderRadius: "inherit",
           filter: "grayscale(0.2)",
         }}
-      ></Box>
+      />
       <Box
         sx={{
           position: "absolute",

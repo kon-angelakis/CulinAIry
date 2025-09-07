@@ -1,200 +1,164 @@
+import RoomRoundedIcon from "@mui/icons-material/RoomRounded";
+import RestaurantRoundedIcon from "@mui/icons-material/RestaurantRounded";
+
 import {
-  Paper,
-  AppBar,
-  Toolbar,
   Box,
-  Avatar,
-  Typography,
-  IconButton,
   Button,
-  TextField,
-  Slider,
   Grid,
-  Drawer,
-  List,
-  ListItem,
-  ListItemText,
-  alpha,
+  Slider,
+  TextField,
+  Typography,
 } from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { ReactComponent as LogoRibbon } from "../assets/logo_ribbon.svg";
-import { useState } from "react";
-import SkeletonPlaceCard from "../components/SkeletonPlaceCard";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 
 export default function HomePage() {
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [searching, setSearching] = useState(false);
+  const [formData, setFormData] = useState({
+    userInput: "",
+    location: null,
+    radius: 5000, //matching starting slider radius
+  });
+
+  const navigate = useNavigate();
+
   const [radius, setRadius] = useState(5000);
+
+  const [locationGranted, setLocationGranted] = useState(false);
+  const [requestingLocation, setRequestingLocation] = useState(false);
+
+  const [loadingNextPage, setLoadingNextPage] = useState(false);
+
+  const requestLocation = () => {
+    setRequestingLocation(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setRequestingLocation(false);
+        setLocationGranted(true);
+        // Update form location data
+        setFormData({
+          ...formData,
+          location: {
+            longitude: position.coords.longitude,
+            latitude: position.coords.latitude,
+          },
+        });
+      },
+      (error) => {
+        setLocationGranted(false);
+        setRequestingLocation(false);
+        alert("Please enable location to continue");
+      },
+      {
+        enableHighAccuracy: true,
+      }
+    );
+  };
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
 
   return (
     <Box>
-      {/* APPBAR */}
-      <AppBar sx={{ px: 2 }}>
-        <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
-          {/* LEFT SIDE */}
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <IconButton
-              sx={{ display: { xs: "flex", sm: "none" } }}
-              onClick={() => setDrawerOpen(true)}
-            >
-              <MenuIcon sx={{ color: "#fff" }} />
-            </IconButton>
-
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                height: { xs: 35, sm: 50, md: 60 },
-                mx: { xs: "auto", sm: 0 },
-                "&:hover": {
-                  cursor: "pointer",
-                  color: "primary.dark",
-                },
-              }}
-              onClick={() => {
-                window.location.href = "/home";
-              }}
-            >
-              <LogoRibbon
-                style={{
-                  width: "auto",
-                  height: "110%",
-                  display: "block",
-                }}
-              />
-            </Box>
-          </Box>
-
-          {/* RIGHT SIDE */}
-          <Box
-            sx={{
-              display: { xs: "none", sm: "flex" },
-              alignItems: "center",
-              gap: 1,
-            }}
-          >
-            <Avatar sx={{ bgcolor: "secondary.main" }}>{"U"}</Avatar>
-            <Box sx={{ display: "flex", alignItems: "center" }}>
-              <Typography
-                variant="subtitle1"
-                sx={{ fontWeight: 500, cursor: "pointer" }}
-              >
-                {"Firstname"}
-              </Typography>
-              <IconButton size="small">
-                <ExpandMoreIcon />
-              </IconButton>
-            </Box>
-          </Box>
-        </Toolbar>
-      </AppBar>
-      {/* HAMBURGER DRAWER */}
-      <Drawer
-        anchor="left"
-        open={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
+      <Typography
+        variant={"h2"}
+        sx={{
+          textAlign: "start",
+          mb: 12,
+        }}
       >
-        <Box sx={{ width: 250 }} role="presentation">
-          <List>
-            <ListItem button>
-              <ListItemText primary="Profile" />
-            </ListItem>
-            <ListItem button>
-              <ListItemText primary="Settings" />
-            </ListItem>
-            <ListItem button>
-              <ListItemText primary="Logout" />
-            </ListItem>
-          </List>
-        </Box>
-      </Drawer>
-      {/* MAIN PAGE */}
-      <Paper elevation={2} sx={{ py: 10, px: 2 }}>
-        {!searching && (
-          <Box>
-            <Typography
-              variant="h3"
-              sx={{
-                textAlign: "start",
-                fontWeight: 700,
-                mb: 4,
-              }}
+        Hungry? Start typing below to get started
+      </Typography>
+      <Grid
+        container
+        rowSpacing={4}
+        sx={{ mb: 6, flexDirection: { xs: "column", md: "row" } }}
+      >
+        <TextField
+          name="userInput"
+          onChange={handleChange}
+          label="Search for restaurants, cafes..."
+          variant="outlined"
+          multiline
+          fullWidth
+        />
+
+        <Grid
+          size={{ xs: "grow", md: 8 }}
+          textAlign={"start"}
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Slider
+            name="radius"
+            value={radius}
+            onChange={(e, val) => {
+              setRadius(val);
+              handleChange(e);
+            }}
+            min={100}
+            max={10000}
+            step={100}
+            shiftStep={500}
+            valueLabelDisplay="auto"
+          />
+        </Grid>
+
+        <Grid
+          size="grow"
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            flexDirection: "column",
+          }}
+        >
+          {/* Show the grant location permission button first and iff the user accepts then proceed with showing him the search button */}
+          <Typography variant="caption" color="text.secondary">
+            Distance {radius}m
+          </Typography>
+          {!locationGranted ? (
+            <Button
+              variant="outlined"
+              size={"small"}
+              color="secondary"
+              sx={{ height: 56, width: "80%" }}
+              onClick={requestLocation}
+              endIcon={<RoomRoundedIcon color="primary" />}
+              loadingPosition="start"
+              loading={requestingLocation}
             >
-              Hungry? Start typing below to get started
-            </Typography>
-
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: { xs: "column", md: "row" },
-                alignItems: "center",
-                gap: 2,
-                mb: 4,
+              {requestingLocation ? "Detecting.." : "Enable Location"}
+            </Button>
+          ) : (
+            <Button
+              variant="contained"
+              size={"large"}
+              color="primary"
+              sx={{ height: 56, width: "80%" }}
+              onClick={() => {
+                setLoadingNextPage(true);
+                //Simulate a loading might implement this into an actual loading based on results gotten
+                setTimeout(() => {
+                  navigate("/results");
+                }, 1000);
+                console.log(formData);
               }}
+              endIcon={<RestaurantRoundedIcon />}
+              loadingPosition="start"
+              loading={loadingNextPage}
             >
-              <TextField
-                label="Search for restaurants, cafes..."
-                variant="outlined"
-                fullWidth
-              />
-
-              <Box sx={{ width: { xs: "100%", sm: 200 } }}>
-                <Typography gutterBottom>Radius (meters)</Typography>
-                <Slider
-                  value={radius}
-                  onChange={(e, val) => setRadius(val)}
-                  min={0}
-                  max={20000}
-                  valueLabelDisplay="auto"
-                />
-              </Box>
-
-              <Button variant="contained" color="primary" sx={{ height: 56 }}>
-                Use My Location
-              </Button>
-
-              <Button
-                variant="contained"
-                color="secondary"
-                sx={{ height: 56 }}
-                onClick={() => setSearching(true)}
-              >
-                Search
-              </Button>
-            </Box>
-          </Box>
-        )}
-        {searching && (
-          <Box>
-            <Typography variant="h4" sx={{ mb: 4 }}>
-              Found X results
-            </Typography>
-
-            <Grid container spacing={2} justifyContent="space-evenly">
-              {Array.from({ length: 11 }).map((_, idx) => (
-                <Grid
-                  item
-                  key={idx}
-                  sx={{
-                    flex: "1 1 275px", //container dynamic shrinking
-                    maxWidth: 400,
-                    width: { xs: "275px" }, //on mobiles start with the smallest possible size
-                  }}
-                >
-                  <SkeletonPlaceCard />
-                </Grid>
-              ))}
-            </Grid>
-          </Box>
-        )}
-      </Paper>
+              Search
+            </Button>
+          )}
+        </Grid>
+      </Grid>
     </Box>
   );
 }

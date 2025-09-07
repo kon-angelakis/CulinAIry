@@ -1,17 +1,14 @@
 import {
-  AppBar,
-  Toolbar,
+  Alert,
   Box,
-  Avatar,
-  Typography,
-  TextField,
   Button,
-  Paper,
-  Link,
   Container,
   Divider,
-  Alert,
+  Link,
+  Paper,
   Snackbar,
+  TextField,
+  Typography,
 } from "@mui/material";
 import GoogleButton from "../components/GoogleButton.jsx";
 
