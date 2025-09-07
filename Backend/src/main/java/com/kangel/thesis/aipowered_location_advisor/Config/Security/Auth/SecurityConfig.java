@@ -26,7 +26,9 @@ public class SecurityConfig {
 
     @Autowired
     private final CorsConfig corsConfig;
+    @Autowired
     private final UserService userDetailService;
+    @Autowired
     private final JwtAuthFilter jwtAuthFilter;
 
     @Bean
