@@ -1,20 +1,28 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
-import { createTheme, ThemeProvider } from "@mui/material";
+import { createTheme, ThemeProvider, responsiveFontSizes } from "@mui/material";
 import { BrowserRouter as Router } from "react-router";
 import App from "./App.jsx";
 
 import "@fontsource-variable/outfit";
 import "@fontsource/paytone-one";
 
-const customTheme = createTheme({
+let customTheme = createTheme({
   palette: {
     primary: {
       main: "#D62929",
     },
     secondary: {
       main: "#FFAB03",
+    },
+    background: {
+      default: "#FAFAFA",
+      paper: "#FFFFFF",
+    },
+    text: {
+      primary: "#2C2C2C",
+      secondary: "#6B6B6B",
     },
   },
   typography: {
@@ -23,17 +31,15 @@ const customTheme = createTheme({
     h2: { fontFamily: "'Paytone One', sans-serif", letterSpacing: "-2px" },
     h3: { fontFamily: "'Paytone One', sans-serif", letterSpacing: "-2px" },
     h4: { fontFamily: "'Paytone One', sans-serif", letterSpacing: "-2px" },
-    h5: { fontFamily: "'Paytone One', sans-serif", letterSpacing: "-2px" },
-    h6: { fontFamily: "'Paytone One', sans-serif", letterSpacing: "-2px" },
   },
 });
 
+customTheme = responsiveFontSizes(customTheme);
+
 createRoot(document.getElementById("root")).render(
-  <StrictMode>
-    <ThemeProvider theme={customTheme}>
-      <Router>
-        <App />
-      </Router>
-    </ThemeProvider>
-  </StrictMode>
+  <ThemeProvider theme={customTheme}>
+    <Router>
+      <App />
+    </Router>
+  </ThemeProvider>
 );

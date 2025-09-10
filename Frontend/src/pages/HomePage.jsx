@@ -1,5 +1,9 @@
 import RoomRoundedIcon from "@mui/icons-material/RoomRounded";
 import RestaurantRoundedIcon from "@mui/icons-material/RestaurantRounded";
+import DirectionsWalkRoundedIcon from "@mui/icons-material/DirectionsWalkRounded";
+import DirectionsRunRoundedIcon from "@mui/icons-material/DirectionsRunRounded";
+import DirectionsBikeRoundedIcon from "@mui/icons-material/DirectionsBikeRounded";
+import DirectionsCarRoundedIcon from "@mui/icons-material/DirectionsCarRounded";
 
 import {
   Box,
@@ -61,6 +65,29 @@ export default function HomePage() {
     });
   };
 
+  const handleSubmit = (e) => {
+    setLoadingNextPage(true);
+
+    e.preventDefault();
+    //Simulate a loading might implement this into an actual loading based on results gotten
+    setTimeout(() => {
+      navigate("/results", { state: { formData } });
+    }, 1000);
+    console.log(formData);
+  };
+
+  function getDirectionsIcon(radius) {
+    if (radius < 2000) {
+      return <DirectionsWalkRoundedIcon fontSize="medium" />;
+    } else if (radius < 5000) {
+      return <DirectionsRunRoundedIcon fontSize="medium" />;
+    } else if (radius < 7000) {
+      return <DirectionsBikeRoundedIcon fontSize="medium" />;
+    } else {
+      return <DirectionsCarRoundedIcon fontSize="medium" />;
+    }
+  }
+
   return (
     <Box>
       <Typography
@@ -70,95 +97,95 @@ export default function HomePage() {
           mb: 12,
         }}
       >
-        Hungry? Start typing below to get started
+        HUNGRY? START TYPING BELOW TO GET STARTED
       </Typography>
-      <Grid
-        container
-        rowSpacing={4}
-        sx={{ mb: 6, flexDirection: { xs: "column", md: "row" } }}
-      >
-        <TextField
-          name="userInput"
-          onChange={handleChange}
-          label="Search for restaurants, cafes..."
-          variant="outlined"
-          multiline
-          fullWidth
-        />
-
+      <form method="POST" onSubmit={handleSubmit}>
         <Grid
-          size={{ xs: "grow", md: 8 }}
-          textAlign={"start"}
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
+          container
+          rowSpacing={4}
+          sx={{ mb: 6, flexDirection: { xs: "column", md: "row" } }}
         >
-          <Slider
-            name="radius"
-            value={radius}
-            onChange={(e, val) => {
-              setRadius(val);
-              handleChange(e);
-            }}
-            min={100}
-            max={10000}
-            step={100}
-            shiftStep={500}
-            valueLabelDisplay="auto"
+          <TextField
+            name="userInput"
+            onChange={handleChange}
+            label="Search for restaurants, cafes..."
+            variant="outlined"
+            multiline
+            fullWidth
+            required
           />
-        </Grid>
 
-        <Grid
-          size="grow"
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            flexDirection: "column",
-          }}
-        >
-          {/* Show the grant location permission button first and iff the user accepts then proceed with showing him the search button */}
-          <Typography variant="caption" color="text.secondary">
-            Distance {radius}m
-          </Typography>
-          {!locationGranted ? (
-            <Button
-              variant="outlined"
-              size={"small"}
-              color="secondary"
-              sx={{ height: 56, width: "80%" }}
-              onClick={requestLocation}
-              endIcon={<RoomRoundedIcon color="primary" />}
-              loadingPosition="start"
-              loading={requestingLocation}
-            >
-              {requestingLocation ? "Detecting.." : "Enable Location"}
-            </Button>
-          ) : (
-            <Button
-              variant="contained"
-              size={"large"}
-              color="primary"
-              sx={{ height: 56, width: "80%" }}
-              onClick={() => {
-                setLoadingNextPage(true);
-                //Simulate a loading might implement this into an actual loading based on results gotten
-                setTimeout(() => {
-                  navigate("/results");
-                }, 1000);
-                console.log(formData);
+          <Grid
+            size={{ xs: "grow", md: 8 }}
+            textAlign={"start"}
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <Slider
+              name="radius"
+              value={radius}
+              onChange={(e, val) => {
+                setRadius(val);
+                handleChange(e);
               }}
-              endIcon={<RestaurantRoundedIcon />}
-              loadingPosition="start"
-              loading={loadingNextPage}
-            >
-              Search
-            </Button>
-          )}
+              min={100}
+              max={10000}
+              step={100}
+              shiftStep={500}
+              valueLabelDisplay="auto"
+            />
+          </Grid>
+
+          <Grid
+            size="grow"
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              flexDirection: "column",
+            }}
+          >
+            {/* Display a distance indication mark */}
+            <Typography variant="caption" color="text.secondary">
+              {getDirectionsIcon(radius)}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              Distance <strong>{radius / 1000}</strong>km
+            </Typography>
+            {/* Show the grant location permission button first and iff the user accepts then proceed with showing him the search button */}
+            {!locationGranted ? (
+              <Button
+                variant="outlined"
+                size={"small"}
+                color="secondary"
+                sx={{ height: 56, width: "80%" }}
+                onClick={requestLocation}
+                endIcon={<RoomRoundedIcon color="primary" />}
+                loadingPosition="start"
+                loading={requestingLocation}
+              >
+                {requestingLocation ? "Detecting.." : "Enable Location"}
+              </Button>
+            ) : (
+              <Button
+                type="submit"
+                variant="contained"
+                size={"large"}
+                color="primary"
+                sx={{ height: 56, width: "80%" }}
+                endIcon={<RestaurantRoundedIcon />}
+                loadingPosition="start"
+                loading={loadingNextPage}
+              >
+                Search
+              </Button>
+            )}
+          </Grid>
         </Grid>
-      </Grid>
+      </form>
     </Box>
   );
 }

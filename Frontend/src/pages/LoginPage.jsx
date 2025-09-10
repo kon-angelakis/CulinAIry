@@ -16,6 +16,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import apiAxios from "../config/apiAxiosConfig.js";
 import authAxios from "../config/authAxiosConfig.js";
+import CulinairyFooter from "../components/CulinairyFooter.jsx";
 
 export default function LoginPage() {
   const navigate = useNavigate(); //Skip login if already logined
@@ -117,7 +118,7 @@ export default function LoginPage() {
             width: "100%",
           }}
         >
-          <Typography variant="h5" sx={{ mb: 2, fontWeight: 600 }}>
+          <Typography variant="h4" sx={{ mb: 2, fontWeight: 600 }}>
             Sign In to Culinairy
           </Typography>
           <form onSubmit={handleSubmit} method="POST" style={{ width: "100%" }}>
@@ -182,6 +183,7 @@ export default function LoginPage() {
           </Box>
         </Paper>
       </Container>
+      <CulinairyFooter />
     </Box>
   );
 }

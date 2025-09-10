@@ -1,5 +1,5 @@
 import { Box, Paper, Skeleton, Typography } from "@mui/material";
-export default function PlaceCard() {
+export default function SkeletonPlaceCard() {
   return (
     <Paper
       elevation={4}
@@ -10,7 +10,7 @@ export default function PlaceCard() {
         width: "100%", // take full width of Grid cell
         aspectRatio: "16/10", // keeps proportions instead of hardcoding height
         maxWidth: 400,
-        minWidth: 275,
+        minWidth: 250,
       }}
     >
       <Skeleton

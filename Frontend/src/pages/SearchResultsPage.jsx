@@ -1,27 +1,95 @@
 import { Box, Grid, Typography } from "@mui/material";
 import SkeletonPlaceCard from "../components/SkeletonPlaceCard";
+import { useEffect, useState } from "react";
+import authAxios from "../config/authAxiosConfig.js";
+import PlaceCard from "../components/PlaceCard.jsx";
+import { useLocation } from "react-router";
+import { useQuery } from "@tanstack/react-query";
 
 export default function SearchResultsPage() {
+  const location = useLocation();
+  const { formData } = location.state || {};
+  const [placesResponse, setPlacesResponse] = useState(null);
+
+  const fetchPlaces = async () => {
+    try {
+      const response = await authAxios.post("/search", formData);
+      setPlacesResponse(response.data);
+      return response.data.data;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  // useQuery for caching results so if a user backtracks he doesnt requery the backend
+  //on page refresh the componenet is unmounted therefore cache loss
+  const { data: results = [], isLoading } = useQuery({
+    queryKey: [
+      "searchResults",
+      {
+        ...formData,
+        radius: Math.round(formData.radius / 500) * 500, //fuzzy caching of +-500m radius difference
+      },
+    ],
+    queryFn: fetchPlaces,
+    enabled: !!formData, //if somehow formData is invalid dont proceed
+    staleTime: 1000 * 60 * 5, //5 mins for stale data update
+    cacheTime: 1000 * 60 * 10, //10 mins for memory wipe
+  });
+
   return (
-    <Box>
+    <Box
+      sx={{
+        maxHeight: "80vh",
+        overflowY: "scroll",
+        scrollbarWidth: "none",
+      }}
+    >
       <Typography variant="h4" sx={{ mb: 4 }}>
-        Found X results
+        {isLoading
+          ? "Loading results"
+          : !placesResponse?.success
+          ? `Error retrieving results: ${placesResponse?.message}`
+          : `Found ${results.length} results`}
       </Typography>
 
-      <Grid container spacing={2} justifyContent="space-evenly">
-        {Array.from({ length: 11 }).map((_, idx) => (
-          <Grid
-            item
-            key={idx}
-            sx={{
-              flex: "1 1 275px", //container dynamic shrinking
-              maxWidth: 400,
-              width: { xs: "275px" }, //on mobiles start with the smallest possible size
-            }}
-          >
-            <SkeletonPlaceCard />
-          </Grid>
-        ))}
+      <Grid container spacing={4} sx={{ p: 2 }} justifyContent="space-evenly">
+        {isLoading
+          ? Array.from({ length: 11 }).map((_, idx) => (
+              <Grid
+                key={idx}
+                item
+                sx={{
+                  flex: "1 1 250px",
+                  maxWidth: 400,
+                  width: { xs: "250px" },
+                }}
+              >
+                <SkeletonPlaceCard />
+              </Grid>
+            ))
+          : placesResponse?.success
+          ? results.map((place) => (
+              <Grid
+                key={place.id}
+                item
+                sx={{
+                  flex: "1 1 250px",
+                  maxWidth: 400,
+                  width: { xs: "250px" },
+                }}
+              >
+                <PlaceCard
+                  id={place.id}
+                  thumbnail={place.thumbnail}
+                  name={place.name}
+                  category={place.primaryType}
+                  rating={place.rating}
+                  reviewCount={place.totalRatings}
+                />
+              </Grid>
+            ))
+          : "-"}
       </Grid>
     </Box>
   );

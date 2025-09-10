@@ -1,6 +1,7 @@
-import { Box, Paper, Typography } from "@mui/material";
+import { Box, Container, Paper } from "@mui/material";
 import { Outlet } from "react-router";
 import CulinairyAppbar from "../components/CulinairyAppbar";
+import CulinairyFooter from "../components/CulinairyFooter";
 
 export default function PageLayout() {
   return (
@@ -8,6 +9,8 @@ export default function PageLayout() {
       sx={{
         display: "flex",
         flexDirection: "column",
+        position: "relative",
+        p: { xs: 1, sm: 2, md: 4, lg: 8 },
       }}
     >
       <CulinairyAppbar />
@@ -17,30 +20,22 @@ export default function PageLayout() {
         sx={{
           pt: 5,
           pb: 10,
-          px: 2,
           width: "100%",
-          maxWidth: "clamp(275px, 75vw, 1200px)",
-          mx: "auto",
-          mt: 5,
+          maxWidth: "clamp(300px, 100vw, 1920px)",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          bgcolor: "#f5f5f5",
         }}
       >
-        <Outlet />
-        {/* Footer */}
-        <Typography
-          variant="subtitle1"
-          sx={{
-            position: "absolute",
-            mt: { xs: 30, lg: 40 },
-            pb: 2,
-            left: 0,
-            right: 0,
-            color: "black",
-          }}
+        <Container
+          sx={{ px: { xs: 3, sm: 6, md: 9, lg: 12 }, maxWidth: "inherit" }}
         >
-          Konstantinos Angelakis &copy; 2024-{new Date().getFullYear()}{" "}
-          <strong>Culinairy</strong>
-        </Typography>
+          <Outlet />
+        </Container>
       </Paper>
+      <CulinairyFooter />
     </Box>
   );
 }

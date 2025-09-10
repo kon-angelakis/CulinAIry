@@ -13,11 +13,13 @@ import {
   Typography,
 } from "@mui/material";
 import { useState } from "react";
-import { Outlet } from "react-router";
 
 import { ReactComponent as LogoRibbon } from "../assets/logo_ribbon.svg";
+import { useNavigate } from "react-router";
 
 export default function CulinairyAppbar() {
+  const navigate = useNavigate();
+
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   return (
@@ -43,7 +45,7 @@ export default function CulinairyAppbar() {
               sx={{
                 display: "flex",
                 alignItems: "center",
-                height: { xs: 35, sm: 50, md: 60 },
+                height: { xs: 40, sm: 50, md: 60 },
                 mx: { xs: "auto", sm: 0 },
                 "&:hover": {
                   cursor: "pointer",
@@ -51,7 +53,7 @@ export default function CulinairyAppbar() {
                 },
               }}
               onClick={() => {
-                window.location.href = "/home";
+                navigate("/home");
               }}
             >
               <LogoRibbon

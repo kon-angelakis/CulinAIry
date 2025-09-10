@@ -1,71 +1,106 @@
 import { useState } from "react";
-import Slider from "react-slick";
-import "slick-carousel/slick/slick-theme.css";
-import "slick-carousel/slick/slick.css";
 import { Modal, Box } from "@mui/material";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay, Pagination } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/pagination";
 
 export default function ImageCarousel({ images }) {
-  const sliderSettings = {
-    arrows: false,
-    dots: true,
-    infinite: true,
-    draggable: true,
-    slidesToShow: 1,
-    slidesToScroll: 1,
-    autoplay: true,
-    speed: 500,
-    autoplaySpeed: 5000,
-    easing: "ease-in-out",
-    lazyLoad: true,
-  };
-
   const [open, setOpen] = useState(false);
-  const [selectedModalImage, setselectedModalImage] = useState(null);
+  const [selectedModalImage, setSelectedModalImage] = useState(null);
+  const [grabbing, setGrabbing] = useState(false);
 
   return (
-    <Box>
-      <div className="slider-container">
-        <Slider {...sliderSettings}>
-          {images.map((image, idx) => (
-            <Box key={idx} sx={{ "&:hover": { cursor: "pointer" } }}>
-              <img
+    <Box
+      sx={{
+        position: "relative",
+        "&:hover": { cursor: !grabbing ? "grab" : "grabbing" },
+        userSelect: "none",
+      }}
+    >
+      <Swiper
+        modules={[Autoplay, Pagination]}
+        slidesPerView={1}
+        loop
+        lazy={true}
+        autoplay={{ delay: 5000 }}
+        pagination={{ clickable: true }}
+      >
+        {images.map((image, idx) => (
+          <SwiperSlide key={idx}>
+            <Box
+              sx={{
+                position: "relative",
+                width: "100%",
+                aspectRatio: { xs: "16/24", sm: "16/15", md: "16/9" },
+                borderRadius: 2,
+                overflow: "hidden",
+              }}
+              onPointerUp={() => setGrabbing(false)}
+              onPointerDown={() => setGrabbing(true)}
+            >
+              {/* Background image */}
+              <Box
+                component="img"
                 src={image}
-                style={{
+                alt={`bg-${idx}`}
+                loading="lazy"
+                sx={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
                   width: "100%",
-                  aspectRatio: "16/9",
+                  height: "100%",
                   objectFit: "cover",
-                  borderRadius: "4px",
+                  filter: "blur(5px) brightness(0.5) grayscale(0.5) ",
+                  zIndex: 0,
+                }}
+              />
+
+              {/* Main image */}
+              <Box
+                component="img"
+                src={image}
+                alt={`Slide ${idx}`}
+                loading="lazy"
+                sx={{
+                  position: "relative",
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "contain",
+                  borderRadius: 2,
+                  zIndex: 1,
                 }}
                 onClick={() => {
-                  setselectedModalImage(image);
+                  setSelectedModalImage(image);
                   setOpen(true);
                 }}
               />
             </Box>
-          ))}
-        </Slider>
+          </SwiperSlide>
+        ))}
+      </Swiper>
 
-        <Modal open={open} onClick={() => setOpen(false)}>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              height: "100%",
+      <Modal open={open} onClick={() => setOpen(false)}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "100%",
+          }}
+        >
+          <img
+            src={selectedModalImage}
+            alt="Full view"
+            style={{
+              maxWidth: "90%",
+              maxHeight: "90%",
+              borderRadius: "4px",
             }}
-          >
-            <img
-              src={selectedModalImage}
-              alt="Full view"
-              style={{
-                maxWidth: "90%",
-                maxHeight: "90%",
-                borderRadius: "4px",
-              }}
-            />
-          </Box>
-        </Modal>
-      </div>
+          />
+        </Box>
+      </Modal>
     </Box>
   );
 }

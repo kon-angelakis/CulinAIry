@@ -1,6 +1,7 @@
 import { Box, Fab, Paper, Tooltip, Typography } from "@mui/material";
 import { FavoriteRounded } from "@mui/icons-material";
 import { useState } from "react";
+import { useNavigate } from "react-router";
 
 export default function PlaceCard({
   id,
@@ -10,6 +11,8 @@ export default function PlaceCard({
   rating,
   reviewCount,
 }) {
+  const navigate = useNavigate();
+
   const [elevation, setElevation] = useState(2);
 
   const [favourite, setFavourite] = useState(false);
@@ -22,10 +25,15 @@ export default function PlaceCard({
     );
   };
 
+  const openDetailedPage = () => {
+    setTimeout(() => {
+      navigate(`/place/${id}`);
+    }, 1000);
+  };
+
   return (
     <Paper
       elevation={elevation}
-      data-id={id}
       sx={{
         position: "relative",
         borderRadius: 2,
@@ -33,18 +41,17 @@ export default function PlaceCard({
         width: "100%",
         aspectRatio: "16/10",
         maxWidth: 400,
-        minWidth: 275,
-
+        minWidth: 250,
         transition: "transform 0.3s ease, box-shadow 0.3s ease",
         "&:hover": {
           transform: "scale(1.05)",
-          boxShadow: "0 10px 20px rgba(0,0,0,0.2)",
           cursor: "pointer",
         },
         "&:hover .thumbnail": { filter: "grayscale(0)" },
       }}
-      onMouseEnter={() => setElevation(8)}
-      onMouseLeave={() => setElevation(4)}
+      onMouseEnter={() => setElevation(4)}
+      onMouseLeave={() => setElevation(2)}
+      onClick={openDetailedPage}
     >
       <Tooltip title={favouriteTooltip} placement="left">
         <Fab
@@ -53,10 +60,11 @@ export default function PlaceCard({
           sx={{
             position: "absolute",
             bgcolor: "transparent",
+            boxShadow: "none",
             top: 12,
             right: 12,
-            color: favourite ? "primary.main" : "primary.dark",
-            ":hover": { bgcolor: "primary.light" },
+            color: favourite ? "primary.main" : "rgba(255, 255, 255, 0.5)",
+            ":hover": { bgcolor: "primary.light", color: "white" },
           }}
         >
           <FavoriteRounded />
@@ -83,7 +91,7 @@ export default function PlaceCard({
           textAlign: "start",
           width: "100%",
           bottom: "0",
-          bgcolor: "rgba(255, 255, 255, 0.05)",
+          bgcolor: "rgba(255, 255, 255, 0.4)",
           backdropFilter: "blur(10px)",
           borderBottomLeftRadius: "inherit",
           borderBottomRightRadius: "inherit",
@@ -92,9 +100,18 @@ export default function PlaceCard({
           justifyContent: "space-between",
         }}
       >
-        <Box textAlign="start" sx={{ ml: 2, maxWidth: "70%" }}>
+        <Box
+          textAlign="start"
+          sx={{
+            ml: 2,
+            maxWidth: "50%",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+          }}
+        >
           <Tooltip title={name} arrow placement="top">
-            <Typography variant="h5" noWrap>
+            <Typography variant="h6" noWrap>
               {name}
             </Typography>
           </Tooltip>
@@ -105,8 +122,17 @@ export default function PlaceCard({
             </Typography>
           </Tooltip>
         </Box>
-        <Box textAlign="end" sx={{ mr: 2 }}>
-          <Typography variant="h6">{rating + " / 5 ⭐"}</Typography>
+        <Box
+          textAlign="end"
+          sx={{
+            mr: 2,
+            maxWidth: "50%",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+          }}
+        >
+          <Typography variant="subtitle1">{rating + " / 5 ⭐"}</Typography>
           <Typography variant="caption" color="text.secondary">
             ({reviewCount + " reviews"})
           </Typography>

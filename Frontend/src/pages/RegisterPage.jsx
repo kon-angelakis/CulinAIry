@@ -11,6 +11,7 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import apiAxios from "../config/apiAxiosConfig.js";
+import CulinairyFooter from "../components/CulinairyFooter.jsx";
 
 export default function RegisterPage() {
   const [alert, setAlert] = useState({
@@ -123,7 +124,7 @@ export default function RegisterPage() {
             borderRadius: 3,
           }}
         >
-          <Typography variant="h5" sx={{ mb: 3, fontWeight: 600 }}>
+          <Typography variant="h4" sx={{ mb: 3, fontWeight: 600 }}>
             Sign Up to Culinairy
           </Typography>
           <form onSubmit={handleSubmit} method="POST" style={{ width: "100%" }}>
@@ -254,6 +255,7 @@ export default function RegisterPage() {
           </Box>
         </Paper>
       </Container>
+      <CulinairyFooter />
     </Box>
   );
 }
