@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.kangel.thesis.aipowered_location_advisor.Models.Place;
 import com.kangel.thesis.aipowered_location_advisor.Models.User;
 import com.kangel.thesis.aipowered_location_advisor.Models.Enums.PlaceListType;
 import com.kangel.thesis.aipowered_location_advisor.Models.Records.ApiResponse;
@@ -33,10 +34,17 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/places") // Returns the dtos to construct cards in the frontend, being less expensive
+    @GetMapping("/places") // Returns the fav/recently viewed place dtos to construct cards in the
+                           // frontend, being less expensive
                            // than the full place object
     public ResponseEntity<?> Places(@RequestParam PlaceListType type) {
         ApiResponse<List<PlaceDTO>> response = userService.GetUserPlaces(type);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/favourites/{placeId}")
+    public ResponseEntity<?> IsFavourite(@PathVariable String placeId, @RequestParam String username) {
+        ApiResponse<Boolean> response = userService.IsFavourite(placeId, username);
         return ResponseEntity.ok(response);
     }
 

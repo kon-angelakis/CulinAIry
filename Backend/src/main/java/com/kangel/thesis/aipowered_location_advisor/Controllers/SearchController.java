@@ -31,6 +31,6 @@ public class SearchController {
     public ResponseEntity<?> PlaceSearch(
             @Valid @RequestBody SearchRequest request) throws JsonProcessingException, InterruptedException {
         ApiResponse<LinkedHashSet<PlaceDTO>> response = searchService.SearchPlaces(request);
-        return (new ResponseEntity<>(response, HttpStatus.OK));
+        return ResponseEntity.ok(response);
     }
 }

@@ -1,6 +1,7 @@
 package com.kangel.thesis.aipowered_location_advisor.Repositories;
 
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.data.mongodb.repository.Aggregation;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -23,7 +24,7 @@ public interface PlaceRepo extends MongoRepository<Place, String> {
                                         "} }",
                         "{ $match: { $expr: { $setIsSubset: [?3, '$secondaryTypes'] } } }",
                         "{ $sort: { dist: 1 } }",
-                        "{ $limit: 20 }"
+                        "{ $limit: 50 }"
         })
         public List<Place> findNearbyPlacesDemanding(double lon, double lat, int maxDist, List<String> types);
 
@@ -39,11 +40,10 @@ public interface PlaceRepo extends MongoRepository<Place, String> {
                                         "} }",
                         "{ $match: { matchCount: { $gt: 0 } } }",
                         "{ $sort: { matchCount: -1 } }",
-                        "{ $limit: 20 }"
+                        "{ $limit: 50 }"
         })
         public List<Place> findNearbyPlacesInclusive(double lon, double lat, int maxDist, List<String> types);
 
-        @Query("SELECT PlaceDTO(p.id, p.thumbnail, p.name, p.primaryType, p.totalRatings, p.rating, p.dateUpdated) " +
-                        "FROM Place p WHERE p.id IN :ids")
-        public List<PlaceDTO> findAllPlaceDTOSByIds(@Param("ids") Iterable<String> ids);
+        @Query(value = "{ '_id': { $in: ?0 } }", fields = "{ 'id': 1, 'thumbnail': 1, 'name': 1, 'primaryType': 1, 'rating': 1, 'totalRatings': 1 }")
+        public List<PlaceDTO> findAllPlaceDTOSById(@Param("ids") Iterable<String> ids);
 }

@@ -10,9 +10,10 @@ public record GooglePlaceDetails(
                 String internationalPhoneNumber,
                 String formattedAddress,
                 String websiteUri,
-                int userRatingCount,
+                Integer userRatingCount,
                 DisplayName displayName,
-                PrimaryTypeDisplayName primaryTypeDisplayName,
+                String primaryType, // eg greek_restaurant
+                PrimaryTypeDisplayName primaryTypeDisplayName, // eg Greek Restaurant
                 GoogleLinks googleMapsLinks,
                 Location location,
                 List<String> types,

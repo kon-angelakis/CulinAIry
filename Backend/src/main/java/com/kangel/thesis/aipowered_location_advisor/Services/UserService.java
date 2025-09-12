@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.kangel.thesis.aipowered_location_advisor.Config.Security.Auth.UserPrincipal;
+import com.kangel.thesis.aipowered_location_advisor.Models.Place;
 import com.kangel.thesis.aipowered_location_advisor.Models.User;
 import com.kangel.thesis.aipowered_location_advisor.Models.Enums.PlaceListType;
 import com.kangel.thesis.aipowered_location_advisor.Models.Records.ApiResponse;
@@ -56,6 +57,11 @@ public class UserService implements UserDetailsService {
         return new ApiResponse<User>(true, "User retrieved", user);
     }
 
+    public ApiResponse<Boolean> IsFavourite(String placeId, String username) {
+        return new ApiResponse<Boolean>(userRepo.existsByUsernameAndFavouritesContains(username, placeId), "favourite?",
+                userRepo.existsByUsernameAndFavouritesContains(username, placeId));
+    }
+
     public ApiResponse<Void> ToggleFavourite(String placeId, boolean toggle) { // toggle decides to
                                                                                // append or remove from favs
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -94,9 +100,10 @@ public class UserService implements UserDetailsService {
         String username = userDetails.getUsername();
         User user = GetUser(username);
         List<PlaceDTO> data;
+
         switch (type) {
-            case FAVOURITES -> data = placeService.FindAllPlaceDTOSByIds(user.getFavourites());
-            case RECENTLY_VIEWED -> data = placeService.FindAllPlaceDTOSByIds(user.getHistory());
+            case FAVOURITES -> data = placeService.FindAllPlaceDTOSById(user.getFavourites());
+            case RECENTLY_VIEWED -> data = placeService.FindAllPlaceDTOSById(user.getHistory());
             default -> throw new IllegalArgumentException("Invalid place list type");
         }
         return new ApiResponse<List<PlaceDTO>>(true, "Retrieved list of places", data);

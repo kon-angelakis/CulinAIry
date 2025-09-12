@@ -34,8 +34,8 @@ public class PlaceService {
         return placeRepo.findNearbyPlacesInclusive(lon, lat, maxDist, types);
     }
 
-    public List<PlaceDTO> FindAllPlaceDTOSByIds(Iterable<String> ids) {
-        return placeRepo.findAllPlaceDTOSByIds(ids);
+    public List<PlaceDTO> FindAllPlaceDTOSById(Iterable<String> ids) {
+        return placeRepo.findAllPlaceDTOSById(ids);
     }
 
     public Place SavePlace(Place place) {

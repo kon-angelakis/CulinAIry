@@ -5,8 +5,8 @@ public record PlaceDTO(
         String thumbnail,
         String name,
         String primaryType,
-        double rating,
-        int totalRatings
+        Double rating,
+        Integer totalRatings
 
 ) {
 

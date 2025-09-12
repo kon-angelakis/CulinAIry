@@ -31,73 +31,6 @@ public class SearchService {
     private final NearbySearchService nearSearchService;
     private final PlaceService placeService;
 
-    // Food related place types
-    private final List<String> acceptableTypes = List.of(
-            "acai_shop",
-            "afghani_restaurant",
-            "african_restaurant",
-            "american_restaurant",
-            "asian_restaurant",
-            "bagel_shop",
-            "bakery",
-            "bar",
-            "bar_and_grill",
-            "barbecue_restaurant",
-            "brazilian_restaurant",
-            "breakfast_restaurant",
-            "brunch_restaurant",
-            "buffet_restaurant",
-            "cafe",
-            "cafeteria",
-            "candy_store",
-            "cat_cafe",
-            "chinese_restaurant",
-            "chocolate_factory",
-            "chocolate_shop",
-            "coffee_shop",
-            "confectionery",
-            "deli",
-            "dessert_restaurant",
-            "dessert_shop",
-            "diner",
-            "dog_cafe",
-            "donut_shop",
-            "fast_food_restaurant",
-            "fine_dining_restaurant",
-            "food_court",
-            "french_restaurant",
-            "greek_restaurant",
-            "hamburger_restaurant",
-            "ice_cream_shop",
-            "indian_restaurant",
-            "indonesian_restaurant",
-            "italian_restaurant",
-            "japanese_restaurant",
-            "juice_shop",
-            "korean_restaurant",
-            "lebanese_restaurant",
-            "meal_delivery",
-            "meal_takeaway",
-            "mediterranean_restaurant",
-            "mexican_restaurant",
-            "middle_eastern_restaurant",
-            "pizza_restaurant",
-            "pub",
-            "ramen_restaurant",
-            "restaurant",
-            "sandwich_shop",
-            "seafood_restaurant",
-            "spanish_restaurant",
-            "steak_house",
-            "sushi_restaurant",
-            "tea_house",
-            "thai_restaurant",
-            "turkish_restaurant",
-            "vegan_restaurant",
-            "vegetarian_restaurant",
-            "vietnamese_restaurant",
-            "wine_bar");
-
     public SearchService(AiManager aiManager, NearbySearchService nearSearchService, PlaceService placeService) {
         this.aiManager = aiManager;
         this.nearSearchService = nearSearchService;
@@ -129,7 +62,7 @@ public class SearchService {
             // whole object info the user must call the PlaceController
             return new ApiResponse<LinkedHashSet<PlaceDTO>>(true, "Retrieved places", ConvertToDTOs(recommendedPlaces));
         } catch (Exception e) {
-            return new ApiResponse<LinkedHashSet<PlaceDTO>>(false, "Could not retrieve places", null);
+            return new ApiResponse<LinkedHashSet<PlaceDTO>>(false, e.toString(), null);
         }
 
     }
@@ -179,14 +112,8 @@ public class SearchService {
                 new NearbySearchRequest(new ObjectMapper().writeValueAsString(types), remaining, coordinates, radius));
 
         apiResults.stream()
-                .filter(place -> { // Filter out all the places that are not primarily food related
-                    String primaryType = place.getPrimaryType();
-                    return acceptableTypes.contains(primaryType); // if false stream filters it out
-                })
-                .forEach(place -> {
-                    recommendedPlaces.add(place);
-                    placesToUpdate.add(place);
-                });
+                .filter(recommendedPlaces::add)
+                .forEach(placesToUpdate::add);
     }
 
     private LinkedHashSet<PlaceDTO> ConvertToDTOs(Set<Place> places) {
