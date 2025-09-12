@@ -71,7 +71,13 @@ export default function HomePage() {
     e.preventDefault();
     //Simulate a loading might implement this into an actual loading based on results gotten
     setTimeout(() => {
-      navigate("/results", { state: { formData } });
+      navigate("/results", {
+        state: {
+          searchEndpoint: "/search",
+          axiosMethod: "POST",
+          formData: formData,
+        },
+      });
     }, 1000);
     console.log(formData);
   };
@@ -131,7 +137,7 @@ export default function HomePage() {
                 setRadius(val);
                 handleChange(e);
               }}
-              min={100}
+              min={500}
               max={10000}
               step={100}
               shiftStep={500}

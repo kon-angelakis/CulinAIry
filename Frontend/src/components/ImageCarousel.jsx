@@ -22,7 +22,6 @@ export default function ImageCarousel({ images }) {
         modules={[Autoplay, Pagination]}
         slidesPerView={1}
         loop
-        lazy={true}
         autoplay={{ delay: 5000 }}
         pagination={{ clickable: true }}
       >

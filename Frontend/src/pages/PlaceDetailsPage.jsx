@@ -1,7 +1,7 @@
 import { Box, Grid } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
-import { useParams } from "react-router";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router";
 import ReviewsPanel from "../components/ReviewsPanel";
 import authAxios from "../config/authAxiosConfig";
 
@@ -13,9 +13,20 @@ import ScheduleCard from "../components/ScheduleCard";
 export default function PlaceDetailsPage() {
   const { id } = useParams();
 
+  const [isFavourite, setIsFavourite] = useState(false);
+
   const fetchDetails = async () => {
     const response = await authAxios.get(`/places/${id}`);
     return response.data.data;
+  };
+
+  const fetchIsFavourited = async () => {
+    const response = await authAxios.get(`/user/favourites/${id}`, {
+      params: {
+        username: JSON.parse(localStorage.getItem("UserDetails")).username,
+      },
+    });
+    setIsFavourite(response.data.data);
   };
 
   const { data: results = {}, isLoading } = useQuery({
@@ -26,17 +37,23 @@ export default function PlaceDetailsPage() {
     cacheTime: 1000 * 60 * 10,
   });
 
+  useEffect(() => {
+    fetchIsFavourited();
+  }, []);
+
   return (
     <Box>
       <Grid container spacing={4}>
         {/* Banner */}
-        <Grid>
+        <Grid size={12}>
           <PlaceBanner
             name={results.name}
             photos={results.photos}
             rating={results.rating}
             totalRatings={results.totalRatings}
             isLoading={isLoading}
+            isFavourite={isFavourite}
+            setIsFavourite={setIsFavourite}
           />
         </Grid>
         {/* Contact methods */}

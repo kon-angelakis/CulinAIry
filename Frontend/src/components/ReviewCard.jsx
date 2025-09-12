@@ -6,14 +6,11 @@ export default function ReviewCard({ review }) {
     switch (rating) {
       case 1:
         return (
-          <Box>
+          <Box sx={{ width: "80%" }}>
             <Box>
-              <StarRoundedIcon
-                fontSize="large"
-                sx={{ color: "gold", mr: 0.5 }}
-              />
+              <StarRoundedIcon fontSize="large" sx={{ color: "gold" }} />
             </Box>
-            <Divider sx={{ mt: 0.5, mb: 3, mx: -2 }}>
+            <Divider sx={{ mt: 0.5, mb: 3 }}>
               <strong>Terrible</strong>
             </Divider>
           </Box>
@@ -21,7 +18,7 @@ export default function ReviewCard({ review }) {
         break;
       case 2:
         return (
-          <Box>
+          <Box sx={{ width: "80%" }}>
             <Box>
               <StarRoundedIcon
                 fontSize="large"
@@ -32,7 +29,7 @@ export default function ReviewCard({ review }) {
                 sx={{ color: "gold", mr: 0.5 }}
               />
             </Box>
-            <Divider sx={{ mt: 0.5, mb: 3, mx: -2 }}>
+            <Divider sx={{ mt: 0.5, mb: 3 }}>
               <strong>Bad</strong>
             </Divider>
           </Box>
@@ -40,7 +37,7 @@ export default function ReviewCard({ review }) {
         break;
       case 3:
         return (
-          <Box>
+          <Box sx={{ width: "80%" }}>
             <Box>
               <StarRoundedIcon
                 fontSize="medium"
@@ -55,7 +52,7 @@ export default function ReviewCard({ review }) {
                 sx={{ color: "gold", mr: 0.5 }}
               />
             </Box>
-            <Divider sx={{ mt: 0.5, mb: 3, mx: -2 }}>
+            <Divider sx={{ mt: 0.5, mb: 3 }}>
               <strong>Fair</strong>
             </Divider>
           </Box>
@@ -63,7 +60,7 @@ export default function ReviewCard({ review }) {
         break;
       case 4:
         return (
-          <Box>
+          <Box sx={{ width: "80%" }}>
             <Box>
               <StarRoundedIcon
                 fontSize="small"
@@ -82,7 +79,7 @@ export default function ReviewCard({ review }) {
                 sx={{ color: "gold", mr: 0.5 }}
               />
             </Box>
-            <Divider sx={{ mt: 0.5, mb: 3, mx: -2 }}>
+            <Divider sx={{ mt: 0.5, mb: 3 }}>
               <strong>Great</strong>
             </Divider>
           </Box>
@@ -90,7 +87,7 @@ export default function ReviewCard({ review }) {
         break;
       case 5:
         return (
-          <Box>
+          <Box sx={{ width: "80%" }}>
             <Box>
               <StarRoundedIcon
                 fontSize="small"
@@ -113,7 +110,7 @@ export default function ReviewCard({ review }) {
                 sx={{ color: "gold", mr: 0.5 }}
               />
             </Box>
-            <Divider sx={{ mt: 0.5, mb: 3, mx: -2 }}>
+            <Divider sx={{ mt: 0.5, mb: 3 }}>
               <strong>Excellent</strong>
             </Divider>
           </Box>
@@ -136,6 +133,8 @@ export default function ReviewCard({ review }) {
         bgcolor: "primary.200",
         borderTopLeftRadius: " 25px",
         borderBottomRightRadius: " 25px",
+        overflowX: "clip",
+        textOverflow: "ellipsis",
       }}
     >
       <Box

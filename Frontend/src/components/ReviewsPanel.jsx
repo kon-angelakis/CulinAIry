@@ -119,8 +119,10 @@ export default function ReviewsPanel({ reviews }) {
         }}
       >
         <Masonry columns={{ xs: 1, sm: 2, md: 3, lg: 3 }} spacing={4}>
-          {reviews && reviews.length > 0 ? (
-            reviews.map((review, idx) => <ReviewCard review={review} />)
+          {reviews != null && reviews.length > 0 ? (
+            reviews.map((review, idx) => (
+              <ReviewCard key={idx} review={review} />
+            ))
           ) : (
             <Typography variant="body2" color="text.secondary">
               No reviews yet.

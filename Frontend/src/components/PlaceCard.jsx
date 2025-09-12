@@ -2,6 +2,7 @@ import { Box, Fab, Paper, Tooltip, Typography } from "@mui/material";
 import { FavoriteRounded } from "@mui/icons-material";
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import authAxios from "../config/authAxiosConfig";
 
 export default function PlaceCard({
   id,
@@ -15,20 +16,13 @@ export default function PlaceCard({
 
   const [elevation, setElevation] = useState(2);
 
-  const [favourite, setFavourite] = useState(false);
-  const [favouriteTooltip, setFavouriteTooltip] = useState("Add to favourites");
-
-  const toggleFavourite = () => {
-    setFavourite((prev) => !prev);
-    setFavouriteTooltip(
-      favourite ? "Add to favourites" : "Remove from favourites"
-    );
-  };
-
-  const openDetailedPage = () => {
-    setTimeout(() => {
-      navigate(`/place/${id}`);
-    }, 1000);
+  //Add place to history
+  const handleClick = async () => {
+    const response = await authAxios.post(`/user/history/${id}`).then(() => {
+      setTimeout(() => {
+        navigate(`/place/${id}`);
+      }, 1000);
+    });
   };
 
   return (
@@ -51,25 +45,8 @@ export default function PlaceCard({
       }}
       onMouseEnter={() => setElevation(4)}
       onMouseLeave={() => setElevation(2)}
-      onClick={openDetailedPage}
+      onClick={handleClick}
     >
-      <Tooltip title={favouriteTooltip} placement="left">
-        <Fab
-          size="small"
-          onClick={toggleFavourite}
-          sx={{
-            position: "absolute",
-            bgcolor: "transparent",
-            boxShadow: "none",
-            top: 12,
-            right: 12,
-            color: favourite ? "primary.main" : "rgba(255, 255, 255, 0.5)",
-            ":hover": { bgcolor: "primary.light", color: "white" },
-          }}
-        >
-          <FavoriteRounded />
-        </Fab>
-      </Tooltip>
       <Box
         className="thumbnail"
         component="img"

@@ -24,7 +24,14 @@ export default function LoginPage() {
     authAxios
       .get("/auth/authenticated")
       .then(() => navigate("/home"))
-      .catch(() => navigate("/login"));
+      .catch((error) => {
+        setAlert({
+          open: true,
+          severity: "error",
+          message: String(error),
+        });
+        navigate("/login");
+      });
   }, [navigate]);
 
   const [formData, setFormData] = useState({
@@ -70,7 +77,11 @@ export default function LoginPage() {
         }
       })
       .catch((error) => {
-        throw error;
+        setAlert({
+          open: true,
+          severity: "error",
+          message: String(error),
+        });
       });
   };
 

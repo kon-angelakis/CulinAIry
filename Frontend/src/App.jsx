@@ -6,9 +6,9 @@ import HomePage from "./pages/HomePage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import PlaceDetailsPage from "./pages/PlaceDetailsPage.jsx";
 import RegisterPage from "./pages/RegisterPage.jsx";
-import SearchResultsPage from "./pages/SearchResultsPage.jsx";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import HeroPage from "./pages/HeroPage.jsx";
+import ResultsPage from "./pages/ResultsPage.jsx";
 
 const queryClient = new QueryClient();
 
@@ -24,7 +24,9 @@ export default function App() {
           <Route element={<PageLayout />}>
             {/* protected pages have an appbar/footer layout */}
             <Route path="/home" element={<HomePage />} />
-            <Route path="/results" element={<SearchResultsPage />} />
+            <Route path="/results" element={<ResultsPage />} />
+            <Route path="/:username/favourites" element={<ResultsPage />} />
+            <Route path="/:username/history" element={<ResultsPage />} />
             <Route path="/place/:id" element={<PlaceDetailsPage />} />
           </Route>
         </Route>

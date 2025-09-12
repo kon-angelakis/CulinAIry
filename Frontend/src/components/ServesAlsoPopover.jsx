@@ -39,7 +39,7 @@ export default function ServesAlsoPopover({ secondaryTypes }) {
       >
         <Box sx={{ p: 2, maxWidth: 220 }}>
           <Typography variant="subtitle2" gutterBottom>
-            Serves Also
+            Also is:
           </Typography>
           <List dense>
             {secondaryTypes.map((type, idx) => (

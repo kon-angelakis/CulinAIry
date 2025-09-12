@@ -82,7 +82,11 @@ export default function RegisterPage() {
         });
       })
       .catch((error) => {
-        throw error;
+        setAlert({
+          open: true,
+          severity: "error",
+          message: String(error),
+        });
       });
   };
 

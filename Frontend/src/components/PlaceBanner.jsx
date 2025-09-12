@@ -15,7 +15,10 @@ import { useState } from "react";
 
 // Icons
 import FavoriteBorderRoundedIcon from "@mui/icons-material/FavoriteBorderRounded";
+import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
 import RateReviewRoundedIcon from "@mui/icons-material/RateReviewRounded";
+import authAxios from "../config/authAxiosConfig";
+import { useParams } from "react-router";
 
 export default function PlaceBanner({
   name,
@@ -23,10 +26,28 @@ export default function PlaceBanner({
   rating,
   totalRatings,
   isLoading,
+  isFavourite,
+  setIsFavourite,
 }) {
+  const { id } = useParams();
+
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [reviewText, setReviewText] = useState("");
   const [reviewRating, setReviewRating] = useState(0);
+
+  const addToFavs = async () => {
+    const response = await authAxios.post(`/user/favourites/${id}`).then(() => {
+      setIsFavourite(true);
+    });
+  };
+
+  const delFromFavs = async () => {
+    const response = await authAxios
+      .delete(`/user/favourites/${id}`)
+      .then(() => {
+        setIsFavourite(false);
+      });
+  };
 
   return (
     <Paper
@@ -69,14 +90,29 @@ export default function PlaceBanner({
           )}
 
           <Stack direction="column" spacing={2}>
+            {!isFavourite ? (
+              <Button
+                onClick={addToFavs}
+                variant="outlined"
+                startIcon={<FavoriteBorderRoundedIcon />}
+              >
+                Add to favourites
+              </Button>
+            ) : (
+              <Button
+                onClick={delFromFavs}
+                variant="contained"
+                startIcon={
+                  <FavoriteRoundedIcon sx={{ color: "primary.light" }} />
+                }
+                color="secondary"
+              >
+                Remove from favourites
+              </Button>
+            )}
+
             <Button
-              variant="outlined"
-              startIcon={<FavoriteBorderRoundedIcon />}
-            >
-              Add to favourites
-            </Button>
-            <Button
-              variant="contained"
+              variant="text"
               startIcon={<RateReviewRoundedIcon />}
               onClick={() => setShowReviewForm((prev) => !prev)}
             >

@@ -1,34 +1,43 @@
 import { Box, Grid, Typography } from "@mui/material";
-import SkeletonPlaceCard from "../components/SkeletonPlaceCard";
+import SkeletonPlaceCard from "./SkeletonPlaceCard.jsx";
 import { useEffect, useState } from "react";
 import authAxios from "../config/authAxiosConfig.js";
-import PlaceCard from "../components/PlaceCard.jsx";
+import PlaceCard from "./PlaceCard.jsx";
 import { useLocation } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 
-export default function SearchResultsPage() {
+export default function SearchResultsBox({ endpoint, method, formData }) {
   const location = useLocation();
-  const { formData } = location.state || {};
   const [placesResponse, setPlacesResponse] = useState(null);
 
   const fetchPlaces = async () => {
     try {
-      const response = await authAxios.post("/search", formData);
+      const response = await authAxios({
+        url: endpoint,
+        method: method,
+        ...(method === "GET"
+          ? { params: formData.params }
+          : { data: formData }),
+      });
       setPlacesResponse(response.data);
       return response.data.data;
     } catch (error) {
-      throw error;
+      console.log(error);
     }
   };
 
   // useQuery for caching results so if a user backtracks he doesnt requery the backend
   //on page refresh the componenet is unmounted therefore cache loss
-  const { data: results = [], isLoading } = useQuery({
+  const {
+    data: results = [],
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
     queryKey: [
       "searchResults",
       {
-        ...formData,
-        radius: Math.round(formData.radius / 500) * 500, //fuzzy caching of +-500m radius difference
+        formData,
       },
     ],
     queryFn: fetchPlaces,
@@ -48,9 +57,9 @@ export default function SearchResultsPage() {
       <Typography variant="h4" sx={{ mb: 4 }}>
         {isLoading
           ? "Loading results"
-          : !placesResponse?.success
+          : isError
           ? `Error retrieving results: ${placesResponse?.message}`
-          : `Found ${results.length} results`}
+          : `Found ${results.length} entries`}
       </Typography>
 
       <Grid container spacing={4} sx={{ p: 2 }} justifyContent="space-evenly">
@@ -68,7 +77,7 @@ export default function SearchResultsPage() {
                 <SkeletonPlaceCard />
               </Grid>
             ))
-          : placesResponse?.success
+          : !isError
           ? results.map((place) => (
               <Grid
                 key={place.id}
