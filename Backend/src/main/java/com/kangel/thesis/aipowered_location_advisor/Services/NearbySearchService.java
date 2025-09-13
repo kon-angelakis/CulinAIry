@@ -232,7 +232,7 @@ public class NearbySearchService {
 
                 // Contains imageIds
                 List<String> photosRaw = placeDetails.photos() != null
-                                ? placeDetails.photos().stream().limit(3).map(PhotoDTO::toPhotoString).toList()
+                                ? placeDetails.photos().stream().limit(2).map(PhotoDTO::toPhotoString).toList()
                                 : List.of();
 
                 // Contains imagekit links for image retrieval

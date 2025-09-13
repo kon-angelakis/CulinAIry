@@ -24,7 +24,7 @@ import {
 import { useState } from "react";
 
 import { ReactComponent as LogoRibbon } from "../assets/logo_ribbon.svg";
-import { useNavigate } from "react-router";
+import { href, useNavigate } from "react-router";
 
 export default function CulinairyAppbar() {
   const navigate = useNavigate();
@@ -204,7 +204,14 @@ export default function CulinairyAppbar() {
               </ListItemIcon>
               <ListItemText primary="Settings" />
             </ListItem>
-            <ListItem button sx={{ cursor: "pointer" }}>
+            <ListItem
+              button
+              sx={{ cursor: "pointer" }}
+              onClick={() => {
+                localStorage.clear();
+                window.location.reload();
+              }}
+            >
               <ListItemIcon>
                 <ExitToAppRoundedIcon />
               </ListItemIcon>

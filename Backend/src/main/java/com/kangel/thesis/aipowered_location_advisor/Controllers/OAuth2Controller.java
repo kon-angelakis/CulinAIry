@@ -1,22 +1,17 @@
 package com.kangel.thesis.aipowered_location_advisor.Controllers;
 
-import java.io.IOException;
-import java.util.Base64;
-import java.util.Map;
-
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kangel.thesis.aipowered_location_advisor.Models.User;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.kangel.thesis.aipowered_location_advisor.Models.Records.ApiResponse;
+import com.kangel.thesis.aipowered_location_advisor.Models.Records.LoginResponse;
+import com.kangel.thesis.aipowered_location_advisor.Models.Records.OAuth2LoginRequest;
 import com.kangel.thesis.aipowered_location_advisor.Services.Authentication.OAuth2.OAuth2GoogleService;
-
-import jakarta.servlet.http.HttpServletResponse;
 
 @RestController
 @RequestMapping("/oauth2")
@@ -29,21 +24,9 @@ public class OAuth2Controller {
     }
 
     @PostMapping("/google")
-    public ResponseEntity<?> googleLogin(@RequestBody Map<String, String> request, HttpServletResponse response)
-            throws IOException {
-        String authCode = request.get("code");
-
-        // Get user id token from a call to the google api so as to extract user info
-        String idToken = oauth2GoogleService.GetToken(authCode);
-
-        // Decode the token for the data extraction
-        String payload = new String(Base64.getUrlDecoder().decode(idToken.split("\\.")[1]));
-        Map<String, String> userInfo = new ObjectMapper().readValue(payload, new TypeReference<>() {
-        });
-        User user = oauth2GoogleService.ExtractUser(userInfo);
-
-        Map<String, Object> responseMap = oauth2GoogleService.Login(user, response);
-
-        return new ResponseEntity<>(responseMap, (HttpStatusCode) responseMap.get("StatusCode"));
+    public ResponseEntity<?> googleLogin(@RequestBody OAuth2LoginRequest request)
+            throws JsonMappingException, JsonProcessingException {
+        ApiResponse<LoginResponse> response = oauth2GoogleService.CreateOauth2User(request.code());
+        return ResponseEntity.ok(response);
     }
 }

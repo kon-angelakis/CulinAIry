@@ -9,28 +9,31 @@ import RegisterPage from "./pages/RegisterPage.jsx";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import HeroPage from "./pages/HeroPage.jsx";
 import ResultsPage from "./pages/ResultsPage.jsx";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 const queryClient = new QueryClient();
 
 export default function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/" element={<HeroPage />} />
-        <Route path="/*" element={<Navigate to="/" replace />} />
-        <Route element={<ProtectedRoute />}>
-          <Route element={<PageLayout />}>
-            {/* protected pages have an appbar/footer layout */}
-            <Route path="/home" element={<HomePage />} />
-            <Route path="/results" element={<ResultsPage />} />
-            <Route path="/:username/favourites" element={<ResultsPage />} />
-            <Route path="/:username/history" element={<ResultsPage />} />
-            <Route path="/place/:id" element={<PlaceDetailsPage />} />
+    <GoogleOAuthProvider clientId="862654135638-ihdkg67htd7spqhla2qf3bk40ee0cdrk.apps.googleusercontent.com">
+      <QueryClientProvider client={queryClient}>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/" element={<HeroPage />} />
+          <Route path="/*" element={<Navigate to="/" replace />} />
+          <Route element={<ProtectedRoute />}>
+            <Route element={<PageLayout />}>
+              {/* protected pages have an appbar/footer layout */}
+              <Route path="/home" element={<HomePage />} />
+              <Route path="/results" element={<ResultsPage />} />
+              <Route path="/:username/favourites" element={<ResultsPage />} />
+              <Route path="/:username/history" element={<ResultsPage />} />
+              <Route path="/place/:id" element={<PlaceDetailsPage />} />
+            </Route>
           </Route>
-        </Route>
-      </Routes>
-    </QueryClientProvider>
+        </Routes>
+      </QueryClientProvider>
+    </GoogleOAuthProvider>
   );
 }

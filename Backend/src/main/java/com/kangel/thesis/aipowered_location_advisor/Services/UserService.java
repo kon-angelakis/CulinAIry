@@ -10,7 +10,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.kangel.thesis.aipowered_location_advisor.Config.Security.Auth.UserPrincipal;
-import com.kangel.thesis.aipowered_location_advisor.Models.Place;
 import com.kangel.thesis.aipowered_location_advisor.Models.User;
 import com.kangel.thesis.aipowered_location_advisor.Models.Enums.PlaceListType;
 import com.kangel.thesis.aipowered_location_advisor.Models.Records.ApiResponse;

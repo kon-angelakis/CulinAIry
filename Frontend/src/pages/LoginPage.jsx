@@ -66,11 +66,11 @@ export default function LoginPage() {
       .post("/auth/login", formData)
       .then((response) => {
         console.log(response);
-        setAlert({
-          open: true,
+        showAlert({
           severity: response.data.success ? "success" : "error",
           message: response.data.message,
         });
+
         if (response.data.success) {
           saveAuthenticationDetails(response);
           window.location.reload(); //Refresh to redirect to homepage via useEffect
@@ -83,6 +83,14 @@ export default function LoginPage() {
           message: String(error),
         });
       });
+  };
+
+  const showAlert = ({ severity, message }) => {
+    setAlert({
+      open: true,
+      severity,
+      message,
+    });
   };
 
   return (
@@ -174,7 +182,7 @@ export default function LoginPage() {
           <Divider t sx={{ width: "100%", mb: 2 }}>
             OR
           </Divider>
-          <GoogleButton />
+          <GoogleButton showAlert={showAlert} />
           <Box
             sx={{
               display: "flex",
