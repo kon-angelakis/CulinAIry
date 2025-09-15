@@ -23,6 +23,7 @@ public class Place {
 
     @Id
     private String id;
+    private boolean isDetailed;
     private String thumbnail;
 
     private String name, primaryType, phone, address, website, directionsUri;
@@ -32,15 +33,15 @@ public class Place {
     @GeoSpatialIndexed(type = GeoSpatialIndexType.GEO_2DSPHERE)
     private GeoJsonPoint location;
 
-    private List<String> secondaryTypes = List.of();
-    private List<String> schedule = List.of();
-    private List<String> photos = List.of();
-    private List<Review> reviews = List.of();
+    private List<String> secondaryTypes;
+    private List<String> schedule;
+    private List<String> photos;
+    private List<Review> reviews;
 
     private LocalDateTime dateUpdated;
 
     public PlaceDTO ToPlaceDTO() {
-        return new PlaceDTO(id, thumbnail, name, primaryType, rating, totalRatings);
+        return new PlaceDTO(id, thumbnail, name, primaryType);
     }
 
     @Override

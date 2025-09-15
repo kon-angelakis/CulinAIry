@@ -27,6 +27,8 @@ import jakarta.validation.Valid;
 @Service
 public class SearchService {
 
+    public static final int MAX_NEARBY_SEARCH_RESULTS = 1;
+
     private final AiManager aiManager;
     private final NearbySearchService nearSearchService;
     private final PlaceService placeService;
@@ -48,18 +50,18 @@ public class SearchService {
 
             Set<Place> recommendedPlaces = FetchPlacesFromDB(coordinates, request.radius(), restaurantTypes,
                     userIntent);
-            List<Place> placesToUpdate = UpdateStalePlaces(recommendedPlaces);
 
-            // Fetch additional places if less than 20
-            if (recommendedPlaces.size() < 20) {
-                FetchAdditionalPlaces(recommendedPlaces, placesToUpdate, restaurantTypes, coordinates,
+            // Fetch additional places if less than MAX_NEARBY_SEARCH_RESULTS
+            if (recommendedPlaces.size() < MAX_NEARBY_SEARCH_RESULTS) {
+                FetchNewPlaces(recommendedPlaces, restaurantTypes, coordinates,
                         request.radius());
             }
 
-            // Save all updated/new places
-            placeService.SavePlaces(placesToUpdate);
-            // Dont return the whole place object to the frontend just the DTO, to get the
-            // whole object info the user must call the PlaceController
+            placeService.SavePlaces(new ArrayList<>(recommendedPlaces));
+
+            // Return the cheap version of each place to save bandwidth
+            // The place after a cheap search is already its cheap version but it might get
+            // populated later with more data
             return new ApiResponse<LinkedHashSet<PlaceDTO>>(true, "Retrieved places", ConvertToDTOs(recommendedPlaces));
         } catch (Exception e) {
             return new ApiResponse<LinkedHashSet<PlaceDTO>>(false, e.toString(), null);
@@ -84,36 +86,15 @@ public class SearchService {
                         radius, types));
     }
 
-    // Each 2 weeks update the stale place data
-    private List<Place> UpdateStalePlaces(Set<Place> places) throws InterruptedException {
-        List<Place> updatedPlaces = new ArrayList<>();
-        LocalDateTime twoWeeksAgo = LocalDateTime.now().minusWeeks(2);
-
-        List<Place> stalePlaces = places.stream()
-                .filter(p -> p.getDateUpdated().isBefore(twoWeeksAgo))
-                .toList();
-
-        for (Place stale : stalePlaces) {
-            places.remove(stale);
-            Place updated = nearSearchService.SearchPlaceDetails(stale.getId());
-            places.add(updated);
-            updatedPlaces.add(updated);
-        }
-
-        return updatedPlaces;
-    }
-
-    // If too few entries in the db < 20 call the google maps api to retrieve
-    // more(might still be <20)
-    private void FetchAdditionalPlaces(Set<Place> recommendedPlaces, List<Place> placesToUpdate,
-            List<String> types, Location coordinates, int radius) throws JsonProcessingException, InterruptedException {
-        int remaining = 20 - recommendedPlaces.size();
-        List<Place> apiResults = nearSearchService.NearbySearch(
+    // If too few entries in the db call the google maps api to retrieve
+    // more(might still be less than the MAX num specified)
+    private void FetchNewPlaces(Set<Place> recommendedPlaces, List<String> types, Location coordinates, int radius)
+            throws JsonProcessingException, InterruptedException {
+        int remaining = MAX_NEARBY_SEARCH_RESULTS - recommendedPlaces.size();
+        List<Place> apiResults = nearSearchService.CheapNearbySearch(
                 new NearbySearchRequest(new ObjectMapper().writeValueAsString(types), remaining, coordinates, radius));
 
-        apiResults.stream()
-                .filter(recommendedPlaces::add)
-                .forEach(placesToUpdate::add);
+        recommendedPlaces.addAll(apiResults);
     }
 
     private LinkedHashSet<PlaceDTO> ConvertToDTOs(Set<Place> places) {

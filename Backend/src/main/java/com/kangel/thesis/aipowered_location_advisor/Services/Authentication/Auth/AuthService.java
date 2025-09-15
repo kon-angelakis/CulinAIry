@@ -55,7 +55,7 @@ public class AuthService {
         }
         // user exists or token not expired
         if (user.isVerified() || !jwtService.validateToken(user.getVerificationCode())) {
-            String msg = user.isVerified() ? "User already registered"
+            String msg = user.isVerified() ? "User already exists"
                     : "User already registered and awaiting verification";
             return new ApiResponse<>(false, msg, null);
         }

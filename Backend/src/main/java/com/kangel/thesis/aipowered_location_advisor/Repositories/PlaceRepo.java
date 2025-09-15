@@ -44,6 +44,6 @@ public interface PlaceRepo extends MongoRepository<Place, String> {
         })
         public List<Place> findNearbyPlacesInclusive(double lon, double lat, int maxDist, List<String> types);
 
-        @Query(value = "{ '_id': { $in: ?0 } }", fields = "{ 'id': 1, 'thumbnail': 1, 'name': 1, 'primaryType': 1, 'rating': 1, 'totalRatings': 1 }")
+        @Query(value = "{ '_id': { $in: ?0 } }", fields = "{ 'id': 1, 'thumbnail': 1, 'name': 1, 'primaryType': 1}")
         public List<PlaceDTO> findAllPlaceDTOSById(@Param("ids") Iterable<String> ids);
 }

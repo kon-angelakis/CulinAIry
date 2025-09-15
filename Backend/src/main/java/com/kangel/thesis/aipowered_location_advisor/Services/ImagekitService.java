@@ -1,5 +1,7 @@
 package com.kangel.thesis.aipowered_location_advisor.Services;
 
+import java.util.Date;
+
 import org.springframework.stereotype.Service;
 
 import io.github.cdimascio.dotenv.Dotenv;
@@ -29,22 +31,38 @@ public class ImagekitService {
         imageKit.setConfig(config);
     }
 
-    // The path is gonna be like /places/placeID/0-2 (Reason to not use photoID
-    // instead is google changes up the names each request so we end up with
-    // multiple duplicate images, this way we only keep 3 at all times and overwrite
-    // them if needed)
-    public Result UploadImage(String googlePhotoUri, String placeId, int photoNum) throws InternalServerException,
+    public Result UploadImageString(String imageUri, String path, String subfolderId, String savedName)
+            throws InternalServerException,
             BadRequestException, UnknownException, ForbiddenException, TooManyRequestsException, UnauthorizedException {
-        FileCreateRequest fileCreateRequest = new FileCreateRequest(googlePhotoUri, String.format("%d.jpg", photoNum));
-        fileCreateRequest.setFolder(String.format("/places/%s/", placeId));
+        FileCreateRequest fileCreateRequest = new FileCreateRequest(imageUri, String.format("%s.jpg", savedName));
+        fileCreateRequest.setFolder(String.format("/%s/%s/", path, subfolderId));
         fileCreateRequest.useUniqueFileName = false;
         Result result = ImageKit.getInstance().upload(fileCreateRequest);
 
         return result;
     }
 
-    public String RequestImage(String placeId, int photoNum) {
-        return String.format("%s/places/%s/%d.jpg", urlString, placeId, photoNum);
+    public Result UploadImageBytes(byte[] imageUri, String path, String subfolderId, String savedName)
+            throws InternalServerException,
+            BadRequestException, UnknownException, ForbiddenException, TooManyRequestsException, UnauthorizedException {
+        FileCreateRequest fileCreateRequest = new FileCreateRequest(imageUri, String.format("%s.jpg", savedName));
+        fileCreateRequest.setFolder(String.format("/%s/%s/", path, subfolderId));
+        fileCreateRequest.useUniqueFileName = false;
+        Result result = ImageKit.getInstance().upload(fileCreateRequest);
+
+        return result;
+    }
+
+    public String RequestImage(String path, String subfolderId, String savedName) {
+        return String.format("%s/%s/%s/%s.jpg", urlString, path, subfolderId, savedName);
+    }
+
+    // For cache overriding
+    public String RequestImage(String path, String subfolderId, String savedName, Result result) {
+        Date updatedAt = result.getUpdatedAt();
+        long timestamp = updatedAt != null ? updatedAt.getTime() : System.currentTimeMillis(); // result might not have
+                                                                                               // populated yet
+        return String.format("%s/%s/%s/%s.jpg?updatedAt=%d", urlString, path, subfolderId, savedName, timestamp);
     }
 
 }

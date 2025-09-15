@@ -13,8 +13,19 @@ import com.kangel.thesis.aipowered_location_advisor.Config.Security.Auth.UserPri
 import com.kangel.thesis.aipowered_location_advisor.Models.User;
 import com.kangel.thesis.aipowered_location_advisor.Models.Enums.PlaceListType;
 import com.kangel.thesis.aipowered_location_advisor.Models.Records.ApiResponse;
+import com.kangel.thesis.aipowered_location_advisor.Models.Records.ChangeDataRequest;
+import com.kangel.thesis.aipowered_location_advisor.Models.Records.LoginResponse;
 import com.kangel.thesis.aipowered_location_advisor.Models.Records.PlaceDTO;
 import com.kangel.thesis.aipowered_location_advisor.Repositories.UserRepo;
+import com.kangel.thesis.aipowered_location_advisor.Services.Authentication.Auth.JwtService;
+
+import io.imagekit.sdk.exceptions.BadRequestException;
+import io.imagekit.sdk.exceptions.ForbiddenException;
+import io.imagekit.sdk.exceptions.InternalServerException;
+import io.imagekit.sdk.exceptions.TooManyRequestsException;
+import io.imagekit.sdk.exceptions.UnauthorizedException;
+import io.imagekit.sdk.exceptions.UnknownException;
+import io.imagekit.sdk.models.results.Result;
 
 @Service
 public class UserService implements UserDetailsService {
@@ -23,10 +34,15 @@ public class UserService implements UserDetailsService {
 
     private final UserRepo userRepo;
     private final PlaceService placeService;
+    private final ImagekitService imagekitService;
+    private final JwtService jwtService;
 
-    public UserService(UserRepo userRepo, PlaceService placeService) {
+    public UserService(UserRepo userRepo, PlaceService placeService, ImagekitService imagekitService,
+            JwtService jwtService) {
         this.userRepo = userRepo;
         this.placeService = placeService;
+        this.imagekitService = imagekitService;
+        this.jwtService = jwtService;
     }
 
     @Override
@@ -46,6 +62,10 @@ public class UserService implements UserDetailsService {
     public User GetUser(String user) { // If the user exists do get the user
         return user.contains("@") ? userRepo.findByEmail(user).orElse(null)
                 : userRepo.findByUsername(user).orElse(null);
+    }
+
+    public void DeleteUser(User user) {
+        userRepo.delete(user);
     }
 
     public ApiResponse<User> GetUserDetails() { // Get user but in ApiResponse format
@@ -112,6 +132,58 @@ public class UserService implements UserDetailsService {
         if (user == null)
             return null;
         return userRepo.save(user);
+    }
+
+    public ApiResponse<LoginResponse> ChangePfp(byte[] imageFile) throws InternalServerException, BadRequestException,
+            UnknownException, ForbiddenException, TooManyRequestsException, UnauthorizedException {
+        try {
+
+            UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
+                    .getPrincipal();
+            User user = GetUser(userDetails.getUsername());
+
+            Result result = imagekitService.UploadImageBytes(imageFile, "users", user.getUsername(), "avatar");
+            user.setPfp(imagekitService.RequestImage("users", user.getUsername(), "avatar", result));
+            // Change profile picture in the db and return a new jwt
+            user = SaveUser(user);
+            String newJwt = jwtService.GenerateToken(user);
+            return new ApiResponse<LoginResponse>(true, "Avatar changed",
+                    new LoginResponse(user.ToUserDTO(), newJwt));
+        } catch (Exception e) {
+            return new ApiResponse<LoginResponse>(false, "Avatar change error", null);
+        }
+    }
+
+    public ApiResponse<LoginResponse> ChangeData(ChangeDataRequest request) {
+        try {
+
+            UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
+                    .getPrincipal();
+            User user = GetUser(userDetails.getUsername());
+            user.setUsername(request.username());
+            user.setFirstName(request.firstName());
+            user.setLastName(request.lastName());
+            user = SaveUser(user);
+            String newJwt = jwtService.GenerateToken(user);
+            return new ApiResponse<LoginResponse>(true, "Data changed",
+                    new LoginResponse(user.ToUserDTO(), newJwt));
+        } catch (Exception e) {
+            return new ApiResponse<LoginResponse>(false, "Data change error", null);
+        }
+    }
+
+    public ApiResponse<Void> DeleteUser() {
+        try {
+
+            UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
+                    .getPrincipal();
+            User user = GetUser(userDetails.getUsername());
+            DeleteUser(user);
+            return new ApiResponse<Void>(true, "User deleted",
+                    null);
+        } catch (Exception e) {
+            return new ApiResponse<Void>(false, "User deletion error", null);
+        }
     }
 
 }

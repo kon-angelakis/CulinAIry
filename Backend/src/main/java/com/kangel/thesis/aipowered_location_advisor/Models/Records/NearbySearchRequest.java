@@ -5,9 +5,9 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
 public record NearbySearchRequest(
-        @NotNull String restaurantTypes,
-        @NotNull int numOfPlaces,
-        @NotNull Location location,
-        @Positive @Max(20000) int radius) {
+                @NotNull String restaurantTypes,
+                @NotNull @Max(10) int numOfPlaces,
+                @NotNull Location location,
+                @Positive @Max(20000) int radius) {
 
 }

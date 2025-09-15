@@ -11,19 +11,22 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 public class HashingConfig {
 
     private final int encoderStrength = 8;
-    private final SecureRandom secureRandom = new SecureRandom();
 
     @Bean
     public BCryptPasswordEncoder PasswordEncoder() {
         return new BCryptPasswordEncoder(encoderStrength);
     }
 
-    public String GenerateRandomUsername(int length) {
+    public String GenerateRandomUsername(int length) { // refactored to create file safe names for user pfp in imagekit
 
-        byte[] hash = new byte[length];
-        secureRandom.nextBytes(hash);
-        String base64Hash = Base64.getEncoder().encodeToString(hash);
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        SecureRandom random = new SecureRandom();
+        StringBuilder sb = new StringBuilder(length);
 
-        return base64Hash;
+        for (int i = 0; i < length; i++) {
+            sb.append(chars.charAt(random.nextInt(chars.length())));
+        }
+
+        return sb.toString();
     }
 }

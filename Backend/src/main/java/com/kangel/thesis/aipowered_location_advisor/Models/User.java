@@ -28,8 +28,8 @@ public class User {
     private boolean isVerified;
     private String verificationCode;
 
-    private String firstName;
-    private String lastName;
+    private String firstName = "";
+    private String lastName = "";
 
     private String email;
     private String username;
@@ -70,7 +70,7 @@ public class User {
     }
 
     public UserDTO ToUserDTO() {
-        return new UserDTO(firstName, lastName, email, username, pfp);
+        return new UserDTO(firstName, lastName, email, username, pfp, registration_method);
     }
 
 }

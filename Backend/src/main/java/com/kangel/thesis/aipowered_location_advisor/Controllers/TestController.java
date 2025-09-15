@@ -32,6 +32,7 @@ import io.imagekit.sdk.exceptions.TooManyRequestsException;
 import io.imagekit.sdk.exceptions.UnauthorizedException;
 import io.imagekit.sdk.exceptions.UnknownException;
 import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/test")
@@ -66,22 +67,18 @@ public class TestController {
         return (new ResponseEntity<>(response, HttpStatus.OK));
     }
 
-    @PostMapping("/imagekit")
-    public String postMethodName() throws InternalServerException, BadRequestException,
-            UnknownException, ForbiddenException, TooManyRequestsException, UnauthorizedException {
-        imagekitService.UploadImage(
-                "https://lh3.googleusercontent.com/place-photos/AJnk2czROuQWAJtcc-KYJiS_Emjpy37O2lvSn0M9L78VjkRZnj5x8IcpL8PlxwYgAykQVWnFs92scIfTp4rHECTQCcxQ3E5q7IWWCELoSaBULThacdBEbMbyOlIOcjb1O0--oAJtrx88xwyq2K8AqBg=s4800-w1920-h1080",
-                "ChIJaSIytstyZIgR9KXlpsw1rMw",
-                1);
-
-        return "entity";
-    }
-
     @GetMapping("/place/{placeId}")
     public ResponseEntity<?> FindPlace(@PathVariable String placeId) {
         ApiResponse<Place> response = placeService.FindPlace(placeId);
         return ResponseEntity.ok(response);
 
+    }
+
+    @GetMapping("/mongo")
+    public String getMethodName() {
+        placeService.SavePlace(new Place("asd", false, "a", null, null, null, null, null, null, 0, 0, null, null,
+                null, null, null, null));
+        return "ok";
     }
 
 }

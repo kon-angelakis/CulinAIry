@@ -39,7 +39,8 @@ public class JwtService {
                 user.getLastName(),
                 user.getEmail(),
                 user.getUsername(),
-                user.getPfp());
+                user.getPfp(),
+                user.getRegistration_method());
         claims.put("User", userDTO);
 
         return Jwts.builder()
@@ -71,7 +72,8 @@ public class JwtService {
                     (String) userClaims.get("lastName"),
                     (String) userClaims.get("email"),
                     (String) userClaims.get("username"),
-                    (String) userClaims.get("pfp"));
+                    (String) userClaims.get("pfp"),
+                    (String) userClaims.get("regMethod"));
         } catch (JwtException | ClassCastException e) {
             return null;
         }
