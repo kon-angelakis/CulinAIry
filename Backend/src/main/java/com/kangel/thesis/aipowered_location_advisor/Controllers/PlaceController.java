@@ -1,18 +1,20 @@
 package com.kangel.thesis.aipowered_location_advisor.Controllers;
 
-import java.util.LinkedHashSet;
+import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.kangel.thesis.aipowered_location_advisor.Models.Place;
+import com.kangel.thesis.aipowered_location_advisor.Models.Review;
 import com.kangel.thesis.aipowered_location_advisor.Models.Records.ApiResponse;
-import com.kangel.thesis.aipowered_location_advisor.Models.Records.PlaceDTO;
 import com.kangel.thesis.aipowered_location_advisor.Services.PlaceService;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/places/{placeId}")
@@ -33,7 +35,7 @@ public class PlaceController {
     // Updates place object with reviews doesnt return review objects
     @GetMapping("/reviews")
     public ResponseEntity<?> PlaceReviews(@PathVariable String placeId) {
-        ApiResponse<Place> response = placeService.FindReviews(placeId);
+        ApiResponse<List<Review>> response = placeService.FindReviews(placeId);
         return ResponseEntity.ok(response);
     }
 

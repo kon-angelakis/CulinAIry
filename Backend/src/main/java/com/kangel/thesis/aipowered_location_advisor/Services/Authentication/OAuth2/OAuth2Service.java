@@ -1,6 +1,5 @@
 package com.kangel.thesis.aipowered_location_advisor.Services.Authentication.OAuth2;
 
-import java.io.IOException;
 import java.util.Map;
 
 import org.springframework.security.core.AuthenticationException;

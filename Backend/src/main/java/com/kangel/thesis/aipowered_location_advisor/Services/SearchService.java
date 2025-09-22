@@ -1,6 +1,5 @@
 package com.kangel.thesis.aipowered_location_advisor.Services;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -27,7 +26,7 @@ import jakarta.validation.Valid;
 @Service
 public class SearchService {
 
-    public static final int MAX_NEARBY_SEARCH_RESULTS = 1;
+    public static final int MAX_NEARBY_SEARCH_RESULTS = 5;
 
     private final AiManager aiManager;
     private final NearbySearchService nearSearchService;

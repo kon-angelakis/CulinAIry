@@ -40,7 +40,7 @@ public class User {
 
     private Set<String> history = new LinkedHashSet<>();
     private Set<String> favourites = new HashSet<>();
-    private List<Review> reviews = List.of();
+    private Set<Review> reviews = new HashSet<>();
 
     @CreatedDate
     private final LocalDateTime date_created = LocalDateTime.now();

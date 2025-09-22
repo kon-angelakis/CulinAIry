@@ -1,7 +1,6 @@
 package com.kangel.thesis.aipowered_location_advisor.Repositories;
 
 import java.util.List;
-import java.util.Set;
 
 import org.springframework.data.mongodb.repository.Aggregation;
 import org.springframework.data.mongodb.repository.MongoRepository;

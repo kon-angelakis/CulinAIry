@@ -2,6 +2,8 @@ package com.kangel.thesis.aipowered_location_advisor.Models.Records;
 
 import java.util.List;
 
+import org.bson.types.ObjectId;
+
 import com.kangel.thesis.aipowered_location_advisor.Models.Review;
 
 public record GooglePlaceDetails(
@@ -46,7 +48,7 @@ public record GooglePlaceDetails(
                         int rating,
                         TextDTO text) {
                 public Review toReview() {
-                        return new Review(rating, text != null ? text.text() : null);
+                        return new Review(new ObjectId(), null, null, null, rating, text != null ? text.text() : null);
                 }
         }
 

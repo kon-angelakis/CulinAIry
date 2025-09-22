@@ -1,7 +1,6 @@
 package com.kangel.thesis.aipowered_location_advisor.Config.Security.Auth;
 
 import java.security.SecureRandom;
-import java.util.Base64;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

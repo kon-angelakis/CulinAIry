@@ -1,7 +1,9 @@
 package com.kangel.thesis.aipowered_location_advisor.Models;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
@@ -26,9 +28,9 @@ public class Place {
     private boolean isDetailed;
     private String thumbnail;
 
-    private String name, primaryType, phone, address, website, directionsUri;
-    private double rating;
-    private int totalRatings;
+    private String name, primaryType, primaryTypeRaw, phone, address, website, directionsUri;
+    private Double rating, inappRating;
+    private Integer totalRatings, inappTotalRatings;
 
     @GeoSpatialIndexed(type = GeoSpatialIndexType.GEO_2DSPHERE)
     private GeoJsonPoint location;
@@ -36,7 +38,7 @@ public class Place {
     private List<String> secondaryTypes;
     private List<String> schedule;
     private List<String> photos;
-    private List<Review> reviews;
+    private Set<Review> reviews = new HashSet<>();
 
     private LocalDateTime dateUpdated;
 

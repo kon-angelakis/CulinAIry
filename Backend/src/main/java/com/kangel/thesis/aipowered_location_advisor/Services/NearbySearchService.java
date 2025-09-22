@@ -2,8 +2,9 @@ package com.kangel.thesis.aipowered_location_advisor.Services;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Random;
+import java.util.Set;
 
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.stereotype.Service;
@@ -11,11 +12,11 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import com.kangel.thesis.aipowered_location_advisor.Models.Place;
 import com.kangel.thesis.aipowered_location_advisor.Models.Review;
-import com.kangel.thesis.aipowered_location_advisor.Models.Records.NearbySearchRequest;
-import com.kangel.thesis.aipowered_location_advisor.Models.Records.NearbySearchResponse;
 import com.kangel.thesis.aipowered_location_advisor.Models.Records.GooglePlaceDetails;
 import com.kangel.thesis.aipowered_location_advisor.Models.Records.GooglePlaceDetails.PhotoDTO;
 import com.kangel.thesis.aipowered_location_advisor.Models.Records.GooglePlaceDetails.ReviewDTO;
+import com.kangel.thesis.aipowered_location_advisor.Models.Records.NearbySearchRequest;
+import com.kangel.thesis.aipowered_location_advisor.Models.Records.NearbySearchResponse;
 import com.kangel.thesis.aipowered_location_advisor.Models.Records.PlaceImageResponse;
 
 import io.github.cdimascio.dotenv.Dotenv;
@@ -27,6 +28,7 @@ import reactor.core.publisher.Mono;
 public class NearbySearchService {
 
         private final ImagekitService imagekitService;
+        private final ReviewService reviewService;
         private final String API_KEY;
         private WebClient webClient;
 
@@ -97,8 +99,9 @@ public class NearbySearchService {
                         "vietnamese_restaurant",
                         "wine_bar");
 
-        public NearbySearchService(Dotenv env, ImagekitService imagekitService) {
+        public NearbySearchService(Dotenv env, ImagekitService imagekitService, ReviewService reviewService) {
                 this.imagekitService = imagekitService;
+                this.reviewService = reviewService;
                 this.API_KEY = env.get("MAPS_PLATFORM_KEY");
                 // default webclient parameters build
                 webClient = WebClient.builder()
@@ -179,7 +182,7 @@ public class NearbySearchService {
         // Used to retrieve google place reviews if the user wants
         // Triggers Enterprise & Atmosphere SKU 1 times per N results (1000 free
         // req/month)
-        public Place ReviewsSearch(String id, Place place) {
+        public List<Review> ReviewsSearch(String id) {
                 GooglePlaceDetails response = webClient
                                 .get()
                                 .uri(uriBuilder -> uriBuilder
@@ -192,7 +195,7 @@ public class NearbySearchService {
                                 .bodyToMono(GooglePlaceDetails.class)
                                 .block();
 
-                return ExtractPlaceReviewData(response, place);
+                return (ExtractPlaceReviewData(response, id));
         }
 
         private Mono<String> ExtractAndUploadPlaceImageAsync(String placeId, String photoId, String location,
@@ -210,10 +213,9 @@ public class NearbySearchService {
                                 .flatMap(response -> Mono
                                                 .fromCallable(() -> imagekitService.UploadImageString(
                                                                 response.photoUri(),
-                                                                location,
-                                                                "", Integer.toString(photoNum))))
+                                                                location, Integer.toString(photoNum))))
                                 // Google changes image name so save a number instead
-                                .map(uploaded -> imagekitService.RequestImage(location, placeId,
+                                .map(uploaded -> imagekitService.RequestImage(location,
                                                 Integer.toString(photoNum)));
         }
 
@@ -267,8 +269,8 @@ public class NearbySearchService {
                                 : null;
                 String thumbnail = photosRefined != null ? photosRefined.get(0) : null;
 
-                return (new Place(id, false, thumbnail, name, typeDisplayName, null, address, null,
-                                directions, 0, 0,
+                return (new Place(id, false, thumbnail, name, typeDisplayName, type, null, address, null,
+                                directions, 0.0, 0.0, 0, 0,
                                 location, secondaryTypes, null, null, null,
                                 LocalDateTime.now()));
         }
@@ -303,18 +305,24 @@ public class NearbySearchService {
                                 .block() // Only block once for the whole list
                                 : null;
 
-                return (new Place(id, true, place.getThumbnail(), place.getName(), place.getPrimaryType(), phone,
+                return (new Place(id, true, place.getThumbnail(), place.getName(), place.getPrimaryType(),
+                                place.getPrimaryTypeRaw(), phone,
                                 place.getAddress(), website,
-                                place.getDirectionsUri(), rating, totalRatings,
+                                place.getDirectionsUri(), rating, place.getInappRating(), totalRatings,
+                                place.getInappTotalRatings(),
                                 place.getLocation(), place.getSecondaryTypes(), schedule, photosRefined, null,
                                 LocalDateTime.now()));
         }
 
-        private Place ExtractPlaceReviewData(GooglePlaceDetails placeDetails, Place place) {
+        private List<Review> ExtractPlaceReviewData(GooglePlaceDetails placeDetails, String placeId) {
                 List<Review> reviews = placeDetails.reviews() != null
-                                ? placeDetails.reviews().stream().map(ReviewDTO::toReview).toList()
+                                ? placeDetails.reviews().stream().map(dto -> {
+                                        Review r = dto.toReview();
+                                        r.setPlaceId(placeId);
+                                        return r;
+                                }).toList()
                                 : null;
-                place.setReviews(reviews);
-                return (place);
+                reviews = reviewService.SaveReviews(reviews);
+                return reviews;
         }
 }

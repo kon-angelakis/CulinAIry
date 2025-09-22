@@ -25,14 +25,7 @@ import com.kangel.thesis.aipowered_location_advisor.Services.Authentication.Auth
 import com.kangel.thesis.aipowered_location_advisor.Services.Messaging.Email.EmailFactory;
 import com.kangel.thesis.aipowered_location_advisor.Services.Messaging.Email.SpringEmailService;
 
-import io.imagekit.sdk.exceptions.BadRequestException;
-import io.imagekit.sdk.exceptions.ForbiddenException;
-import io.imagekit.sdk.exceptions.InternalServerException;
-import io.imagekit.sdk.exceptions.TooManyRequestsException;
-import io.imagekit.sdk.exceptions.UnauthorizedException;
-import io.imagekit.sdk.exceptions.UnknownException;
 import jakarta.validation.Valid;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/test")
@@ -72,13 +65,6 @@ public class TestController {
         ApiResponse<Place> response = placeService.FindPlace(placeId);
         return ResponseEntity.ok(response);
 
-    }
-
-    @GetMapping("/mongo")
-    public String getMethodName() {
-        placeService.SavePlace(new Place("asd", false, "a", null, null, null, null, null, null, 0, 0, null, null,
-                null, null, null, null));
-        return "ok";
     }
 
 }
