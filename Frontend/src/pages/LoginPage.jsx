@@ -12,24 +12,22 @@ import {
 } from "@mui/material";
 import GoogleButton from "../components/GoogleButton.jsx";
 
-import { useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import apiAxios from "../config/apiAxiosConfig.js";
 import authAxios from "../config/authAxiosConfig.js";
 import CulinairyFooter from "../components/CulinairyFooter.jsx";
+import { UserContext } from "../App.jsx"; // or wherever you put the context
 
 export default function LoginPage() {
+  const { user, setUser } = useContext(UserContext);
   const navigate = useNavigate(); //Skip login if already logined
   useEffect(() => {
     authAxios
       .get("/auth/authenticated")
       .then(() => navigate("/home"))
       .catch((error) => {
-        setAlert({
-          open: true,
-          severity: "error",
-          message: String(error),
-        });
+        console.log(error);
         navigate("/login");
       });
   }, [navigate]);
@@ -58,6 +56,7 @@ export default function LoginPage() {
       "UserDetails",
       JSON.stringify(response.data.data.userDetails)
     );
+    setUser(response.data.data.userDetails);
   };
 
   const handleSubmit = (e) => {
@@ -129,15 +128,16 @@ export default function LoginPage() {
           elevation={6}
           borderRadius={15}
           sx={{
-            p: { xs: 5, sm: 10 },
+            p: { xs: 4, sm: 8 },
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            maxWidth: 400,
+            maxWidth: 500,
             width: "100%",
+            borderRadius: 2,
           }}
         >
-          <Typography variant="h4" sx={{ mb: 2, fontWeight: 600 }}>
+          <Typography variant="h4" sx={{ mt: 1, mb: 4, fontWeight: 600 }}>
             Sign In to Culinairy
           </Typography>
           <form onSubmit={handleSubmit} method="POST" style={{ width: "100%" }}>
@@ -182,7 +182,7 @@ export default function LoginPage() {
           <Divider t sx={{ width: "100%", mb: 2 }}>
             OR
           </Divider>
-          <GoogleButton showAlert={showAlert} />
+          <GoogleButton text={"Sign in with Google"} showAlert={showAlert} />
           <Box
             sx={{
               display: "flex",
@@ -193,11 +193,11 @@ export default function LoginPage() {
               p: 2,
             }}
           >
-            <Link href="#" underline="hover">
-              Forgot password?
-            </Link>
             <Link href="/register" underline="hover">
               Don't have an account? Sign Up
+            </Link>
+            <Link href="/" underline="none" color="secondary.main">
+              Back Home
             </Link>
           </Box>
         </Paper>

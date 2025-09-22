@@ -16,24 +16,28 @@ export default function ScheduleCard({ schedule, isLoading }) {
       </Box>
       <Divider sx={{ my: 1 }} />
       <Box sx={{ p: 1 }}>
-        {isLoading
-          ? Array.from({ length: 7 }).map((_, idx) => (
-              <Skeleton
-                key={idx}
-                width="60%"
-                sx={{ mx: "auto", my: 0.7 }}
-                variant="text"
-              />
-            ))
-          : schedule.map((day, idx) => (
-              <Typography
-                key={idx}
-                variant="subtitle2"
-                sx={{ textAlign: "center", my: 0.7 }}
-              >
-                {day}
-              </Typography>
-            ))}
+        {isLoading ? (
+          Array.from({ length: 7 }).map((_, idx) => (
+            <Skeleton
+              key={idx}
+              width="60%"
+              sx={{ mx: "auto", my: 0.7 }}
+              variant="text"
+            />
+          ))
+        ) : schedule ? (
+          schedule.map((day, idx) => (
+            <Typography
+              key={idx}
+              variant="subtitle2"
+              sx={{ textAlign: "center", my: 0.7 }}
+            >
+              {day}
+            </Typography>
+          ))
+        ) : (
+          <Typography>Nothing found</Typography>
+        )}
       </Box>
     </Paper>
   );

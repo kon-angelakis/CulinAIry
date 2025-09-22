@@ -14,6 +14,7 @@ import {
   styled,
   keyframes,
 } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import { LocationOn, Star, Restaurant, Person } from "@mui/icons-material";
 import logo from "../assets/logo.svg";
 import logoRibbon from "../assets/logo_ribbon.svg";
@@ -43,45 +44,94 @@ const fadeInUp = keyframes`
   }
 `;
 
-// Styled components
-const HeroContainer = styled(Box)(({ theme }) => ({
-  minHeight: "100vh",
-  minWidth: "100%",
-  background: `linear-gradient(135deg, ${theme.palette.background.default} 0%, #FFF8F0 100%)`,
-  position: "relative",
-  overflow: "hidden",
-}));
+// Styled components (theme-aware)
+const HeroContainer = styled(Box)(({ theme }) => {
+  const isDark = theme.palette.mode === "dark";
+
+  // softer gradients so white isn't aggressive
+  const bgStart = theme.palette.background.default;
+  const bgEnd = isDark
+    ? alpha(theme.palette.background.paper, 0.92)
+    : alpha(theme.palette.background.paper, 0.98);
+
+  const overlay = isDark
+    ? alpha(theme.palette.primary.main, 0.08)
+    : alpha(theme.palette.secondary.main, 0.2);
+
+  return {
+    minHeight: "100vh",
+    minWidth: "100%",
+    background: `linear-gradient(135deg, ${bgStart} 0%, ${bgEnd} 100%)`,
+    position: "relative",
+    overflow: "hidden",
+    // subtle overlay to add warmth / depth depending on mode
+    "&::after": {
+      content: '""',
+      position: "absolute",
+      inset: 0,
+      background: `linear-gradient(180deg, transparent 0%, ${overlay} 100%)`,
+      pointerEvents: "none",
+    },
+  };
+});
 
 const GradientText = styled(Typography)(({ theme }) => ({
-  background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
+  // avoid heavy glow by lowering alpha and removing hard white
+  background: `linear-gradient(135deg, ${alpha(
+    theme.palette.primary.main,
+    0.98
+  )}, ${alpha(theme.palette.primary.main, 0.75)})`,
   WebkitBackgroundClip: "text",
   WebkitTextFillColor: "transparent",
   backgroundClip: "text",
-  textShadow: `0 0 20px ${theme.palette.primary.main}30`,
+  textShadow: `0 0 10px ${alpha(theme.palette.primary.main, 0.12)}`,
 }));
 
-const AnimatedIcon = styled(Box)({
-  animation: `${bounce} 2s infinite`,
-});
-
-const FadeInBox = styled(Box)({
-  animation: `${fadeInUp} 0.8s ease-out`,
-});
-
-const GlowButton = styled(Button)(({ theme }) => ({
-  background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
-  "&:hover": {
-    background: `linear-gradient(135deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
-    boxShadow: `0 0 40px ${theme.palette.primary.main}60`,
-  },
-}));
-
-const FloatingElement = styled(Box)(({ theme }) => ({
-  position: "absolute",
-  opacity: 0.05,
+const AnimatedIcon = styled(Box)(({ theme }) => ({
   animation: `${bounce} 2s infinite`,
   color: theme.palette.primary.main,
 }));
+
+const FadeInBox = styled(Box)(() => ({
+  animation: `${fadeInUp} 0.8s ease-out`,
+}));
+
+const GlowButton = styled(Button)(({ theme }) => ({
+  background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${alpha(
+    theme.palette.primary.main,
+    0.85
+  )})`,
+  color: theme.palette.primary.contrastText,
+  "&:hover": {
+    background: `linear-gradient(135deg, ${alpha(
+      theme.palette.primary.dark
+        ? theme.palette.primary.dark
+        : theme.palette.primary.main,
+      1
+    )}, ${theme.palette.primary.main})`,
+    boxShadow: `0 0 28px ${alpha(theme.palette.primary.main, 0.25)}`,
+  },
+}));
+
+// floating decorative elements should be neutral gray-ish and visible in both modes
+const FloatingElement = styled(Box)(({ theme }) => {
+  const grayVisible =
+    theme.palette.mode === "dark"
+      ? theme.palette.grey?.[400] ?? alpha("#fff", 0.45)
+      : theme.palette.grey?.[800] ?? alpha("#000", 0.45);
+
+  return {
+    position: "absolute",
+    opacity: 0.08,
+    animation: `${bounce} 2s infinite`,
+    color: grayVisible,
+    // ensure children icons inherit this color
+    "& .MuiSvgIcon-root": {
+      color: "inherit",
+      opacity: 0.95,
+    },
+  };
+});
 
 const HeroPageMUI = () => {
   const navigate = useNavigate();
@@ -92,6 +142,20 @@ const HeroPageMUI = () => {
   React.useEffect(() => {
     setMounted(true);
   }, []);
+
+  // derived helper colors for inline sx use (so orbs respect mode)
+  const orbPrimary = alpha(
+    theme.palette.primary.main,
+    theme.palette.mode === "dark" ? 0.1 : 0.08
+  );
+  const orbSecondary = alpha(
+    theme.palette.secondary.main,
+    theme.palette.mode === "dark" ? 0.08 : 0.08
+  );
+
+  // small helper: image filter for SVGs so they read white on dark mode
+  const svgFilter =
+    theme.palette.mode === "dark" ? "brightness(0) invert(1)" : "none";
 
   return (
     <HeroContainer>
@@ -108,10 +172,17 @@ const HeroPageMUI = () => {
           <Box sx={{ display: "flex", alignItems: "center", flexGrow: 1 }}>
             <Fade in={mounted} timeout={600}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-                <img
+                {/* use Box component for img so we can use sx */}
+                <Box
+                  component="img"
                   src={logo}
                   alt="Culinairy Logo"
-                  style={{ height: 40, width: 40 }}
+                  sx={{
+                    height: 40,
+                    width: 40,
+                    filter: svgFilter,
+                    transition: "filter .2s ease, opacity .15s ease",
+                  }}
                 />
                 <Typography
                   variant="h5"
@@ -170,16 +241,18 @@ const HeroPageMUI = () => {
           {/* Logo Ribbon */}
           <Grow in={mounted} timeout={1000}>
             <Box sx={{ mb: 4 }}>
-              <img
+              <Box
+                component="img"
                 src={logoRibbon}
                 alt="Culinairy"
-                style={{
+                sx={{
                   height: 64,
-                  opacity: 0.9,
-                  transition: "opacity 0.3s ease",
+                  opacity: 0.95,
+                  transition: "opacity 0.3s ease, filter .15s ease",
+                  filter: svgFilter,
                 }}
                 onMouseEnter={(e) => (e.currentTarget.style.opacity = "1")}
-                onMouseLeave={(e) => (e.currentTarget.style.opacity = "0.9")}
+                onMouseLeave={(e) => (e.currentTarget.style.opacity = "0.95")}
               />
             </Box>
           </Grow>
@@ -246,13 +319,14 @@ const HeroPageMUI = () => {
                 sx={{
                   p: 3,
                   borderRadius: 3,
-                  backgroundColor: "rgba(255, 107, 0, 0.1)",
-                  transition: "all 0.3s ease",
+                  // subtle paper tone that stays gentle in both modes
+                  backgroundColor: (t) =>
+                    t.palette.mode === "dark"
+                      ? alpha(t.palette.background.paper, 0.03)
+                      : alpha(t.palette.background.paper, 0.015),
+                  transition: "all 0.25s ease",
                   cursor: "pointer",
-                  "&:hover": {
-                    backgroundColor: "rgba(255, 107, 0, 0.2)",
-                    transform: "scale(1.05)",
-                  },
+                  "&:hover": { transform: "scale(1.05)" },
                 }}
               >
                 <Stack alignItems="center" spacing={1}>
@@ -268,13 +342,13 @@ const HeroPageMUI = () => {
                 sx={{
                   p: 3,
                   borderRadius: 3,
-                  backgroundColor: "rgba(46, 125, 50, 0.1)",
-                  transition: "all 0.3s ease",
+                  backgroundColor: (t) =>
+                    t.palette.mode === "dark"
+                      ? alpha(t.palette.background.paper, 0.03)
+                      : alpha(t.palette.background.paper, 0.015),
+                  transition: "all 0.25s ease",
                   cursor: "pointer",
-                  "&:hover": {
-                    backgroundColor: "rgba(46, 125, 50, 0.2)",
-                    transform: "scale(1.05)",
-                  },
+                  "&:hover": { transform: "scale(1.05)" },
                 }}
               >
                 <Stack alignItems="center" spacing={1}>
@@ -294,17 +368,17 @@ const HeroPageMUI = () => {
                 sx={{
                   p: 3,
                   borderRadius: 3,
-                  backgroundColor: "rgba(255, 193, 7, 0.1)",
-                  transition: "all 0.3s ease",
+                  backgroundColor: (t) =>
+                    t.palette.mode === "dark"
+                      ? alpha(t.palette.background.paper, 0.03)
+                      : alpha(t.palette.background.paper, 0.015),
+                  transition: "all 0.25s ease",
                   cursor: "pointer",
-                  "&:hover": {
-                    backgroundColor: "rgba(255, 193, 7, 0.2)",
-                    transform: "scale(1.05)",
-                  },
+                  "&:hover": { transform: "scale(1.05)" },
                 }}
               >
                 <Stack alignItems="center" spacing={1}>
-                  <LocationOn sx={{ fontSize: 32, color: "#FF8F00" }} />
+                  <LocationOn sx={{ fontSize: 32, color: "warning.main" }} />
                   <Typography variant="caption" sx={{ fontWeight: 600 }}>
                     Nearby
                   </Typography>
@@ -315,7 +389,7 @@ const HeroPageMUI = () => {
         </Box>
       </Container>
 
-      {/* Background Decorative Elements */}
+      {/* Background Decorative Elements (neutral grayish so visible in both modes) */}
       <FloatingElement sx={{ top: "10%", left: "5%", animationDelay: "1s" }}>
         <Person sx={{ fontSize: 96 }} />
       </FloatingElement>
@@ -333,7 +407,7 @@ const HeroPageMUI = () => {
         <LocationOn sx={{ fontSize: 72 }} />
       </FloatingElement>
 
-      {/* Gradient Orbs */}
+      {/* Gradient Orbs (toned down) */}
       <Box
         sx={{
           position: "absolute",
@@ -342,7 +416,10 @@ const HeroPageMUI = () => {
           width: 384,
           height: 384,
           borderRadius: "50%",
-          background: `linear-gradient(135deg, ${theme.palette.primary.main}20, ${theme.palette.primary.light}20)`,
+          background: `linear-gradient(135deg, ${orbPrimary}, ${alpha(
+            theme.palette.primary.main,
+            0.04
+          )})`,
           filter: "blur(60px)",
           animation: `${bounce} 4s infinite ease-in-out`,
         }}
@@ -355,7 +432,10 @@ const HeroPageMUI = () => {
           width: 320,
           height: 320,
           borderRadius: "50%",
-          background: `linear-gradient(135deg, ${theme.palette.secondary.main}20, ${theme.palette.secondary.light}20)`,
+          background: `linear-gradient(135deg, ${orbSecondary}, ${alpha(
+            theme.palette.secondary.main,
+            0.03
+          )})`,
           filter: "blur(60px)",
           animation: `${bounce} 4s infinite ease-in-out 1s`,
         }}

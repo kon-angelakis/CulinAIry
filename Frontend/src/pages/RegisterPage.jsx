@@ -3,6 +3,7 @@ import {
   Box,
   Button,
   Container,
+  Divider,
   Link,
   Paper,
   Snackbar,
@@ -12,6 +13,7 @@ import {
 import { useState } from "react";
 import apiAxios from "../config/apiAxiosConfig.js";
 import CulinairyFooter from "../components/CulinairyFooter.jsx";
+import GoogleButton from "../components/GoogleButton.jsx";
 
 export default function RegisterPage() {
   const [alert, setAlert] = useState({
@@ -19,6 +21,14 @@ export default function RegisterPage() {
     severity: "",
     message: "",
   });
+
+  const showAlert = ({ severity, message }) => {
+    setAlert({
+      open: true,
+      severity,
+      message,
+    });
+  };
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -119,16 +129,23 @@ export default function RegisterPage() {
         <Paper
           elevation={6}
           sx={{
-            p: { xs: 5, sm: 10 },
+            p: { xs: 4, sm: 8 },
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
             maxWidth: 500,
             width: "100%",
-            borderRadius: 3,
+            borderRadius: 2,
           }}
         >
-          <Typography variant="h4" sx={{ mb: 3, fontWeight: 600 }}>
+          <Typography
+            variant="h4"
+            sx={{
+              mt: 1,
+              mb: 4,
+              fontWeight: 600,
+            }}
+          >
             Sign Up to Culinairy
           </Typography>
           <form onSubmit={handleSubmit} method="POST" style={{ width: "100%" }}>
@@ -245,16 +262,35 @@ export default function RegisterPage() {
               Sign Up
             </Button>
           </form>
+          <Divider t sx={{ width: "100%", mb: 2 }}>
+            OR
+          </Divider>
+          <GoogleButton text={"Sign up with Google"} showAlert={showAlert} />
           <Box
             sx={{
               display: "flex",
-              justifyContent: "flex-start",
+              justifyContent: "space-between",
               width: "100%",
-              p: 1,
+              flexDirection: "column",
+              gap: 2,
+              p: 2,
+            }}
+          ></Box>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              width: "100%",
+              flexDirection: "column",
+              gap: 2,
+              p: 2,
             }}
           >
             <Link href="/login" underline="hover">
               Already have an account? Sign In
+            </Link>
+            <Link href="/" underline="none" color="secondary.main">
+              Back Home
             </Link>
           </Box>
         </Paper>

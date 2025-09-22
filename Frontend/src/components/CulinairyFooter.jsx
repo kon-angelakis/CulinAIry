@@ -1,8 +1,11 @@
 import Footer from "rc-footer";
 import { Typography } from "@mui/material";
 import "rc-footer/assets/index.css"; // import 'rc-footer/asssets/index.less';
+import { ThemeContext } from "../App.jsx";
+import { useContext } from "react";
 
 export default function CulinairyFooter() {
+  const { mode, setMode, deviceTheme } = useContext(ThemeContext);
   return (
     <Footer
       bottom={
@@ -12,7 +15,7 @@ export default function CulinairyFooter() {
         </Typography>
       }
       backgroundColor="transparent"
-      theme="light"
+      theme={mode == "light" ? "light" : "dark"}
     />
   );
 }

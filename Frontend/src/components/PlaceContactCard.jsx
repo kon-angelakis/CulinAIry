@@ -54,7 +54,9 @@ export default function PlaceContactCard({
           {isLoading ? (
             <Skeleton width={100} />
           ) : (
-            <Typography variant="body1">{type}</Typography>
+            <Typography variant="body1" textAlign={"start"}>
+              {type}
+            </Typography>
           )}
           {!isLoading && secondaryTypes?.length > 0 && (
             <ServesAlsoPopover secondaryTypes={secondaryTypes} />
@@ -72,6 +74,8 @@ export default function PlaceContactCard({
               target="_blank"
               rel="noopener"
               underline="hover"
+              color="secondary"
+              textAlign={"start"}
             >
               {getBaseUrl(website)}
             </Link>
@@ -86,7 +90,12 @@ export default function PlaceContactCard({
           {isLoading ? (
             <Skeleton width={90} />
           ) : phone ? (
-            <Link href={`tel:${phone}`} underline="hover" color="inherit">
+            <Link
+              href={`tel:${phone}`}
+              underline="hover"
+              color="secondary"
+              textAlign={"start"}
+            >
               {phone}
             </Link>
           ) : (
@@ -105,6 +114,8 @@ export default function PlaceContactCard({
               target="_blank"
               rel="noopener"
               underline="hover"
+              color="secondary"
+              textAlign={"start"}
             >
               <Typography variant="body1">{address}</Typography>
             </Link>

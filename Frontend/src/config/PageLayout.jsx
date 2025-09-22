@@ -10,23 +10,22 @@ export default function PageLayout() {
         display: "flex",
         flexDirection: "column",
         position: "relative",
-        p: { xs: 1, sm: 2, md: 4, lg: 8 },
+        px: { xs: 1, sm: 2, md: 4, lg: 8 },
       }}
     >
       <CulinairyAppbar />
       <Paper
         elevation={2}
-        component="main"
         sx={{
-          pt: 5,
-          pb: 10,
+          minHeight: "100vh",
           width: "100%",
           maxWidth: "clamp(300px, 100vw, 1920px)",
           display: "flex",
           flexDirection: "column",
-          justifyContent: "center",
+          justifyContent: "start",
           alignItems: "center",
-          bgcolor: "#f5f5f5",
+          mt: 0,
+          py: 12,
         }}
       >
         <Container

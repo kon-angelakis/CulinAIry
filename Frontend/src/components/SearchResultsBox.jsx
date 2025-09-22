@@ -6,7 +6,7 @@ import PlaceCard from "./PlaceCard.jsx";
 import { useLocation } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 
-export default function SearchResultsBox({ endpoint, method, formData }) {
+export default function SearchResultsBox({ endpoint, method, formData, text }) {
   const location = useLocation();
   const [placesResponse, setPlacesResponse] = useState(null);
 
@@ -57,9 +57,9 @@ export default function SearchResultsBox({ endpoint, method, formData }) {
       <Typography variant="h4" sx={{ mb: 4 }}>
         {isLoading
           ? "Loading results"
-          : isError
-          ? `Error retrieving results: ${placesResponse?.message}`
-          : `Found ${results.length} entries`}
+          : isError || !results
+          ? `${placesResponse?.message}`
+          : `Found ${results.length} ${text}`}
       </Typography>
 
       <Grid container spacing={4} sx={{ p: 2 }} justifyContent="space-evenly">
@@ -77,7 +77,7 @@ export default function SearchResultsBox({ endpoint, method, formData }) {
                 <SkeletonPlaceCard />
               </Grid>
             ))
-          : !isError
+          : !isError && results
           ? results.map((place) => (
               <Grid
                 key={place.id}
@@ -98,7 +98,7 @@ export default function SearchResultsBox({ endpoint, method, formData }) {
                 />
               </Grid>
             ))
-          : "-"}
+          : null}
       </Grid>
     </Box>
   );

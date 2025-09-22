@@ -1,7 +1,7 @@
-import { Box, Fab, Paper, Tooltip, Typography } from "@mui/material";
-import { FavoriteRounded } from "@mui/icons-material";
-import { useState } from "react";
+import { Box, Paper, Tooltip, Typography } from "@mui/material";
+import { useContext, useState } from "react";
 import { useNavigate } from "react-router";
+import { ThemeContext } from "../App.jsx";
 import authAxios from "../config/authAxiosConfig";
 
 export default function PlaceCard({
@@ -12,6 +12,8 @@ export default function PlaceCard({
   rating,
   reviewCount,
 }) {
+  const { mode } = useContext(ThemeContext);
+
   const navigate = useNavigate();
 
   const [elevation, setElevation] = useState(2);
@@ -68,7 +70,10 @@ export default function PlaceCard({
           textAlign: "start",
           width: "100%",
           bottom: "0",
-          bgcolor: "rgba(255, 255, 255, 0.4)",
+          bgcolor:
+            mode == "light"
+              ? "rgba(211, 211, 211, 0.5)"
+              : " rgba(39, 39, 39, 0.5)",
           backdropFilter: "blur(10px)",
           borderBottomLeftRadius: "inherit",
           borderBottomRightRadius: "inherit",
@@ -81,7 +86,7 @@ export default function PlaceCard({
           textAlign="start"
           sx={{
             ml: 2,
-            maxWidth: "50%",
+            maxWidth: "90%",
             display: "flex",
             flexDirection: "column",
             justifyContent: "center",
@@ -98,21 +103,6 @@ export default function PlaceCard({
               {category}
             </Typography>
           </Tooltip>
-        </Box>
-        <Box
-          textAlign="end"
-          sx={{
-            mr: 2,
-            maxWidth: "50%",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-          }}
-        >
-          <Typography variant="subtitle1">{rating + " / 5 ⭐"}</Typography>
-          <Typography variant="caption" color="text.secondary">
-            ({reviewCount + " reviews"})
-          </Typography>
         </Box>
       </Box>
     </Paper>

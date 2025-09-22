@@ -1,38 +1,37 @@
+import ExitToAppRoundedIcon from "@mui/icons-material/ExitToAppRounded";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
 import MenuIcon from "@mui/icons-material/Menu";
 import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
-import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
 import ScheduleRoundedIcon from "@mui/icons-material/ScheduleRounded";
-import StarRoundedIcon from "@mui/icons-material/StarRounded";
 import SettingsRoundedIcon from "@mui/icons-material/SettingsRounded";
-import ExitToAppRoundedIcon from "@mui/icons-material/ExitToAppRounded";
+import StarRoundedIcon from "@mui/icons-material/StarRounded";
 import {
   AppBar,
   Avatar,
   Box,
   Drawer,
   IconButton,
-  InputAdornment,
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
-  TextField,
   Toolbar,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
+import { useContext, useState } from "react";
 
+import { useNavigate } from "react-router";
+import { UserContext } from "../App.jsx"; // or wherever you put the context
 import { ReactComponent as LogoRibbon } from "../assets/logo_ribbon.svg";
-import { href, useNavigate } from "react-router";
 
 export default function CulinairyAppbar() {
+  const { user, setUser } = useContext(UserContext);
+
   const navigate = useNavigate();
 
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerPosition, setDrawerPosition] = useState("right");
-
-  let user = JSON.parse(localStorage.getItem("UserDetails"));
 
   return (
     <Box>
@@ -147,7 +146,16 @@ export default function CulinairyAppbar() {
               <Typography variant="h6">{user.username}</Typography>
             </ListItem>
             <ListItem divider sx={{ my: 1 }}></ListItem>
-            <ListItem button sx={{ cursor: "pointer" }}>
+            <ListItem
+              button
+              sx={{
+                cursor: "pointer",
+                "&:hover": { bgcolor: "primary.light" },
+              }}
+              onClick={() => {
+                navigate("/profile");
+              }}
+            >
               <ListItemIcon>
                 <PersonRoundedIcon />
               </ListItemIcon>
@@ -155,13 +163,17 @@ export default function CulinairyAppbar() {
             </ListItem>
             <ListItem
               button
-              sx={{ cursor: "pointer" }}
+              sx={{
+                cursor: "pointer",
+                "&:hover": { bgcolor: "primary.light" },
+              }}
               onClick={() => {
                 navigate(`${user.username}/favourites`, {
                   state: {
                     searchEndpoint: "/user/places",
                     axiosMethod: "GET",
                     formData: { params: { type: "FAVOURITES" } },
+                    text: "favourite place(s)",
                   },
                 });
               }}
@@ -173,13 +185,17 @@ export default function CulinairyAppbar() {
             </ListItem>
             <ListItem
               button
-              sx={{ cursor: "pointer" }}
+              sx={{
+                cursor: "pointer",
+                "&:hover": { bgcolor: "primary.light" },
+              }}
               onClick={() => {
                 navigate(`${user.username}/history`, {
                   state: {
                     searchEndpoint: "/user/places",
                     axiosMethod: "GET",
                     formData: { params: { type: "RECENTLY_VIEWED" } },
+                    text: "/ 16 most recents",
                   },
                 });
               }}
@@ -189,7 +205,16 @@ export default function CulinairyAppbar() {
               </ListItemIcon>
               <ListItemText primary="History" />
             </ListItem>
-            <ListItem button sx={{ cursor: "pointer" }}>
+            <ListItem
+              button
+              sx={{
+                cursor: "pointer",
+                "&:hover": { bgcolor: "primary.light" },
+              }}
+              onClick={() => {
+                navigate(`${user.username}/reviews`);
+              }}
+            >
               <ListItemIcon>
                 <StarRoundedIcon />
               </ListItemIcon>
@@ -198,7 +223,16 @@ export default function CulinairyAppbar() {
           </List>
           <List>
             <ListItem divider sx={{ my: 1 }}></ListItem>
-            <ListItem button sx={{ cursor: "pointer" }}>
+            <ListItem
+              button
+              sx={{
+                cursor: "pointer",
+                "&:hover": { bgcolor: "primary.light" },
+              }}
+              onClick={() => {
+                navigate("/settings");
+              }}
+            >
               <ListItemIcon>
                 <SettingsRoundedIcon />
               </ListItemIcon>
@@ -206,7 +240,10 @@ export default function CulinairyAppbar() {
             </ListItem>
             <ListItem
               button
-              sx={{ cursor: "pointer" }}
+              sx={{
+                cursor: "pointer",
+                "&:hover": { bgcolor: "secondary.main" },
+              }}
               onClick={() => {
                 localStorage.clear();
                 window.location.reload();

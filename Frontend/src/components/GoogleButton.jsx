@@ -3,8 +3,11 @@ import { useGoogleLogin } from "@react-oauth/google";
 import { Button } from "@mui/material";
 import { useNavigate } from "react-router";
 import apiAxios from "../config/apiAxiosConfig";
+import { useContext } from "react";
+import { UserContext } from "../App";
 
-export default function GoogleButton({ showAlert }) {
+export default function GoogleButton({ text, showAlert }) {
+  const { user, setUser } = useContext(UserContext);
   const navigate = useNavigate();
 
   const login = useGoogleLogin({
@@ -24,6 +27,8 @@ export default function GoogleButton({ showAlert }) {
           "UserDetails",
           JSON.stringify(response.data.data.userDetails)
         );
+        setUser(response.data.data.userDetails);
+
         navigate("/home");
       } catch (error) {
         console.error("Google login failed:", error);
@@ -45,7 +50,7 @@ export default function GoogleButton({ showAlert }) {
         textTransform: "none",
       }}
     >
-      Sign in with Google
+      {text}
     </Button>
   );
 }

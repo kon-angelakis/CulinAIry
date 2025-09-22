@@ -1,4 +1,4 @@
-import { Box, Grid } from "@mui/material";
+import { Box, Button, Grid, Skeleton } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
@@ -14,9 +14,19 @@ export default function PlaceDetailsPage() {
   const { id } = useParams();
 
   const [isFavourite, setIsFavourite] = useState(false);
+  const [reviewsLoaded, setReviewsLoaded] = useState(null);
+  const [myReview, setMyReview] = useState(null);
 
   const fetchDetails = async () => {
-    const response = await authAxios.get(`/places/${id}`);
+    const response = await authAxios.get(`/places/${id}/details`);
+    return response.data.data;
+  };
+
+  const fetchReviews = async () => {
+    setReviewsLoaded(false);
+    const response = await authAxios.get(`/places/${id}/reviews`);
+    setReviewsLoaded(true);
+    results.reviews = response.data.data;
     return response.data.data;
   };
 
@@ -29,6 +39,11 @@ export default function PlaceDetailsPage() {
     setIsFavourite(response.data.data);
   };
 
+  const fetchMyReview = async () => {
+    const response = await authAxios.get(`/user/myreview/${id}`);
+    setMyReview(response.data);
+  };
+
   const { data: results = {}, isLoading } = useQuery({
     queryKey: ["place", id],
     queryFn: fetchDetails,
@@ -39,6 +54,7 @@ export default function PlaceDetailsPage() {
 
   useEffect(() => {
     fetchIsFavourited();
+    fetchMyReview();
   }, []);
 
   return (
@@ -49,11 +65,14 @@ export default function PlaceDetailsPage() {
           <PlaceBanner
             name={results.name}
             photos={results.photos}
-            rating={results.rating}
-            totalRatings={results.totalRatings}
+            googleRating={results.rating}
+            appRating={results.inappRating}
+            googleTotalRatings={results.totalRatings}
+            appTotalRatings={results.inappTotalRatings}
             isLoading={isLoading}
             isFavourite={isFavourite}
             setIsFavourite={setIsFavourite}
+            userReview={myReview}
           />
         </Grid>
         {/* Contact methods */}
@@ -77,7 +96,21 @@ export default function PlaceDetailsPage() {
           )}
         </Grid>
         <Grid size={12}>
-          {!isLoading && <ReviewsPanel reviews={results.reviews} />}
+          {results.reviews || reviewsLoaded ? (
+            <ReviewsPanel reviews={results.reviews} isLoading={isLoading} />
+          ) : (
+            <Button
+              variant="contained"
+              size="large"
+              color="secondary"
+              onClick={fetchReviews}
+              loadingPosition="end"
+              loading={reviewsLoaded != null}
+              disabled={isLoading}
+            >
+              {reviewsLoaded != null ? "Loading Reviews" : "Load Reviews"}
+            </Button>
+          )}
         </Grid>
       </Grid>
     </Box>

@@ -8,19 +8,27 @@ import DirectionsCarRoundedIcon from "@mui/icons-material/DirectionsCarRounded";
 import {
   Box,
   Button,
+  Divider,
   Grid,
+  Paper,
   Slider,
   TextField,
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
+import SearchResultsBox from "../components/SearchResultsBox";
 
 export default function HomePage() {
   const [formData, setFormData] = useState({
     userInput: "",
     location: null,
     radius: 5000, //matching starting slider radius
+  });
+
+  const [curatedFormData, setCuratedFormData] = useState({
+    location: null,
+    radius: 5000,
   });
 
   const navigate = useNavigate();
@@ -46,6 +54,13 @@ export default function HomePage() {
             latitude: position.coords.latitude,
           },
         });
+        setCuratedFormData({
+          ...curatedFormData,
+          location: {
+            longitude: position.coords.longitude,
+            latitude: position.coords.latitude,
+          },
+        });
       },
       (error) => {
         setLocationGranted(false);
@@ -57,6 +72,10 @@ export default function HomePage() {
       }
     );
   };
+
+  useEffect(() => {
+    requestLocation();
+  }, []);
 
   const handleChange = (e) => {
     setFormData({
@@ -76,6 +95,7 @@ export default function HomePage() {
           searchEndpoint: "/search",
           axiosMethod: "POST",
           formData: formData,
+          text: "entries",
         },
       });
     }, 1000);
@@ -192,6 +212,17 @@ export default function HomePage() {
           </Grid>
         </Grid>
       </form>
+      <Divider sx={{ my: 16 }} />
+      {locationGranted && (
+        <Box sx={{ mt: "20vh" }}>
+          <SearchResultsBox
+            endpoint={"/user/curated"}
+            method={"POST"}
+            formData={curatedFormData}
+            text={"nearby place(s) you might be interested in"}
+          />
+        </Box>
+      )}
     </Box>
   );
 }

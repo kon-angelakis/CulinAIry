@@ -73,7 +73,7 @@ export default function ReviewsPanel({ reviews }) {
               >
                 Summarizing
                 <AutoAwesomeRoundedIcon
-                  sx={{ px: 1, color: "secondary.light" }}
+                  sx={{ px: 0.5, color: "secondary.light" }}
                 />
               </Typography>
               <Skeleton animation="wave" variant="text" />
@@ -93,7 +93,7 @@ export default function ReviewsPanel({ reviews }) {
               >
                 Summary
                 <AutoAwesomeRoundedIcon
-                  sx={{ px: 1, color: "secondary.light" }}
+                  sx={{ px: 0.5, color: "secondary.light" }}
                 />
               </Typography>
               <Typography variant="body1" color="text.secondary">
