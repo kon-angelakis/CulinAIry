@@ -1,0 +1,42 @@
+.mySwiper .swiper-slide {
+  transform: scale(0.82);
+  opacity: 0.55;
+  filter: blur(1px);
+  transition: transform 0.35s ease, opacity 0.35s ease, box-shadow 0.35s ease,
+    filter 0.35s ease;
+}
+
+.mySwiper .swiper-slide-active {
+  transform: scale(1.12);
+  opacity: 1;
+  filter: none;
+  z-index: 20;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.22), 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.mySwiper .swiper-slide-next,
+.mySwiper .swiper-slide-prev {
+  transform: scale(0.93);
+  opacity: 0.85;
+  filter: blur(0);
+  z-index: 10;
+}
+
+.mySwiper .swiper-slide-active:hover {
+  transform: scale(1.15);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.25), 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.mySwiper .swiper-pagination-progressbar-fill {
+  background: linear-gradient(90deg, #ff7d2e, #ffa74c);
+}
+
+.mySwiper {
+  overflow: visible;
+  scrollbar-width: none;
+}
+
+.mySwiper::-webkit-scrollbar {
+  display: none;
+}

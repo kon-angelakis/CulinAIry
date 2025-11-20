@@ -1,29 +1,33 @@
-import { Box, Button, Pagination, Stack, Typography } from "@mui/material";
-import ReviewCardSlim from "../components/ReviewCardSlim";
+import { Box, Pagination, Stack, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
-import authAxios from "../config/authAxiosConfig";
+import ReviewCardSlim from "../components/ReviewCardSlim";
+import useCache from "../hooks/useCache";
 
 export default function UserReviewsPage() {
-  const [maxPage, setMaxPage] = useState(1);
+  const [maxPages, setMaxPages] = useState(1);
   const [paging, setPaging] = useState({
     page: 0,
-    size: 5,
+    size: 10,
   });
-  const [reviews, setReviews] = useState(null);
 
-  const fetchReviews = async () => {
-    const response = await authAxios.post("/user/reviews", paging);
-    setReviews(response.data.data.content);
-    return response.data.data;
-  };
+  const { data, isLoading } = useCache({
+    queryKey: "Reviews",
+    endpoint: "/user/reviews",
+    formData: paging,
+    method: "POST",
+  });
 
   useEffect(() => {
-    const load = async () => {
-      const response = await fetchReviews();
-      setMaxPage(response.totalPages);
-    };
-    load();
-  }, [paging]);
+    if (data?.data?.totalPages != null && maxPages == null) {
+      setMaxPages(data.data.totalPages);
+    }
+  }, [data]);
+
+  const reviews = data?.data ?? [];
+
+  const currentCount = reviews?.content?.length ? reviews.content.length : 0;
+
+  const totalCount = reviews?.totalElements ?? 0;
 
   const changePage = (e, value) => {
     setPaging({ ...paging, page: value - 1 });
@@ -32,11 +36,11 @@ export default function UserReviewsPage() {
   return (
     <Box>
       <Typography variant="h2" sx={{ mb: 8 }}>
-        My Reviews
+        Your Reviews
       </Typography>
       <Stack spacing={4}>
         {reviews && reviews.length != 0 ? (
-          reviews.map((review, index) => (
+          reviews.content.map((review, index) => (
             <ReviewCardSlim
               key={index}
               placeId={review.placeId}
@@ -59,9 +63,9 @@ export default function UserReviewsPage() {
         }}
       >
         <Pagination
-          count={maxPage}
+          count={maxPages}
           page={paging.page + 1}
-          onChange={(e, value) => changePage(e, value)}
+          onChange={changePage}
           color="primary"
           size="large"
         />

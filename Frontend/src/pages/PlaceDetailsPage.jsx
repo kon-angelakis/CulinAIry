@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Skeleton } from "@mui/material";
+import { Box, Grid } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
@@ -8,24 +8,26 @@ import authAxios from "../config/authAxiosConfig";
 // Icons
 import PlaceBanner from "../components/PlaceBanner";
 import PlaceContactCard from "../components/PlaceContactCard";
+import RecommendationBox from "../components/RecommendationBox";
 import ScheduleCard from "../components/ScheduleCard";
 
 export default function PlaceDetailsPage() {
   const { id } = useParams();
+  const navigate = useNavigate();
 
   const [isFavourite, setIsFavourite] = useState(false);
-  const [reviewsLoaded, setReviewsLoaded] = useState(null);
+  const [reviews, setReviews] = useState(null);
   const [myReview, setMyReview] = useState(null);
 
   const fetchDetails = async () => {
     const response = await authAxios.get(`/places/${id}/details`);
+    if (!response.data.success) navigate("/home");
     return response.data.data;
   };
 
   const fetchReviews = async () => {
-    setReviewsLoaded(false);
     const response = await authAxios.get(`/places/${id}/reviews`);
-    setReviewsLoaded(true);
+    setReviews(response.data.data);
     results.reviews = response.data.data;
     return response.data.data;
   };
@@ -55,6 +57,7 @@ export default function PlaceDetailsPage() {
   useEffect(() => {
     fetchIsFavourited();
     fetchMyReview();
+    fetchReviews();
   }, []);
 
   return (
@@ -73,6 +76,7 @@ export default function PlaceDetailsPage() {
             isFavourite={isFavourite}
             setIsFavourite={setIsFavourite}
             userReview={myReview}
+            location={results.location}
           />
         </Grid>
         {/* Contact methods */}
@@ -95,22 +99,31 @@ export default function PlaceDetailsPage() {
             <ScheduleCard schedule={results.schedule} isLoading={isLoading} />
           )}
         </Grid>
+        {/*Reviews*/}
         <Grid size={12}>
-          {results.reviews || reviewsLoaded ? (
-            <ReviewsPanel reviews={results.reviews} isLoading={isLoading} />
-          ) : (
-            <Button
-              variant="contained"
-              size="large"
-              color="secondary"
-              onClick={fetchReviews}
-              loadingPosition="end"
-              loading={reviewsLoaded != null}
-              disabled={isLoading}
-            >
-              {reviewsLoaded != null ? "Loading Reviews" : "Load Reviews"}
-            </Button>
-          )}
+          {reviews && <ReviewsPanel reviews={reviews} isLoading={isLoading} />}
+        </Grid>
+        <Grid size={12}>
+          {results.location &&
+            results.primaryType &&
+            results.secondaryTypes &&
+            results.id && (
+              <RecommendationBox
+                title={"Similar to this"}
+                endpoint={"/recommendations/similar"}
+                method={"POST"}
+                formData={{
+                  location: {
+                    longitude: results.location.x,
+                    latitude: results.location.y,
+                  },
+                  primaryType: results.primaryType,
+                  secondaryTypes: results.secondaryTypes,
+                  originalId: results.id,
+                }}
+                height={450}
+              />
+            )}
         </Grid>
       </Grid>
     </Box>

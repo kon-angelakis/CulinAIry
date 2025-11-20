@@ -1,4 +1,4 @@
-import { Box, Container, Paper } from "@mui/material";
+import { Box, Paper } from "@mui/material";
 import { Outlet } from "react-router";
 import CulinairyAppbar from "../components/CulinairyAppbar";
 import CulinairyFooter from "../components/CulinairyFooter";
@@ -28,11 +28,15 @@ export default function PageLayout() {
           py: 12,
         }}
       >
-        <Container
-          sx={{ px: { xs: 3, sm: 6, md: 9, lg: 12 }, maxWidth: "inherit" }}
+        <Box
+          sx={{
+            px: { xs: 3, sm: 6, md: 9, lg: 12 },
+            width: "100%",
+            overflow: "hidden",
+          }}
         >
           <Outlet />
-        </Container>
+        </Box>
       </Paper>
       <CulinairyFooter />
     </Box>

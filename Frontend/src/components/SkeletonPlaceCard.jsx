@@ -1,31 +1,18 @@
 import { Box, Paper, Skeleton, Typography } from "@mui/material";
-export default function SkeletonPlaceCard() {
+export default function SkeletonPlaceCard({ height }) {
   return (
     <Paper
-      elevation={4}
+      elevation={8}
       sx={{
         position: "relative",
         borderRadius: 2,
-        flex: 1,
-        width: "100%", // take full width of Grid cell
-        aspectRatio: "16/10", // keeps proportions instead of hardcoding height
-        maxWidth: 400,
-        minWidth: 250,
+        aspectRatio: "16/10",
+        maxHeight: height,
+        minHeight: 200,
+        width: "100%",
+        overflow: "hidden",
       }}
     >
-      <Skeleton
-        variant="rounded"
-        sx={{ bgcolor: "grey.400", width: "100%", height: "100%" }}
-      >
-        <Box
-          sx={{
-            position: "relative",
-            width: 400,
-            objectFit: "cover",
-            borderRadius: "inherit",
-          }}
-        />
-      </Skeleton>
       <Box
         sx={{
           position: "absolute",
@@ -33,7 +20,8 @@ export default function SkeletonPlaceCard() {
           width: "100%",
           maxHeight: "40%",
           bottom: "0",
-          bgcolor: "rgba(255, 255, 255, 0.5)",
+          bgcolor: "primary",
+          filter: "saturate(60%)",
           backdropFilter: "blur(10px)",
           borderBottomLeftRadius: "inherit",
           borderBottomRightRadius: "inherit",
@@ -55,12 +43,7 @@ export default function SkeletonPlaceCard() {
             </Typography>
           </Skeleton>
         </Box>
-        <Skeleton
-          variant="text"
-          animation="wave"
-          textAlign="end"
-          sx={{ mr: 2 }}
-        >
+        <Skeleton variant="text" animation="wave" sx={{ mr: 2 }}>
           <Typography variant="h6">"X / 5 ⭐"</Typography>
           <Typography variant="caption" color="text.secondary">
             ("reviewCount")

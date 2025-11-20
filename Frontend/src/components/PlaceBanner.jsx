@@ -18,10 +18,10 @@ import { useState } from "react";
 import FavoriteBorderRoundedIcon from "@mui/icons-material/FavoriteBorderRounded";
 import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
 import RateReviewRoundedIcon from "@mui/icons-material/RateReviewRounded";
-import authAxios from "../config/authAxiosConfig";
+import { AdvancedMarker, Map, Pin } from "@vis.gl/react-google-maps";
 import { useParams } from "react-router";
+import authAxios from "../config/authAxiosConfig";
 import ReviewCard from "./ReviewCard";
-import { BorderAllSharp } from "@mui/icons-material";
 
 export default function PlaceBanner({
   name,
@@ -34,6 +34,7 @@ export default function PlaceBanner({
   isFavourite,
   setIsFavourite,
   userReview,
+  location,
 }) {
   const { id } = useParams();
 
@@ -83,14 +84,19 @@ export default function PlaceBanner({
       ) : (
         <ImageCarousel images={photos || []} />
       )}
-
-      {/* General Info */}
-      <Box>
-        <Stack
-          spacing={2}
-          direction="column"
-          sx={{ p: 2, justifyContent: "space-evenly", alignItems: "center" }}
-        >
+      <Divider sx={{ my: 6 }} />
+      <Stack
+        spacing={2}
+        direction={{ xs: "column", lg: "row" }}
+        sx={{
+          p: 2,
+          justifyContent: "space-evenly",
+          alignItems: "stretch",
+          display: "flex",
+        }}
+      >
+        {/* General Info */}
+        <Box sx={{ flex: 1 }}>
           {isLoading ? (
             <Skeleton width={150} height={80} />
           ) : name ? (
@@ -102,7 +108,11 @@ export default function PlaceBanner({
           <Stack
             spacing={{ xs: 6, md: 12 }}
             direction={{ xs: "column", md: "row" }}
-            sx={{ p: 2, alignItems: "center", justifyContent: "space-evenly" }}
+            sx={{
+              p: 2,
+              alignItems: "center",
+              justifyContent: "space-evenly",
+            }}
           >
             <Stack
               spacing={1}
@@ -205,9 +215,10 @@ export default function PlaceBanner({
               </Button>
             )}
             {userReview != null && userReview.data != null ? (
-              <Box sx={{ p: 2, width: "90%", alignSelf: "center" }}>
-                <Typography variant="h4">Your review</Typography>
-                <Divider sx={{ my: 4 }} />
+              <Box sx={{ width: "100%", alignSelf: "start" }}>
+                <Typography variant="h5" sx={{ mb: 2 }}>
+                  Your review
+                </Typography>
                 <ReviewCard review={userReview.data} />
               </Box>
             ) : (
@@ -221,8 +232,48 @@ export default function PlaceBanner({
               </Button>
             )}
           </Stack>
-        </Stack>
-      </Box>
+        </Box>
+        {/* Map */}
+        <Paper
+          sx={{
+            width: "100%",
+            flex: { xs: "none", lg: 1 },
+            height: { xs: 300, lg: "auto" },
+            borderRadius: 4,
+            overflow: "hidden",
+          }}
+          elevation={4}
+        >
+          <Map
+            defaultZoom={13}
+            defaultCenter={{ lat: 37.88, lng: 23.77 }}
+            gestureHandling="greedy"
+            disableDefaultUI
+            mapId={"4507aa4305d5313cbdf88773"}
+            colorScheme="FOLLOW_SYSTEM"
+          >
+            <AdvancedMarker position={{ lat: 37.88, lng: 23.77 }}>
+              <Pin
+                background="#4285F4"
+                glyph="👤"
+                glyphColor="#fff"
+                borderColor="#000"
+              />
+              <Tooltip title="Your location" placement="top" />
+            </AdvancedMarker>
+            {location && (
+              <AdvancedMarker position={{ lat: location.y, lng: location.x }}>
+                <Pin
+                  background="#FBBC04"
+                  glyph="🍔"
+                  glyphColor="#000"
+                  borderColor="#000"
+                />
+              </AdvancedMarker>
+            )}
+          </Map>
+        </Paper>
+      </Stack>
 
       {showReviewForm ? (
         !reviewSubmitted ? (

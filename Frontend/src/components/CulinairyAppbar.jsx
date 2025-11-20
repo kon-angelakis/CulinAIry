@@ -1,6 +1,7 @@
 import ExitToAppRoundedIcon from "@mui/icons-material/ExitToAppRounded";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
+import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
 import MenuIcon from "@mui/icons-material/Menu";
 import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
 import ScheduleRoundedIcon from "@mui/icons-material/ScheduleRounded";
@@ -12,6 +13,7 @@ import {
   Box,
   Drawer,
   IconButton,
+  Link,
   List,
   ListItem,
   ListItemIcon,
@@ -20,10 +22,12 @@ import {
   Typography,
 } from "@mui/material";
 import { useContext, useState } from "react";
+import { Link as RouterLink } from "react-router";
 
 import { useNavigate } from "react-router";
 import { UserContext } from "../App.jsx"; // or wherever you put the context
 import { ReactComponent as LogoRibbon } from "../assets/logo_ribbon.svg";
+import SearchBar from "./Searchbar.jsx";
 
 export default function CulinairyAppbar() {
   const { user, setUser } = useContext(UserContext);
@@ -46,7 +50,7 @@ export default function CulinairyAppbar() {
             }}
           >
             <IconButton
-              sx={{ display: { xs: "flex", sm: "none" } }}
+              sx={{ display: { xs: "flex", md: "none" } }}
               onClick={() => {
                 setDrawerOpen(true);
                 setDrawerPosition("left");
@@ -55,7 +59,8 @@ export default function CulinairyAppbar() {
               <MenuIcon sx={{ color: "#fff" }} />
             </IconButton>
 
-            <Box
+            <Link
+              color="#ffffff"
               sx={{
                 display: "flex",
                 alignItems: "center",
@@ -66,24 +71,35 @@ export default function CulinairyAppbar() {
                   color: "primary.dark",
                 },
               }}
-              onClick={() => {
-                navigate("/home");
-              }}
+              to="/home"
+              component={RouterLink}
             >
-              <LogoRibbon
-                style={{
+              <Box
+                sx={{
+                  display: { xs: "none", md: "block" },
                   width: "auto",
                   height: "110%",
-                  display: "block",
                 }}
-              />
-            </Box>
+              >
+                <LogoRibbon
+                  style={{
+                    width: "auto",
+                    height: "110%",
+                    display: "block",
+                  }}
+                />
+              </Box>
+            </Link>
+          </Box>
+          {/* CENTER SIDE */}
+          <Box sx={{ flexGrow: 1, display: "flex", justifyContent: "center" }}>
+            <SearchBar />
           </Box>
 
           {/* RIGHT SIDE */}
           <Box
             sx={{
-              display: { xs: "none", sm: "flex" },
+              display: { xs: "none", md: "flex" },
               alignItems: "center",
               gap: 1,
             }}
@@ -168,12 +184,27 @@ export default function CulinairyAppbar() {
                 "&:hover": { bgcolor: "primary.light" },
               }}
               onClick={() => {
+                navigate("/home");
+              }}
+            >
+              <ListItemIcon>
+                <HomeRoundedIcon />
+              </ListItemIcon>
+              <ListItemText primary="Home" />
+            </ListItem>
+            <ListItem
+              button
+              sx={{
+                cursor: "pointer",
+                "&:hover": { bgcolor: "primary.light" },
+              }}
+              onClick={() => {
                 navigate(`${user.username}/favourites`, {
                   state: {
                     searchEndpoint: "/user/places",
                     axiosMethod: "GET",
                     formData: { params: { type: "FAVOURITES" } },
-                    text: "favourite place(s)",
+                    title: "My Favourites",
                   },
                 });
               }}
@@ -195,7 +226,7 @@ export default function CulinairyAppbar() {
                     searchEndpoint: "/user/places",
                     axiosMethod: "GET",
                     formData: { params: { type: "RECENTLY_VIEWED" } },
-                    text: "/ 16 most recents",
+                    title: "My History",
                   },
                 });
               }}

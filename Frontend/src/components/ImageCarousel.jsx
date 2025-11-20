@@ -1,20 +1,18 @@
+import { Box, Modal } from "@mui/material";
 import { useState } from "react";
-import { Modal, Box } from "@mui/material";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
+import { Autoplay, Pagination } from "swiper/modules";
+import { Swiper, SwiperSlide } from "swiper/react";
 
 export default function ImageCarousel({ images }) {
   const [open, setOpen] = useState(false);
   const [selectedModalImage, setSelectedModalImage] = useState(null);
-  const [grabbing, setGrabbing] = useState(false);
 
   return (
     <Box
       sx={{
         position: "relative",
-        "&:hover": { cursor: !grabbing ? "grab" : "grabbing" },
         userSelect: "none",
       }}
     >
@@ -24,6 +22,7 @@ export default function ImageCarousel({ images }) {
         loop
         autoplay={{ delay: 5000 }}
         pagination={{ clickable: true }}
+        grabCursor={true}
       >
         {images.map((image, idx) => (
           <SwiperSlide key={idx}>
@@ -35,8 +34,6 @@ export default function ImageCarousel({ images }) {
                 borderRadius: 2,
                 overflow: "hidden",
               }}
-              onPointerUp={() => setGrabbing(false)}
-              onPointerDown={() => setGrabbing(true)}
             >
               {/* Background image */}
               <Box

@@ -1,17 +1,9 @@
-import Masonry from "@mui/lab/Masonry";
-import {
-  Box,
-  Button,
-  Divider,
-  Fab,
-  Paper,
-  Skeleton,
-  Typography,
-} from "@mui/material";
-import ReviewCard from "./ReviewCard";
 import AutoAwesomeRoundedIcon from "@mui/icons-material/AutoAwesomeRounded";
+import Masonry from "@mui/lab/Masonry";
+import { Box, Button, Paper, Skeleton, Typography } from "@mui/material";
 import { useState } from "react";
 import authAxios from "../config/authAxiosConfig";
+import ReviewCard from "./ReviewCard";
 
 export default function ReviewsPanel({ reviews }) {
   const [summarized, setSummarized] = useState(false);
@@ -42,12 +34,12 @@ export default function ReviewsPanel({ reviews }) {
         maxHeight: "600px",
         overflowY: "auto",
         scrollbarWidth: "thin",
+        boxSizing: "border-box",
       }}
     >
       <Typography variant="h5" sx={{ mt: 0, mb: 2 }} gutterBottom>
         Some users have said
       </Typography>
-      <Divider sx={{ mb: 2 }} />
       {!summarized ? (
         <Button
           variant="contained"
@@ -108,7 +100,6 @@ export default function ReviewsPanel({ reviews }) {
         </Box>
       )}
 
-      <Divider sx={{ mt: 2, mb: 5 }} />
       <Box
         sx={{
           display: "flex",
@@ -116,6 +107,8 @@ export default function ReviewsPanel({ reviews }) {
           justifyContent: "space-around",
           alignItems: "center",
           flexWrap: "wrap",
+          mt: 2,
+          mb: 5,
         }}
       >
         <Masonry columns={{ xs: 1, sm: 2, md: 3, lg: 3 }} spacing={4}>

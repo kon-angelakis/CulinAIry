@@ -1,5 +1,5 @@
-import { Paper, Box, Typography, Divider } from "@mui/material";
 import StarRoundedIcon from "@mui/icons-material/StarRounded";
+import { Box, Divider, Paper, Typography } from "@mui/material";
 
 export default function ReviewCard({ review }) {
   function getStars(rating) {
@@ -129,7 +129,6 @@ export default function ReviewCard({ review }) {
         px: 2,
         py: 3,
         minWidth: 100,
-        maxWidth: 1000,
         bgcolor: "primary.200",
         borderTopLeftRadius: " 25px",
         borderBottomRightRadius: " 25px",

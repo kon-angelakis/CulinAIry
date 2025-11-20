@@ -141,7 +141,7 @@ let lightTheme = createTheme({
     mode: "light",
     primary: { main: "#D62929", contrastText: "#fff" },
     secondary: { main: "#FFAB03", contrastText: "#000" },
-    background: { default: "#FAFAFA", paper: "#FFFFFF" },
+    background: { default: "#f5f5f5ff", paper: "#fafafaff" },
     text: { primary: "#2C2C2C", secondary: "#6B6B6B" },
     success: { main: "#00A86B" },
     error: { main: "#D32F2F" },
