@@ -3,8 +3,6 @@ package com.kangel.thesis.aipowered_location_advisor.Controllers;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,7 +12,6 @@ import com.kangel.thesis.aipowered_location_advisor.Models.Place;
 import com.kangel.thesis.aipowered_location_advisor.Models.Review;
 import com.kangel.thesis.aipowered_location_advisor.Models.Records.ApiResponse;
 import com.kangel.thesis.aipowered_location_advisor.Services.PlaceService;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/places/{placeId}")
@@ -36,6 +33,12 @@ public class PlaceController {
     @GetMapping("/reviews")
     public ResponseEntity<?> PlaceReviews(@PathVariable String placeId) {
         ApiResponse<List<Review>> response = placeService.FindReviews(placeId);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/favouritecount")
+    public ResponseEntity<?> PlaceFavouriteCount(@PathVariable String placeId) {
+        ApiResponse<Integer> response = placeService.FindTimesFavourited(placeId);
         return ResponseEntity.ok(response);
     }
 

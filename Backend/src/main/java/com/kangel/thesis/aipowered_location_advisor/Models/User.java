@@ -1,10 +1,6 @@
 package com.kangel.thesis.aipowered_location_advisor.Models;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
 
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.CreatedDate;
@@ -37,10 +33,6 @@ public class User {
     private String registration_method; // Legacy or OAuth2
 
     private String pfp = "";
-
-    private Set<String> history = new LinkedHashSet<>();
-    private Set<String> favourites = new HashSet<>();
-    private Set<Review> reviews = new HashSet<>();
 
     @CreatedDate
     private final LocalDateTime date_created = LocalDateTime.now();

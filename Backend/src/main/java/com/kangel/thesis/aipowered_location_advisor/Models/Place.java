@@ -10,8 +10,10 @@ import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.data.mongodb.core.index.GeoSpatialIndexType;
 import org.springframework.data.mongodb.core.index.GeoSpatialIndexed;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import com.kangel.thesis.aipowered_location_advisor.Models.Records.PlaceDTO;
+import com.kangel.thesis.aipowered_location_advisor.Models.Records.WeightedRating;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -26,6 +28,7 @@ public class Place {
     @Id
     private String id;
     private boolean isDetailed;
+    private boolean isGoogleReviewed;
     private String thumbnail;
 
     private String name, primaryType, primaryTypeRaw, phone, address, website, directionsUri;
@@ -34,6 +37,8 @@ public class Place {
 
     @GeoSpatialIndexed(type = GeoSpatialIndexType.GEO_2DSPHERE)
     private GeoJsonPoint location;
+    @Field("distance")
+    private Double distance; // Mongo returned distance variable
 
     private List<String> secondaryTypes;
     private List<String> schedule;
@@ -43,7 +48,12 @@ public class Place {
     private LocalDateTime dateUpdated;
 
     public PlaceDTO ToPlaceDTO() {
-        return new PlaceDTO(id, thumbnail, name, primaryType);
+        return new PlaceDTO(id, thumbnail, name, primaryType, location,
+                new WeightedRating(
+                        (rating * totalRatings + inappRating * inappTotalRatings)
+                                / (totalRatings + inappTotalRatings + 0.00001),
+                        totalRatings + inappTotalRatings),
+                distance);
     }
 
     @Override

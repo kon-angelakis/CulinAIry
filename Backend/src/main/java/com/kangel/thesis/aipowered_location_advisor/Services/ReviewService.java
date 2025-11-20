@@ -5,6 +5,7 @@ import java.util.List;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.kangel.thesis.aipowered_location_advisor.Models.Review;
@@ -32,8 +33,12 @@ public class ReviewService {
     }
 
     public Page<Review> FindByAuthorId(ObjectId id, int page, int size) {
-        PageRequest pageable = PageRequest.of(page, size);
+        PageRequest pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "dateCreated"));
         return reviewRepo.findAllByAuthorId(id, pageable);
+    }
+
+    public List<Review> FindByAuthorId(ObjectId id) {
+        return reviewRepo.findAllByAuthorId(id);
     }
 
     public boolean ExistsByAuthorIdAndPlaceId(ObjectId authorId, String placeId) {

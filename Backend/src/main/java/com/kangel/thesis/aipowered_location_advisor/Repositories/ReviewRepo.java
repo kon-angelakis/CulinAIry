@@ -20,7 +20,9 @@ public interface ReviewRepo extends MongoRepository<Review, ObjectId> {
     })
     public List<Review> findSampleReviewsByplaceId(String id);
 
-    Page<Review> findAllByAuthorId(ObjectId authorId, Pageable pageable);
+    public List<Review> findAllByAuthorId(ObjectId authorId);
+
+    public Page<Review> findAllByAuthorId(ObjectId authorId, Pageable pageable); // Paged equivelant
 
     public List<Review> findAllReviewsByAuthorIdAndPlaceId(ObjectId authorId, String placeId);
 

@@ -1,9 +1,7 @@
 package com.kangel.thesis.aipowered_location_advisor.Controllers;
 
 import java.util.Base64;
-import java.util.List;
 
-import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -14,22 +12,18 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.kangel.thesis.aipowered_location_advisor.Models.Place;
 import com.kangel.thesis.aipowered_location_advisor.Models.Review;
 import com.kangel.thesis.aipowered_location_advisor.Models.User;
-import com.kangel.thesis.aipowered_location_advisor.Models.Enums.PlaceListType;
 import com.kangel.thesis.aipowered_location_advisor.Models.Records.ApiResponse;
 import com.kangel.thesis.aipowered_location_advisor.Models.Records.ChangeDataRequest;
 import com.kangel.thesis.aipowered_location_advisor.Models.Records.ChangePfpRequest;
-import com.kangel.thesis.aipowered_location_advisor.Models.Records.CuratedSearchRequest;
 import com.kangel.thesis.aipowered_location_advisor.Models.Records.LoginResponse;
 import com.kangel.thesis.aipowered_location_advisor.Models.Records.PaginationRequest;
 import com.kangel.thesis.aipowered_location_advisor.Models.Records.PlaceDTO;
 import com.kangel.thesis.aipowered_location_advisor.Models.Records.ReviewAdditionRequest;
-import com.kangel.thesis.aipowered_location_advisor.Models.Records.UserDTO;
+import com.kangel.thesis.aipowered_location_advisor.Models.Records.UserPlacesRequest;
 import com.kangel.thesis.aipowered_location_advisor.Services.UserService;
 
 import io.imagekit.sdk.exceptions.BadRequestException;
@@ -56,17 +50,18 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/places") // Returns the fav/recently viewed place dtos to construct cards in the
-                           // frontend, being less expensive
-                           // than the full place object
-    public ResponseEntity<?> Places(@RequestParam PlaceListType type) {
-        ApiResponse<List<PlaceDTO>> response = userService.GetUserPlaces(type);
+    @PostMapping("/places") // Returns the fav/recently viewed place dtos to construct cards in the
+                            // frontend, being less expensive
+                            // than the full place object
+    public ResponseEntity<?> Places(@RequestBody UserPlacesRequest request) {
+        ApiResponse<Page<PlaceDTO>> response = userService.GetUserPlaces(request.type(), request.location(),
+                request.pagingRequest());
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/favourites/{placeId}")
-    public ResponseEntity<?> IsFavourite(@PathVariable String placeId, @RequestParam String username) {
-        ApiResponse<Boolean> response = userService.IsFavourite(placeId, username);
+    public ResponseEntity<?> IsFavourite(@PathVariable String placeId) {
+        ApiResponse<Boolean> response = userService.IsFavourite(placeId);
         return ResponseEntity.ok(response);
     }
 
@@ -85,6 +80,12 @@ public class UserController {
     @PostMapping("/history/{placeId}")
     public ResponseEntity<?> AddRecentlyViewed(@PathVariable String placeId) {
         ApiResponse<Void> response = userService.AddRecentlyViewed(placeId);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/clicked/{placeId}")
+    public ResponseEntity<?> AddClicked(@PathVariable String placeId) {
+        ApiResponse<Void> response = userService.AddClicked(placeId);
         return ResponseEntity.ok(response);
     }
 
@@ -113,13 +114,6 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/curated")
-    public ResponseEntity<?> CuratedPlaces(@RequestBody CuratedSearchRequest request) {
-        ApiResponse<List<PlaceDTO>> response = userService.FindCuratedPlaces(request);
-
-        return ResponseEntity.ok(response);
-    }
-
     @PostMapping("/submitreview")
     public ResponseEntity<?> SubmitReview(@RequestBody ReviewAdditionRequest request) {
         ApiResponse<Void> response = userService.LeaveReview(request);
@@ -137,8 +131,9 @@ public class UserController {
 
     @PostMapping("/reviews")
     public ResponseEntity<?> AllReviews(@AuthenticationPrincipal UserDetails userDetails,
-            @RequestBody PaginationRequest request) {
-        ApiResponse<Page<Review>> response = userService.FindAllReviews(userDetails, request.page(), request.size());
+            @RequestBody PaginationRequest pagingRequest) {
+        ApiResponse<Page<Review>> response = userService.FindAllReviews(userDetails, pagingRequest.page(),
+                pagingRequest.size());
 
         return ResponseEntity.ok(response);
     }

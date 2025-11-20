@@ -61,7 +61,8 @@ public class JwtService {
                     .parseClaimsJws(receivedToken)
                     .getBody();
 
-            Map<String, Object> userClaims = claims.get("User", Map.class);
+            @SuppressWarnings("unchecked")
+            Map<String, Object> userClaims = (Map<String, Object>) claims.get("User", Map.class);
 
             if (userClaims == null) {
                 return null;

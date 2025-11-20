@@ -2,9 +2,7 @@ package com.kangel.thesis.aipowered_location_advisor.Services;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.stereotype.Service;
@@ -14,7 +12,6 @@ import com.kangel.thesis.aipowered_location_advisor.Models.Place;
 import com.kangel.thesis.aipowered_location_advisor.Models.Review;
 import com.kangel.thesis.aipowered_location_advisor.Models.Records.GooglePlaceDetails;
 import com.kangel.thesis.aipowered_location_advisor.Models.Records.GooglePlaceDetails.PhotoDTO;
-import com.kangel.thesis.aipowered_location_advisor.Models.Records.GooglePlaceDetails.ReviewDTO;
 import com.kangel.thesis.aipowered_location_advisor.Models.Records.NearbySearchRequest;
 import com.kangel.thesis.aipowered_location_advisor.Models.Records.NearbySearchResponse;
 import com.kangel.thesis.aipowered_location_advisor.Models.Records.PlaceImageResponse;
@@ -112,7 +109,7 @@ public class NearbySearchService {
 
         // Triggers just the Pro SKU 1 time per N results (5000 free req/month)
         // Triggers Photo Details SKU N times per N results (1000 free req/month)
-        public List<Place> CheapNearbySearch(@Valid NearbySearchRequest request) {
+        public List<Place> NearbySearch(@Valid NearbySearchRequest request) {
                 List<Place> results = new ArrayList<>();
                 String requestBody = String.format("""
                                 {
@@ -139,7 +136,7 @@ public class NearbySearchService {
                                                 .path("/v1/places:searchNearby")
                                                 .queryParam("key", API_KEY)
                                                 .queryParam("fields",
-                                                                "places.id,places.displayName,places.primaryType,places.primaryTypeDisplayName,places.types,places.location,places.formattedAddress,places.photos,places.googleMapsLinks")
+                                                                "places.id,places.displayName,places.primaryType,places.primaryTypeDisplayName,places.types,places.location,places.formattedAddress,places.photos,places.googleMapsLinks,places.internationalPhoneNumber,places.rating,places.userRatingCount,places.websiteUri,places.regularOpeningHours")
                                                 .build())
                                 .bodyValue(requestBody)
                                 .retrieve()
@@ -147,11 +144,10 @@ public class NearbySearchService {
                                 .block();
 
                 // Through the dto record of place detals extract each one as a place object and
-                // add
-                // it to the list
+                // add it to the list
                 if (response != null && response.places() != null) {
                         for (GooglePlaceDetails placeDetails : response.places()) {
-                                Place toAdd = ExtractPlaceCheapData(placeDetails,
+                                Place toAdd = ExtractPlaceData(placeDetails,
                                                 String.format("places/%s/thumbnail", placeDetails.id()), 1);
                                 if (toAdd != null)
                                         results.add(toAdd);
@@ -160,23 +156,21 @@ public class NearbySearchService {
                 return results;
         }
 
-        // Used both for detailed view as well as updating places details
-        // Triggers Enterprise SKU 1 times per N results (1000 free req/month)
         // Triggers Photo Details SKU 3*N times per N results (1000 free req/month)
-        public Place DetailedSearch(String id, Place place) {
+        public Place PhotoSearch(String id, Place place) {
                 GooglePlaceDetails response = webClient
                                 .get()
                                 .uri(uriBuilder -> uriBuilder
                                                 .path("/v1/places/{id}")
                                                 .queryParam("key", API_KEY)
                                                 .queryParam("fields",
-                                                                "id,photos,internationalPhoneNumber,rating,userRatingCount,websiteUri,regularOpeningHours")
+                                                                "id,photos")
                                                 .build(id))
                                 .retrieve()
                                 .bodyToMono(GooglePlaceDetails.class)
                                 .block();
 
-                return ExtractPlaceDetailedData(response, place, String.format("places/%s/slideshow", id), 3);
+                return ExtractPlacePhotos(response, place, String.format("places/%s/slideshow", id), 3);
         }
 
         // Used to retrieve google place reviews if the user wants
@@ -220,8 +214,7 @@ public class NearbySearchService {
         }
 
         // Extract api fields and store them as place objects
-        // Reusable method for cheap, detailed and review search it handles null checks
-        private Place ExtractPlaceCheapData(GooglePlaceDetails placeDetails, String photosLocation,
+        private Place ExtractPlaceData(GooglePlaceDetails placeDetails, String photosLocation,
                         int totalPhotos) {
 
                 // If the place's primary type is food related only then return it else discard
@@ -269,17 +262,6 @@ public class NearbySearchService {
                                 : null;
                 String thumbnail = photosRefined != null ? photosRefined.get(0) : null;
 
-                return (new Place(id, false, thumbnail, name, typeDisplayName, type, null, address, null,
-                                directions, 0.0, 0.0, 0, 0,
-                                location, secondaryTypes, null, null, null,
-                                LocalDateTime.now()));
-        }
-
-        private Place ExtractPlaceDetailedData(GooglePlaceDetails placeDetails, Place place,
-                        String photosLocation,
-                        int totalPhotos) {
-
-                String id = placeDetails.id();
                 Double rating = placeDetails.rating() != null ? placeDetails.rating() : 0;
                 String phone = placeDetails.internationalPhoneNumber() != null ? placeDetails.internationalPhoneNumber()
                                 : null;
@@ -289,6 +271,18 @@ public class NearbySearchService {
                 List<String> schedule = placeDetails.regularOpeningHours() != null
                                 ? placeDetails.regularOpeningHours().weekdayDescriptions()
                                 : null;
+
+                return (new Place(id, true, false, thumbnail, name, typeDisplayName, type, phone, address, website,
+                                directions, rating, 0.0, totalRatings, 0,
+                                location, null, secondaryTypes, schedule, null, null,
+                                LocalDateTime.now()));
+        }
+
+        private Place ExtractPlacePhotos(GooglePlaceDetails placeDetails, Place place,
+                        String photosLocation,
+                        int totalPhotos) {
+
+                String id = placeDetails.id();
 
                 // Contains imageIds
                 List<String> photosRaw = placeDetails.photos() != null
@@ -305,12 +299,16 @@ public class NearbySearchService {
                                 .block() // Only block once for the whole list
                                 : null;
 
-                return (new Place(id, true, place.getThumbnail(), place.getName(), place.getPrimaryType(),
-                                place.getPrimaryTypeRaw(), phone,
-                                place.getAddress(), website,
-                                place.getDirectionsUri(), rating, place.getInappRating(), totalRatings,
+                return (new Place(id, true, false, place.getThumbnail(), place.getName(), place.getPrimaryType(),
+                                place.getPrimaryTypeRaw(), place.getPhone(),
+                                place.getAddress(), place.getWebsite(),
+                                place.getDirectionsUri(), place.getRating(), place.getInappRating(),
+                                place.getTotalRatings(),
                                 place.getInappTotalRatings(),
-                                place.getLocation(), place.getSecondaryTypes(), schedule, photosRefined, null,
+                                place.getLocation(), place.getDistance(), place.getSecondaryTypes(),
+                                place.getSchedule(),
+                                photosRefined,
+                                null,
                                 LocalDateTime.now()));
         }
 
