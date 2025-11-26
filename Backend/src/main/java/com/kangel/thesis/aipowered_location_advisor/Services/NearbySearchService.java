@@ -272,7 +272,7 @@ public class NearbySearchService {
                                 ? placeDetails.regularOpeningHours().weekdayDescriptions()
                                 : null;
 
-                return (new Place(id, true, false, thumbnail, name, typeDisplayName, type, phone, address, website,
+                return (new Place(id, false, false, thumbnail, name, typeDisplayName, type, phone, address, website,
                                 directions, rating, 0.0, totalRatings, 0,
                                 location, null, secondaryTypes, schedule, null, null,
                                 LocalDateTime.now()));

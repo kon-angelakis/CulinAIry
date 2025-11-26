@@ -24,7 +24,7 @@ public interface PlaceRepo extends MongoRepository<Place, String> {
                         "{ $geoNear: { " +
                                         "near: { type: 'Point', coordinates: [?1, ?2] }, " +
                                         "distanceField: 'distance', " +
-                                        "maxDistance: 5000, " +
+                                        "maxDistance: 10000, " +
                                         "spherical: true, " +
                                         "query: { _id: { $in: ?0 } } } }",
         })
@@ -37,11 +37,67 @@ public interface PlaceRepo extends MongoRepository<Place, String> {
                                         "maxDistance: ?2, " +
                                         "spherical: true " +
                                         "} }",
+                        "{ $addFields: { " +
+                                        "weightedRank: { $cond: [ " +
+                                        "{ $gt: [ { $add: [ '$inappTotalRatings', '$totalRatings' ] }, 0 ] }, " +
+                                        "{ $divide: [ " +
+                                        "{ $add: [ " +
+                                        "{ $multiply: [ '$inappRating', '$inappTotalRatings' ] }, " +
+                                        "{ $multiply: [ '$rating', '$totalRatings' ] } " +
+                                        "] }, " +
+                                        "{ $add: [ '$inappTotalRatings', '$totalRatings' ] } " +
+                                        "] }, " +
+                                        "0 " +
+                                        "] }" +
+                                        "} }",
                         "{ $match: { $expr: { $setIsSubset: [?3, '$secondaryTypes'] } } }",
-                        "{ $sort: { dist: 1 } }",
-                        "{ $limit: 50 }"
+                        "{ $sort: { ?#{#sortField}: ?#{#sortDirection} } }",
+                        "{ $skip: ?4 }",
+                        "{ $limit: ?5 }"
         })
-        public List<Place> findPlacesDemandingNearby(double lon, double lat, int maxDist, List<String> types);
+        public List<Place> findPlacesDemandingNearby(double lon, double lat, int maxDist, List<String> type,
+                        int skip, int limit, String sortField, int sortDirection);
+
+        @Aggregation(pipeline = {
+                        "{ $geoNear: { " +
+                                        "near: { type: 'Point', coordinates: [?0, ?1] }, " +
+                                        "distanceField: 'distance', " +
+                                        "maxDistance: ?2, " +
+                                        "spherical: true " +
+                                        "} }",
+                        "{ $match: { $expr: { $setIsSubset: [?3, '$secondaryTypes'] } } }",
+                        "{ $count: 'total' }"
+        })
+        public int countPlacesDemandingNearby(double lon, double lat, int maxDist, List<String> type);
+
+        @Aggregation(pipeline = {
+                        "{ $geoNear: { " +
+                                        "near: { type: 'Point', coordinates: [?0, ?1] }, " +
+                                        "distanceField: 'distance', " +
+                                        "maxDistance: ?2, " +
+                                        "spherical: true " +
+                                        "} }",
+                        "{ $addFields: { " +
+                                        "matchCount: { $size: { $setIntersection: ['$secondaryTypes', ?3] } } " +
+                                        "weightedRank: { $cond: [ " +
+                                        "{ $gt: [ { $add: [ '$inappTotalRatings', '$totalRatings' ] }, 0 ] }, " +
+                                        "{ $divide: [ " +
+                                        "{ $add: [ " +
+                                        "{ $multiply: [ '$inappRating', '$inappTotalRatings' ] }, " +
+                                        "{ $multiply: [ '$rating', '$totalRatings' ] } " +
+                                        "] }, " +
+                                        "{ $add: [ '$inappTotalRatings', '$totalRatings' ] } " +
+                                        "] }, " +
+                                        "0 " +
+                                        "] }" +
+                                        "} }",
+                        "{ $match: { matchCount: { $gt: 0 } } }",
+                        "{ $sort: { ?#{#sortField}: ?#{#sortDirection} } }",
+                        "{ $skip: ?4 }",
+                        "{ $limit: ?5 }"
+        })
+        public List<Place> findPlacesInclusiveNearby(double lon, double lat, int maxDist, List<String> types,
+                        int skip, int limit, String sortField, int sortDirection);
 
         @Aggregation(pipeline = {
                         "{ $geoNear: { " +
@@ -54,21 +110,35 @@ public interface PlaceRepo extends MongoRepository<Place, String> {
                                         "matchCount: { $size: { $setIntersection: ['$secondaryTypes', ?3] } } " +
                                         "} }",
                         "{ $match: { matchCount: { $gt: 0 } } }",
-                        "{ $sort: { matchCount: -1 } }",
-                        "{ $limit: 50 }"
+                        "{ $count: 'total' }"
         })
-        public List<Place> findPlacesInclusiveNearby(double lon, double lat, int maxDist, List<String> types);
+        public int countPlacesInclusiveNearby(double lon, double lat, int maxDist, List<String> types);
 
         @Aggregation(pipeline = {
                         "{ $geoNear: { " +
                                         "near: { type: 'Point', coordinates: [?0, ?1] }, " +
                                         "distanceField: 'distance', " +
-                                        "maxDistance: 5000, " +
+                                        "maxDistance: 10000, " +
                                         "spherical: true " +
                                         "} }",
-                        "{ $match: { inappRating: { $gt: 0 } } }",
-                        "{ $sort: { inappRating: -1 } }",
-                        "{ $limit: 9 }"
+
+                        "{ $addFields: { " +
+                                        "weightedRank: { $cond: [ " +
+                                        "{ $gt: [ { $add: [ '$inappTotalRatings', '$totalRatings' ] }, 0 ] }, " +
+                                        "{ $divide: [ " +
+                                        "{ $add: [ " +
+                                        "{ $multiply: [ '$inappRating', '$inappTotalRatings' ] }, " +
+                                        "{ $multiply: [ '$rating', '$totalRatings' ] } " +
+                                        "] }, " +
+                                        "{ $add: [ '$inappTotalRatings', '$totalRatings' ] } " +
+                                        "] }, " +
+                                        " 0 " +
+                                        "] } " +
+                                        "} }",
+
+                        "{ $match: { weightedRank: { $gt: 0 } } }",
+                        "{ $sort: { weightedRank: -1 } }",
+                        "{ $limit: 10 }"
         })
         public List<Place> findTopPlacesNearby(double lon, double lat);
 
@@ -76,7 +146,7 @@ public interface PlaceRepo extends MongoRepository<Place, String> {
                         "{ $geoNear: { " +
                                         "   near: { type: 'Point', coordinates: [?0, ?1] }, " +
                                         "   distanceField: 'distance', " +
-                                        "   maxDistance: 5000, " +
+                                        "   maxDistance: 10000, " +
                                         "   spherical: true " +
                                         "} }",
                         "{ $match: { " +

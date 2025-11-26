@@ -10,6 +10,7 @@ import com.kangel.thesis.aipowered_location_advisor.Models.Review;
 import com.kangel.thesis.aipowered_location_advisor.Models.UserInteraction;
 import com.kangel.thesis.aipowered_location_advisor.Models.Enums.InteractionType;
 import com.kangel.thesis.aipowered_location_advisor.Models.Records.ApiResponse;
+import com.kangel.thesis.aipowered_location_advisor.Models.Records.PaginationRequest;
 import com.kangel.thesis.aipowered_location_advisor.Repositories.PlaceRepo;
 
 @Service
@@ -33,8 +34,12 @@ public class PlaceService {
         Optional<Place> placeFound = placeRepo.findById(id);
         if (!placeFound.isPresent())
             return new ApiResponse<Place>(false, "No place data found", null);
-
         Place place = placeFound.get();
+        if (!place.isDetailed()) { // Update places images
+            place = SavePlace(nearbySearchService.PhotoSearch(id, place));
+            place.setDetailed(true);
+            place = SavePlace(place);
+        }
 
         return new ApiResponse<Place>(true, "Place data retrieved", place);
     }
@@ -53,12 +58,26 @@ public class PlaceService {
         return new ApiResponse<List<Review>>(true, "Place reviews retrieved", reviews);
     }
 
-    public List<Place> FindPlacesDemanding(double lon, double lat, int maxDist, List<String> types) {
-        return placeRepo.findPlacesDemandingNearby(lon, lat, maxDist, types);
+    public List<Place> FindPlacesDemanding(double lon, double lat, int maxDist, List<String> types,
+            PaginationRequest pagingRequest, String sortField, int sortDirection) {
+        int skip = pagingRequest.page() * pagingRequest.size();
+        int limit = pagingRequest.size();
+        return placeRepo.findPlacesDemandingNearby(lon, lat, maxDist, types, skip, limit, sortField, sortDirection);
     }
 
-    public List<Place> FindPlaceInclusive(double lon, double lat, int maxDist, List<String> types) {
-        return placeRepo.findPlacesInclusiveNearby(lon, lat, maxDist, types);
+    public int CountPlacesDemanding(double lon, double lat, int maxDist, List<String> types) {
+        return placeRepo.countPlacesDemandingNearby(lon, lat, maxDist, types);
+    }
+
+    public List<Place> FindPlaceInclusive(double lon, double lat, int maxDist, List<String> types,
+            PaginationRequest pagingRequest, String sortField, int sortDirection) {
+        int skip = pagingRequest.page() * pagingRequest.size();
+        int limit = pagingRequest.size();
+        return placeRepo.findPlacesInclusiveNearby(lon, lat, maxDist, types, skip, limit, sortField, sortDirection);
+    }
+
+    public int CountPlacesInclusive(double lon, double lat, int maxDist, List<String> types) {
+        return placeRepo.countPlacesInclusiveNearby(lon, lat, maxDist, types);
     }
 
     public List<Place> FindAllPlacesById(List<String> ids, double lon, double lat) {

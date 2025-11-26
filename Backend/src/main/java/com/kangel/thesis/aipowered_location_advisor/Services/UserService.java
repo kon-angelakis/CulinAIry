@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -148,14 +149,14 @@ public class UserService implements UserDetailsService {
     }
 
     public ApiResponse<Page<PlaceDTO>> GetUserPlaces(InteractionType type, Location userLocation,
-            PaginationRequest pagingRequest) {
+            PaginationRequest pagingRequest, Sort.Direction sortOrder) {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String username = userDetails.getUsername();
         User user = GetUser(username);
 
         // Gather the placeIds from the UserInteractions table in a paged manner
         Page<UserInteraction> userInteractions = interactionService.FindAllByUserIdAndType(user.getId(), type,
-                pagingRequest.page(), pagingRequest.size());
+                pagingRequest.page(), pagingRequest.size(), sortOrder);
         List<String> placeIds = userInteractions.stream().map(UserInteraction::getPlaceId).collect(Collectors.toList());
         List<Place> data = placeService.FindAllPlacesById(placeIds, userLocation.longitude(),
                 userLocation.latitude());

@@ -1,10 +1,7 @@
 package com.kangel.thesis.aipowered_location_advisor.Services;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -20,6 +17,8 @@ import com.kangel.thesis.aipowered_location_advisor.Models.Records.ApiResponse;
 import com.kangel.thesis.aipowered_location_advisor.Models.Records.GeolocationResponse;
 import com.kangel.thesis.aipowered_location_advisor.Models.Records.Location;
 import com.kangel.thesis.aipowered_location_advisor.Models.Records.NearbySearchRequest;
+import com.kangel.thesis.aipowered_location_advisor.Models.Records.PaginatedResponse;
+import com.kangel.thesis.aipowered_location_advisor.Models.Records.PaginationRequest;
 import com.kangel.thesis.aipowered_location_advisor.Models.Records.PlaceDTO;
 import com.kangel.thesis.aipowered_location_advisor.Models.Records.SearchRequest;
 
@@ -28,8 +27,6 @@ import jakarta.validation.Valid;
 
 @Service
 public class SearchService {
-
-        public static final int MAX_NEARBY_SEARCH_RESULTS = 5;
 
         private final AiManager aiManager;
         private final NearbySearchService nearSearchService;
@@ -41,7 +38,7 @@ public class SearchService {
                 this.placeService = placeService;
         }
 
-        public ApiResponse<LinkedHashSet<PlaceDTO>> SearchPlaces(@Valid SearchRequest request)
+        public ApiResponse<PaginatedResponse<LinkedHashSet<PlaceDTO>>> SearchPlaces(@Valid SearchRequest request)
                         throws JsonProcessingException, InterruptedException {
                 try {
 
@@ -50,24 +47,40 @@ public class SearchService {
                         String userIntent = aiResponse.userIntent();
                         Location coordinates = request.location();
 
-                        Set<Place> recommendedPlaces = FetchPlacesFromDB(coordinates, request.radius(), restaurantTypes,
+                        List<Place> recommendedPlaces = FetchPlacesFromDB(coordinates, request.radius(),
+                                        restaurantTypes,
+                                        userIntent, request.pagingRequest(), request.sortField(),
+                                        request.sortDirection());
+
+                        // Check if we have enough results > 20
+                        int totalElements = CountPlacesFromDB(coordinates, request.radius(),
+                                        restaurantTypes,
                                         userIntent);
 
-                        // Fetch additional places if less than MAX_NEARBY_SEARCH_RESULTS
-                        if (recommendedPlaces.size() < MAX_NEARBY_SEARCH_RESULTS) {
-                                FetchNewPlaces(recommendedPlaces, restaurantTypes, coordinates,
+                        // Fetch additional places if less than MAX_NEARBY_SEARCH_RESULTS and check only
+                        // once on the first page
+                        if (totalElements < 12 && request.pagingRequest().page() == 0) {
+                                FetchNewPlaces(restaurantTypes, coordinates,
                                                 request.radius());
+                                System.out.println("Fetched new places from API");
                         }
 
-                        placeService.SavePlaces(new ArrayList<>(recommendedPlaces));
-
-                        return new ApiResponse<LinkedHashSet<PlaceDTO>>(true,
-                                        String.format("Showing %d places", recommendedPlaces.size()),
+                        // After saving new places to the db refetch them, this makes pagination easier
+                        // rather than adding the newly fetched results directly to recommendedPlaces
+                        recommendedPlaces = FetchPlacesFromDB(coordinates, request.radius(), restaurantTypes,
+                                        userIntent, request.pagingRequest(), request.sortField(),
+                                        request.sortDirection());
+                        PaginatedResponse<LinkedHashSet<PlaceDTO>> paginatedResponse = new PaginatedResponse<LinkedHashSet<PlaceDTO>>(
                                         recommendedPlaces.stream()
                                                         .map(Place::ToPlaceDTO)
-                                                        .collect(Collectors.toCollection(LinkedHashSet::new)));
+                                                        .collect(Collectors.toCollection(LinkedHashSet::new)),
+                                        totalElements,
+                                        (int) Math.ceil((double) totalElements / request.pagingRequest().size()));
+                        return new ApiResponse<PaginatedResponse<LinkedHashSet<PlaceDTO>>>(true,
+                                        String.format("Showing %d places", recommendedPlaces.size()),
+                                        paginatedResponse);
                 } catch (Exception e) {
-                        return new ApiResponse<LinkedHashSet<PlaceDTO>>(false, e.toString(), null);
+                        return new ApiResponse<PaginatedResponse<LinkedHashSet<PlaceDTO>>>(false, e.toString(), null);
                 }
 
         }
@@ -79,28 +92,36 @@ public class SearchService {
                 return aiManager.Call(AiProvider.OPENAI, aiRequest);
         }
 
-        private Set<Place> FetchPlacesFromDB(Location coordinates, int radius, List<String> types, String intent) {
+        private List<Place> FetchPlacesFromDB(Location coordinates, int radius, List<String> types, String intent,
+                        PaginationRequest pagingRequest, String sortField, int sortDirection) {
                 // inclusive: cafe OR italian -> shows either or both
                 // demanding: italian AND vegan -> shows only both
                 return intent.equals("inclusive")
-                                ? new HashSet<>(
-                                                placeService.FindPlaceInclusive(coordinates.longitude(),
-                                                                coordinates.latitude(), radius, types))
-                                : new HashSet<>(placeService.FindPlacesDemanding(coordinates.longitude(),
+                                ? placeService.FindPlaceInclusive(coordinates.longitude(),
+                                                coordinates.latitude(), radius, types, pagingRequest, sortField,
+                                                sortDirection)
+                                : placeService.FindPlacesDemanding(coordinates.longitude(),
                                                 coordinates.latitude(),
-                                                radius, types));
+                                                radius, types, pagingRequest, sortField, sortDirection);
+        }
+
+        private int CountPlacesFromDB(Location coordinates, int radius, List<String> types, String intent) {
+                return intent.equals("inclusive")
+                                ? placeService.CountPlacesInclusive(coordinates.longitude(),
+                                                coordinates.latitude(), radius, types)
+                                : placeService.CountPlacesDemanding(coordinates.longitude(),
+                                                coordinates.latitude(),
+                                                radius, types);
         }
 
         // If too few entries in the db call the google maps api to retrieve
         // more(might still be less than the MAX num specified)
-        private void FetchNewPlaces(Set<Place> recommendedPlaces, List<String> types, Location coordinates, int radius)
+        private void FetchNewPlaces(List<String> types, Location coordinates, int radius)
                         throws JsonProcessingException, InterruptedException {
-                int remaining = MAX_NEARBY_SEARCH_RESULTS - recommendedPlaces.size();
                 List<Place> apiResults = nearSearchService.NearbySearch(
-                                new NearbySearchRequest(new ObjectMapper().writeValueAsString(types), remaining,
+                                new NearbySearchRequest(new ObjectMapper().writeValueAsString(types), 20,
                                                 coordinates, radius));
-
-                recommendedPlaces.addAll(apiResults);
+                placeService.SavePlaces(apiResults);
         }
 
         public ApiResponse<GeolocationResponse> RetrieveGeolocation(HttpServletRequest request) {

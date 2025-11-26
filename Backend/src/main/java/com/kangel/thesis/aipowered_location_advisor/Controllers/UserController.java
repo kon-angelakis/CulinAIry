@@ -55,7 +55,7 @@ public class UserController {
                             // than the full place object
     public ResponseEntity<?> Places(@RequestBody UserPlacesRequest request) {
         ApiResponse<Page<PlaceDTO>> response = userService.GetUserPlaces(request.type(), request.location(),
-                request.pagingRequest());
+                request.pagingRequest(), request.sortOrder());
         return ResponseEntity.ok(response);
     }
 

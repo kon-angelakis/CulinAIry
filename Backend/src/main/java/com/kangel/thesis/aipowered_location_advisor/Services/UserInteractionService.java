@@ -30,8 +30,8 @@ public class UserInteractionService {
     }
 
     public Page<UserInteraction> FindAllByUserIdAndType(ObjectId userId, InteractionType type,
-            int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "dateInteracted"));
+            int page, int size, Sort.Direction sortOrder) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortOrder, "dateInteracted"));
         Page<UserInteraction> retrievedInteractions = interactionRepo.findAllByUserIdAndType(userId,
                 type, pageable);
         return retrievedInteractions;

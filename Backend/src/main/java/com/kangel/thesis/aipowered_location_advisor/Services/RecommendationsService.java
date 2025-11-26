@@ -20,6 +20,7 @@ import com.kangel.thesis.aipowered_location_advisor.Models.User;
 import com.kangel.thesis.aipowered_location_advisor.Models.Enums.InteractionType;
 import com.kangel.thesis.aipowered_location_advisor.Models.Records.ApiResponse;
 import com.kangel.thesis.aipowered_location_advisor.Models.Records.Location;
+import com.kangel.thesis.aipowered_location_advisor.Models.Records.PaginationRequest;
 import com.kangel.thesis.aipowered_location_advisor.Models.Records.PlaceDTO;
 import com.kangel.thesis.aipowered_location_advisor.Models.Records.SimilarPlacesRequest;
 
@@ -114,10 +115,10 @@ public class RecommendationsService {
                                 request.longitude(),
                                 request.latitude(),
                                 10000,
-                                placesTypes)
+                                placesTypes, new PaginationRequest(0, 10), "relevance", -1)
                                 .stream()
                                 .map(Place::ToPlaceDTO)
-                                .limit(5)
+                                .limit(10)
                                 .collect(Collectors.toCollection(ArrayList::new));
                 // Gather first some data about the user and then display recommendations
                 int favSize = interactionService.FindAllByUserIdAndType(user.getId(), InteractionType.FAVOURITES)

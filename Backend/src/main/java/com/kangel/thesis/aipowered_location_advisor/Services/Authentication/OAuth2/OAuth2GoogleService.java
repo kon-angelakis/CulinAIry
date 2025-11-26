@@ -64,7 +64,7 @@ public class OAuth2GoogleService extends OAuth2Service {
                         "code", code,
                         "client_id", env.get("GOOGLE_CLIENT_ID"),
                         "client_secret", env.get("GOOGLE_CLIENT_SECRET"),
-                        "redirect_uri", "http://localhost:5173",
+                        "redirect_uri", "https://qyvmzivriyxf.share.zrok.io",
                         "grant_type", "authorization_code"))
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<Map<String, String>>() {

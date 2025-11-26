@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.kangel.thesis.aipowered_location_advisor.Models.Records.ApiResponse;
 import com.kangel.thesis.aipowered_location_advisor.Models.Records.GeolocationResponse;
+import com.kangel.thesis.aipowered_location_advisor.Models.Records.PaginatedResponse;
 import com.kangel.thesis.aipowered_location_advisor.Models.Records.PlaceDTO;
 import com.kangel.thesis.aipowered_location_advisor.Models.Records.SearchRequest;
 import com.kangel.thesis.aipowered_location_advisor.Services.SearchService;
@@ -32,7 +33,7 @@ public class SearchController {
     @PostMapping("/places")
     public ResponseEntity<?> CheapSearch(
             @Valid @RequestBody SearchRequest request) throws JsonProcessingException, InterruptedException {
-        ApiResponse<LinkedHashSet<PlaceDTO>> response = searchService.SearchPlaces(request);
+        ApiResponse<PaginatedResponse<LinkedHashSet<PlaceDTO>>> response = searchService.SearchPlaces(request);
         return ResponseEntity.ok(response);
     }
 
