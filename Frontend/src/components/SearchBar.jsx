@@ -2,6 +2,8 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import {
   Box,
+  Button,
+  Divider,
   FormControlLabel,
   InputAdornment,
   Paper,
@@ -14,6 +16,8 @@ import {
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import usePreciseLocation from "../hooks/usePreciseLocation";
+import Grow from "@mui/material/Grow";
+import { RestaurantRounded } from "@mui/icons-material";
 
 export default function SearchBar() {
   const navigate = useNavigate();
@@ -21,11 +25,11 @@ export default function SearchBar() {
   const anchorRef = useRef(null);
   const [radius, setRadius] = useState(5000);
 
-  const { precise, locationGranted, location, handlePreciseToggle } =
+  const { precise, locationGranted, userLocation, handlePreciseToggle } =
     usePreciseLocation();
   const [formData, setFormData] = useState({
     userInput: "",
-    location: location,
+    location: userLocation,
     radius: 5000,
   });
 
@@ -39,7 +43,7 @@ export default function SearchBar() {
   const handleSubmit = (e) => {
     const submittedForm = {
       ...formData,
-      location: location,
+      location: userLocation,
     };
     setFormData(submittedForm);
     e.preventDefault();
@@ -94,12 +98,18 @@ export default function SearchBar() {
         <ExpandMoreIcon
           sx={{
             position: "relative",
-            "&:hover": { cursor: "pointer" },
+            ml: 1,
+            transition: "transform 0.3s ease",
+            transform: open ? "rotate(180deg)" : "rotate(0deg)",
             color: "text.secondary",
+            p: 0.5,
+            borderRadius: "50%",
+            "&:hover": {
+              cursor: "pointer",
+              bgcolor: "action.hover",
+            },
           }}
-          onClick={() => {
-            setOpen((prev) => !prev);
-          }}
+          onClick={() => setOpen((prev) => !prev)}
         />
 
         <Popper
@@ -107,45 +117,66 @@ export default function SearchBar() {
           anchorEl={anchorRef.current}
           placement="bottom"
           style={{ zIndex: 1300 }}
+          transition
         >
-          <Paper
-            elevation={3}
-            sx={{
-              p: 2,
-              mt: 1,
-              minWidth: 250,
-              bgcolor: "background.paper",
-            }}
-          >
-            <Typography variant="subtitle1" gutterBottom>
-              Advanced Search
-            </Typography>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={precise && locationGranted}
-                  onChange={handlePreciseToggle}
+          {({ TransitionProps }) => (
+            <Grow {...TransitionProps} timeout={250}>
+              <Paper
+                elevation={6}
+                sx={{
+                  p: 4,
+                  mt: 1,
+                  minWidth: 280,
+                  borderRadius: 3,
+                  bgcolor: "background.paper",
+                }}
+              >
+                <Typography variant="h6" gutterBottom textAlign={"center"}>
+                  Advanced Search
+                </Typography>
+
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={precise && locationGranted}
+                      onChange={handlePreciseToggle}
+                    />
+                  }
+                  label="Precise location"
                 />
-              }
-              label={"Precise location"}
-            />
-            <Typography variant="body2" gutterBottom>
-              Filter by distance:
-            </Typography>
-            <Slider
-              name="radius"
-              value={radius}
-              onChange={(e, val) => {
-                setRadius(val);
-                handleChange(e);
-              }}
-              min={500}
-              max={10000}
-              step={100}
-              shiftStep={500}
-              valueLabelDisplay="auto"
-            />
-          </Paper>
+
+                <Typography variant="body2" gutterBottom>
+                  Filter by distance:
+                </Typography>
+
+                <Slider
+                  name="radius"
+                  value={radius}
+                  onChange={(e, val) => {
+                    setRadius(val);
+                    handleChange(e);
+                  }}
+                  min={500}
+                  max={10000}
+                  step={100}
+                  shiftStep={500}
+                  valueLabelDisplay="auto"
+                />
+                <Divider sx={{ my: 2 }} />
+                <Button
+                  type="submit"
+                  variant="contained"
+                  size={"large"}
+                  color="primary"
+                  sx={{ height: 48, width: "100%" }}
+                  endIcon={<RestaurantRounded />}
+                  onClick={handleSubmit}
+                >
+                  Search
+                </Button>
+              </Paper>
+            </Grow>
+          )}
         </Popper>
       </form>
     </Box>

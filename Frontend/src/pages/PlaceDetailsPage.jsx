@@ -1,7 +1,7 @@
 import { Box, Grid } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router";
+import { useLocation, useNavigate, useParams } from "react-router";
 import ReviewsPanel from "../components/ReviewsPanel";
 import authAxios from "../config/authAxiosConfig";
 
@@ -14,6 +14,8 @@ import ScheduleCard from "../components/ScheduleCard";
 export default function PlaceDetailsPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const loc = useLocation();
+  const state = loc.state;
 
   const [isFavourite, setIsFavourite] = useState(false);
   const [reviews, setReviews] = useState(null);
@@ -77,6 +79,8 @@ export default function PlaceDetailsPage() {
             setIsFavourite={setIsFavourite}
             userReview={myReview}
             location={results.location}
+            weightedRating={state?.weightedRating}
+            distance={state?.distanceFromUser}
           />
         </Grid>
         {/* Contact methods */}

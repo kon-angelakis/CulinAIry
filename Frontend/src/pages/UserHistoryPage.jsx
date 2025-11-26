@@ -1,4 +1,11 @@
-import { Box, Pagination, Stack, Typography } from "@mui/material";
+import {
+  Box,
+  MenuItem,
+  Pagination,
+  Select,
+  Stack,
+  Typography,
+} from "@mui/material";
 import { useEffect, useState } from "react";
 import PlaceCardSmall from "../components/PlaceCardSmall";
 import SkeletonPlaceCard from "../components/SkeletonPlaceCard";
@@ -6,21 +13,23 @@ import useCache from "../hooks/useCache";
 import usePreciseLocation from "../hooks/usePreciseLocation";
 
 export default function UserHistoryPage() {
-  const [maxPages, setMaxPages] = useState(1);
+  const [sorting, setSorting] = useState("DESC");
+  const [maxPages, setMaxPages] = useState(null);
   const [paging, setPaging] = useState({
     page: 0,
     size: 10,
   });
 
-  const { location } = usePreciseLocation();
+  const { userLocation } = usePreciseLocation();
 
   const { data, isLoading } = useCache({
-    queryKey: "Recently_viewed",
+    queryKey: `Recently_viewed_${sorting}_${paging.page}`,
     endpoint: "/user/places",
     formData: {
       type: "RECENTLY_VIEWED",
-      location: location,
+      location: userLocation,
       pagingRequest: paging,
+      sortOrder: sorting,
     },
     method: "POST",
   });
@@ -41,17 +50,48 @@ export default function UserHistoryPage() {
     setPaging({ ...paging, page: value - 1 });
   };
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [paging.page]);
+
   return (
     <Box>
-      <Typography variant="h2" sx={{ mb: 1 }}>
+      <Typography variant="h2" sx={{ mb: 8 }}>
         Your history
       </Typography>
 
-      {/* NEW: result count indicator */}
       <Typography variant="body1" sx={{ mb: 6, color: "text.secondary" }}>
-        Showing {currentCount + paging.page * paging.size}/{totalCount} results
+        {results && results.length != 0
+          ? `Showing ${
+              currentCount + paging.page * paging.size
+            }/${totalCount} results`
+          : "Loading results..."}
       </Typography>
-
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          mb: 4,
+        }}
+      >
+        <Typography variant="h6" sx={{ mr: 2 }}>
+          Sort By
+        </Typography>
+        <Select
+          labelId="defaultSort"
+          id="defaultSort"
+          value={sorting}
+          label="Sort By"
+          defaultValue={"DESC"}
+          onChange={(event) => {
+            setSorting(event.target.value);
+          }}
+        >
+          <MenuItem value={"ASC"}>Ascending</MenuItem>
+          <MenuItem value={"DESC"}>Descending</MenuItem>
+        </Select>
+      </Box>
       <Stack spacing={4}>
         {results && results.length !== 0
           ? results.content.map((place) => (

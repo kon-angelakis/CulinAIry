@@ -39,7 +39,7 @@ export default function UserReviewsPage() {
         Your Reviews
       </Typography>
       <Stack spacing={4}>
-        {reviews && reviews.length != 0 ? (
+        {reviews?.content && reviews.content.length != 0 ? (
           reviews.content.map((review, index) => (
             <ReviewCardSlim
               key={index}

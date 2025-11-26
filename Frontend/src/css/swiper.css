@@ -18,8 +18,8 @@
 .mySwiper .swiper-slide-next,
 .mySwiper .swiper-slide-prev {
   transform: scale(0.93);
-  opacity: 0.85;
-  filter: blur(0);
+  opacity: 0.8;
+  filter: blur(1.5px) grayscale(0.2);
   z-index: 10;
 }
 

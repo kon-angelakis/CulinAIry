@@ -1,10 +1,10 @@
 // Hook that manages and switches between precise and approximate geolocation
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 export default function usePreciseLocation() {
   const [precise, setPrecise] = useState(false);
   const [locationGranted, setLocationGranted] = useState(false);
-  const [location, setLocation] = useState(
+  const [userLocation, setUserLocation] = useState(
     JSON.parse(localStorage.getItem("UserGeolocationApproximateLocation"))
   );
 
@@ -16,7 +16,7 @@ export default function usePreciseLocation() {
           longitude: position.coords.longitude,
           latitude: position.coords.latitude,
         };
-        setLocation({
+        setUserLocation({
           longitude: coords.longitude,
           latitude: coords.latitude,
         });
@@ -40,7 +40,7 @@ export default function usePreciseLocation() {
     if (val) {
       requestPreciseLocation();
     } else {
-      setLocation(
+      setUserLocation(
         JSON.parse(localStorage.getItem("UserGeolocationApproximateLocation"))
       );
     }
@@ -49,7 +49,7 @@ export default function usePreciseLocation() {
   return {
     precise,
     locationGranted,
-    location,
+    userLocation,
     handlePreciseToggle,
   };
 }

@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = "https://24nfbc8snalq.share.zrok.io/v1/api";
+const API_BASE_URL = "http://localhost:1010/v1/api";
 
 const apiAxios = axios.create({
   //default axios implementation with a base api path

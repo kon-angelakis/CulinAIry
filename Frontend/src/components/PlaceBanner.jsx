@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  Collapse,
   Divider,
   Paper,
   Rating,
@@ -9,18 +10,23 @@ import {
   TextField,
   Tooltip,
   Typography,
+  useTheme,
 } from "@mui/material";
 import ImageCarousel from "../components/ImageCarousel";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 // Icons
 import FavoriteBorderRoundedIcon from "@mui/icons-material/FavoriteBorderRounded";
 import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
+import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
+import LocationOnRoundedIcon from "@mui/icons-material/LocationOnRounded";
 import RateReviewRoundedIcon from "@mui/icons-material/RateReviewRounded";
+
 import { AdvancedMarker, Map, Pin } from "@vis.gl/react-google-maps";
 import { useParams } from "react-router";
 import authAxios from "../config/authAxiosConfig";
+import usePreciseLocation from "../hooks/usePreciseLocation";
 import ReviewCard from "./ReviewCard";
 
 export default function PlaceBanner({
@@ -35,11 +41,17 @@ export default function PlaceBanner({
   setIsFavourite,
   userReview,
   location,
+  weightedRating,
+  distance,
 }) {
   const { id } = useParams();
+  const theme = useTheme();
+  const { userLocation } = usePreciseLocation();
 
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
+  const [favouriteCount, setFavouriteCount] = useState(null);
+  const [showRatings, setShowRatings] = useState(false); // <-- missing before
 
   const [submitReviewForm, setSubmitReviewForm] = useState({
     placeId: id,
@@ -48,154 +60,160 @@ export default function PlaceBanner({
     rating: 1,
   });
 
-  const addToFavs = async () => {
-    const response = await authAxios.post(`/user/favourites/${id}`).then(() => {
-      setIsFavourite(true);
-    });
+  // Get fav count
+  useEffect(() => {
+    fetchFavouriteCount();
+  }, [isFavourite, id]);
+
+  const toggleFavourite = async () => {
+    try {
+      if (!isFavourite) {
+        await authAxios.post(`/user/favourites/${id}`);
+        setIsFavourite(true);
+      } else {
+        await authAxios.delete(`/user/favourites/${id}`);
+        setIsFavourite(false);
+      }
+    } catch (err) {
+      console.error("Failed to toggle favourite:", err);
+    }
   };
 
-  const delFromFavs = async () => {
-    const response = await authAxios
-      .delete(`/user/favourites/${id}`)
-      .then(() => {
-        setIsFavourite(false);
-      });
+  const fetchFavouriteCount = async () => {
+    try {
+      const res = await authAxios.get(`/places/${id}/favouritecount`);
+      const favCount = res?.data?.data ?? 0;
+      setFavouriteCount(favCount);
+    } catch (err) {
+      console.error("Failed to fetch favourite count:", err);
+      setFavouriteCount(0);
+    }
   };
 
   const submitReview = async () => {
-    const response = await authAxios.post("/user/submitreview", {
-      ...submitReviewForm,
-      placeName: name,
-    });
-    setReviewSubmitted(true);
-    setTimeout(() => {
-      window.location.reload();
-    }, 2000);
+    try {
+      await authAxios.post("/user/submitreview", {
+        ...submitReviewForm,
+        placeName: name,
+      });
+      setReviewSubmitted(true);
+      // small UX delay then reload
+      setTimeout(() => {
+        window.location.reload();
+      }, 1200);
+    } catch (err) {
+      console.error("Failed to submit review:", err);
+    }
   };
 
+  const formatDistance = (d) => {
+    if (d == null) return null;
+    const n = Number(d);
+    if (Number.isNaN(n)) return String(d);
+    if (Math.abs(n) >= 1000) return `${Math.round((n / 1000) * 10) / 10} km`;
+    return `${Math.round(n)} m`;
+  };
+
+  const displayWeighted =
+    typeof weightedRating === "number"
+      ? Math.round(weightedRating * 10) / 10
+      : null;
+
   return (
-    <Paper
-      sx={{
-        p: 2,
-      }}
-    >
+    <Paper sx={{ p: { xs: 1.5, sm: 2 } }}>
       {isLoading ? (
-        <Skeleton variant="rectangular" height={600} />
+        <Skeleton variant="rectangular" height={320} />
       ) : (
         <ImageCarousel images={photos || []} />
       )}
-      <Divider sx={{ my: 6 }} />
+
+      <Divider sx={{ my: { xs: 3, md: 6 } }} />
+
       <Stack
-        spacing={2}
+        spacing={{ xs: 3, md: 4 }}
         direction={{ xs: "column", lg: "row" }}
-        sx={{
-          p: 2,
-          justifyContent: "space-evenly",
-          alignItems: "stretch",
-          display: "flex",
-        }}
+        sx={{ alignItems: "stretch" }}
       >
-        {/* General Info */}
-        <Box sx={{ flex: 1 }}>
+        {/* General info */}
+        <Box flex={1}>
           {isLoading ? (
-            <Skeleton width={150} height={80} />
-          ) : name ? (
-            <Typography variant="h3">{name}</Typography>
+            <Skeleton width={180} height={60} />
           ) : (
-            "-"
+            <Typography variant="h2" sx={{ pb: 2, color: "secondary.main" }}>
+              {name || "-"}
+            </Typography>
           )}
-          {/* google and app ratings */}
+
+          {/* Ratings */}
           <Stack
-            spacing={{ xs: 6, md: 12 }}
-            direction={{ xs: "column", md: "row" }}
-            sx={{
-              p: 2,
-              alignItems: "center",
-              justifyContent: "space-evenly",
-            }}
+            direction="row"
+            alignItems="center"
+            justifyContent="center"
+            spacing={1.5}
+            sx={{ mt: 3, mb: 1 }}
           >
-            <Stack
-              spacing={1}
-              direction="column"
-              sx={{ p: 1, alignItems: "center" }}
+            <Typography variant="h4" sx={{ fontWeight: 700, lineHeight: 1 }}>
+              {Math.round(weightedRating * 10) / 10 || "-"}
+            </Typography>
+
+            <Rating
+              value={Math.round(weightedRating * 10) / 10 || 0}
+              precision={0.1}
+              readOnly
+              size="large"
+              sx={{ fontSize: { xs: 32, sm: 40 } }}
+            />
+
+            <Box
+              onClick={() => setShowRatings((prev) => !prev)}
+              sx={{
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                transition: "transform 0.25s ease",
+                transform: showRatings ? "rotate(180deg)" : "rotate(0deg)",
+                color: "text.secondary",
+              }}
             >
-              <Stack
-                spacing={1}
-                direction="row"
-                sx={{
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  width: "100%",
-                }}
-              >
-                <Typography variant="h6">Google</Typography>
-                {isLoading ? (
-                  <Skeleton width={50} height={20} />
-                ) : googleRating ? (
-                  <Tooltip
-                    title={`${googleTotalRatings} reviews`}
-                    placement="top"
-                  >
-                    <Typography variant="subtitle1" color="text.secondary">
-                      {googleRating} / 5
-                    </Typography>
-                  </Tooltip>
-                ) : (
-                  "-"
-                )}
-              </Stack>
-
-              <Rating
-                size="large"
-                value={googleRating || 0}
-                precision={0.5}
-                readOnly
-                sx={{ color: "primary.main" }}
-              />
-            </Stack>
-
-            <Stack
-              spacing={1}
-              direction="column"
-              sx={{ p: 1, alignItems: "center" }}
-            >
-              <Stack
-                spacing={1}
-                direction="row"
-                sx={{
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  width: "100%",
-                }}
-              >
-                <Typography variant="h6">Culinairy</Typography>
-                {isLoading ? (
-                  <Skeleton width={50} height={20} />
-                ) : appRating ? (
-                  <Tooltip title={`${appTotalRatings} reviews`} placement="top">
-                    <Typography variant="subtitle1" color="text.secondary">
-                      {appRating} / 5
-                    </Typography>
-                  </Tooltip>
-                ) : (
-                  "-"
-                )}
-              </Stack>
-
-              <Rating
-                size="large"
-                value={appRating || 0}
-                precision={0.5}
-                readOnly
-                sx={{ color: "primary.main" }}
-              />
-            </Stack>
+              <KeyboardArrowDownRoundedIcon />
+            </Box>
           </Stack>
-          <Stack direction="column" spacing={4} width={"100%"}>
+
+          <Collapse in={showRatings} timeout="auto">
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              spacing={{ xs: 2, sm: 4 }}
+              justifyContent="center"
+              alignItems="center"
+              sx={{ mt: 2 }}
+            >
+              <Stack alignItems="center" spacing={0.5}>
+                <Typography variant="subtitle1">Google</Typography>
+                <Tooltip title={`${googleTotalRatings} reviews`}>
+                  <Typography variant="body2" color="text.secondary">
+                    {googleRating} / 5
+                  </Typography>
+                </Tooltip>
+                <Rating value={googleRating || 0} readOnly precision={0.1} />
+              </Stack>
+
+              <Stack alignItems="center" spacing={0.5}>
+                <Typography variant="subtitle1">Culinairy</Typography>
+                <Tooltip title={`${appTotalRatings} reviews`}>
+                  <Typography variant="body2" color="text.secondary">
+                    {appRating} / 5
+                  </Typography>
+                </Tooltip>
+                <Rating value={appRating || 0} readOnly precision={0.1} />
+              </Stack>
+            </Stack>
+          </Collapse>
+
+          {/* favs part */}
+          <Stack spacing={2} mt={4} alignItems="center">
             {!isFavourite ? (
               <Button
-                sx={{ alignSelf: "center" }}
-                onClick={addToFavs}
+                onClick={toggleFavourite}
                 variant="outlined"
                 startIcon={<FavoriteBorderRoundedIcon />}
               >
@@ -203,27 +221,29 @@ export default function PlaceBanner({
               </Button>
             ) : (
               <Button
-                sx={{ alignSelf: "center" }}
-                onClick={delFromFavs}
+                onClick={toggleFavourite}
                 variant="contained"
-                startIcon={
-                  <FavoriteRoundedIcon sx={{ color: "primary.light" }} />
-                }
                 color="secondary"
+                startIcon={<FavoriteRoundedIcon />}
               >
                 Remove from favourites
               </Button>
             )}
-            {userReview != null && userReview.data != null ? (
-              <Box sx={{ width: "100%", alignSelf: "start" }}>
-                <Typography variant="h5" sx={{ mb: 2 }}>
-                  Your review
-                </Typography>
+          </Stack>
+
+          <Typography sx={{ mt: 1 }} variant="body2" color="text.secondary">
+            <strong>{favouriteCount ?? 0}</strong> users also liked this place
+          </Typography>
+
+          {/* user review */}
+          <Stack mt={4}>
+            {userReview?.data ? (
+              <>
+                <Typography variant="h6">Your review</Typography>
                 <ReviewCard review={userReview.data} />
-              </Box>
+              </>
             ) : (
               <Button
-                sx={{ alignSelf: "center" }}
                 variant="text"
                 startIcon={<RateReviewRoundedIcon />}
                 onClick={() => setShowReviewForm((prev) => !prev)}
@@ -233,93 +253,136 @@ export default function PlaceBanner({
             )}
           </Stack>
         </Box>
+
         {/* Map */}
         <Paper
           sx={{
-            width: "100%",
-            flex: { xs: "none", lg: 1 },
-            height: { xs: 300, lg: "auto" },
-            borderRadius: 4,
+            flex: 1,
+            height: { xs: 280, sm: 360, lg: "auto" },
+            borderRadius: 3,
             overflow: "hidden",
+            position: "relative",
           }}
           elevation={4}
         >
-          <Map
-            defaultZoom={13}
-            defaultCenter={{ lat: 37.88, lng: 23.77 }}
-            gestureHandling="greedy"
-            disableDefaultUI
-            mapId={"4507aa4305d5313cbdf88773"}
-            colorScheme="FOLLOW_SYSTEM"
-          >
-            <AdvancedMarker position={{ lat: 37.88, lng: 23.77 }}>
-              <Pin
-                background="#4285F4"
-                glyph="👤"
-                glyphColor="#fff"
-                borderColor="#000"
-              />
-              <Tooltip title="Your location" placement="top" />
-            </AdvancedMarker>
-            {location && (
-              <AdvancedMarker position={{ lat: location.y, lng: location.x }}>
-                <Pin
-                  background="#FBBC04"
-                  glyph="🍔"
-                  glyphColor="#000"
-                  borderColor="#000"
-                />
-              </AdvancedMarker>
-            )}
-          </Map>
+          {location && userLocation ? (
+            <Box
+              sx={{
+                width: "100%",
+                flex: { xs: "none", lg: 1 },
+                height: { xs: 300, lg: "100%" },
+                borderRadius: 4,
+                overflow: "hidden",
+              }}
+            >
+              <Map
+                defaultZoom={13}
+                defaultCenter={{ lat: location.y, lng: location.x }}
+                gestureHandling="greedy"
+                disableDefaultUI
+                mapId={"4507aa4305d5313cbdf88773"}
+                colorScheme={theme.palette.mode === "dark" ? "DARK" : "LIGHT"}
+              >
+                <AdvancedMarker
+                  position={{
+                    lat: userLocation.latitude,
+                    lng: userLocation.longitude,
+                  }}
+                >
+                  <Pin
+                    background="#4285F4"
+                    glyph="👤"
+                    glyphColor="#fff"
+                    borderColor="#000"
+                  />
+                </AdvancedMarker>
+
+                <AdvancedMarker position={{ lat: location.y, lng: location.x }}>
+                  <Pin glyph="🍔" />
+                </AdvancedMarker>
+              </Map>
+
+              <Box
+                sx={{
+                  position: "absolute",
+                  bottom: 12,
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  backgroundColor: "secondary.light",
+                  color: "primary.main",
+                  px: 2,
+                  py: 0.5,
+                  borderRadius: 999,
+                  boxShadow: 3,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                }}
+              >
+                <LocationOnRoundedIcon fontSize="small" />
+                <Typography variant="body2">
+                  {distance
+                    ? `${
+                        distance < 1000
+                          ? `${Math.round(distance)} m`
+                          : `${Math.round((distance / 1000) * 10) / 10} km`
+                      } away`
+                    : "Distance unavailable"}
+                </Typography>
+              </Box>
+            </Box>
+          ) : (
+            <Typography variant="h6" sx={{ p: 2 }}>
+              Map preview is currently unavailable.
+            </Typography>
+          )}
         </Paper>
       </Stack>
 
-      {showReviewForm ? (
-        !reviewSubmitted ? (
-          <Paper variant="outlined" sx={{ p: 2 }}>
-            <Typography variant="h6" gutterBottom>
-              Share your thoughts
-            </Typography>
-            <Rating
-              name="new-review-rating"
-              value={submitReviewForm.rating}
-              onChange={(_, newValue) =>
-                setSubmitReviewForm({ ...submitReviewForm, rating: newValue })
-              }
-            />
-            <TextField
-              multiline
-              rows={4}
-              placeholder="Write your review..."
-              value={submitReviewForm.text}
-              onChange={(e) =>
-                setSubmitReviewForm({
-                  ...submitReviewForm,
-                  text: e.target.value,
-                })
-              }
-              fullWidth
-              sx={{ mt: 2 }}
-            />
-            <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
-              <Button variant="contained" onClick={submitReview}>
-                Submit
-              </Button>
-              <Button variant="text" onClick={submitReview}>
-                Cancel
-              </Button>
-            </Stack>
-          </Paper>
-        ) : (
-          <Paper variant="outlined" sx={{ p: 2 }}>
-            <Typography variant="h4" gutterBottom>
-              Review Submitted
-            </Typography>
-          </Paper>
-        )
-      ) : (
-        <Box></Box>
+      {/* Review form */}
+      {showReviewForm && (
+        <Paper variant="outlined" sx={{ p: 2, mt: 4 }}>
+          {!reviewSubmitted ? (
+            <>
+              <Typography variant="h6" gutterBottom>
+                Share your thoughts
+              </Typography>
+              <Rating
+                value={submitReviewForm.rating}
+                onChange={(_, newValue) =>
+                  setSubmitReviewForm({
+                    ...submitReviewForm,
+                    rating: newValue,
+                  })
+                }
+              />
+              <TextField
+                multiline
+                rows={4}
+                placeholder="Write your review..."
+                value={submitReviewForm.text}
+                onChange={(e) =>
+                  setSubmitReviewForm({
+                    ...submitReviewForm,
+                    text: e.target.value,
+                  })
+                }
+                fullWidth
+                sx={{ mt: 2 }}
+              />
+              <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+                <Button variant="contained" onClick={submitReview}>
+                  Submit
+                </Button>
+                <Button variant="text" onClick={() => setShowReviewForm(false)}>
+                  Cancel
+                </Button>
+              </Stack>
+            </>
+          ) : (
+            <Typography variant="h5">Review Submitted</Typography>
+          )}
+        </Paper>
       )}
     </Paper>
   );

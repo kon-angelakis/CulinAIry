@@ -1,12 +1,12 @@
 import { FavoriteRounded } from "@mui/icons-material";
 import StarRoundedIcon from "@mui/icons-material/StarRounded";
 import { Box, Paper, Tooltip, Typography } from "@mui/material";
-import { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { ThemeContext } from "../App.jsx";
 import authAxios from "../config/authAxiosConfig.js";
 
-export default function PlaceCardSmall({
+export default React.memo(function PlaceCardSmall({
   id,
   thumbnail,
   name,
@@ -22,7 +22,18 @@ export default function PlaceCardSmall({
   const [elevation, setElevation] = useState(2);
 
   const [favourite, setFavourite] = useState(false);
+  const [favouriteCount, setFavouriteCount] = useState(null);
   const [favouriteTooltip, setFavouriteTooltip] = useState("Add to favourites");
+
+  const fetchFavouriteCount = async () => {
+    try {
+      const res = await authAxios.get(`/places/${id}/favouritecount`);
+      const favCount = res.data.data;
+      setFavouriteCount(favCount);
+    } catch (err) {
+      console.error("Failed to fetch favourite count:", err);
+    }
+  };
 
   // Initial favourite state
   useEffect(() => {
@@ -38,7 +49,9 @@ export default function PlaceCardSmall({
         console.error("Failed to fetch favourite:", err);
       }
     }
+
     fetchFavourite();
+    fetchFavouriteCount();
   }, [id]);
 
   const toggleFavourite = async () => {
@@ -52,6 +65,7 @@ export default function PlaceCardSmall({
         setFavourite(false);
         setFavouriteTooltip("Add to favourites");
       }
+      fetchFavouriteCount();
     } catch (err) {
       console.error("Failed to toggle favourite:", err);
     }
@@ -64,7 +78,12 @@ export default function PlaceCardSmall({
       .post(`/user/history/${id}`)
       .then(() => {
         setTimeout(() => {
-          navigate(`/place/${id}`);
+          navigate(`/place/${id}`, {
+            state: {
+              weightedRating: rating.rating,
+              distanceFromUser: distance,
+            },
+          });
         }, 1000);
       });
   };
@@ -85,6 +104,9 @@ export default function PlaceCardSmall({
           cursor: "pointer",
         },
         "&:hover .thumbnail": { filter: "grayscale(0)" },
+        "&:active": {
+          transform: "scale(0.96)",
+        },
       }}
       onMouseEnter={() => setElevation(4)}
       onMouseLeave={() => setElevation(2)}
@@ -135,14 +157,20 @@ export default function PlaceCardSmall({
                 color: "text.primary",
               }}
             >
-              {/* placeholder */}
+              {favouriteCount
+                ? favouriteCount < 1000
+                  ? favouriteCount
+                  : `${Math.round(favouriteCount / 100) / 10} k`
+                : 0}
             </Typography>
           </Box>
         </Tooltip>
 
         {/* Rating */}
         <Tooltip
-          title={`Weighted rating: ${Math.round(rating.rating * 10) / 10}`}
+          title={`Weighted rating: ${
+            Math.round(rating.rating * 100) / 100
+          } / 5`}
           placement="bottom"
         >
           <Box
@@ -170,7 +198,7 @@ export default function PlaceCardSmall({
                 color: "text.primary",
               }}
             >
-              {Math.round(rating.rating * 10) / 10}/5
+              {Math.round(rating.rating * 10) / 10}
             </Typography>
           </Box>
         </Tooltip>
@@ -197,7 +225,7 @@ export default function PlaceCardSmall({
           position: "absolute",
           textAlign: "start",
           width: "100%",
-          height: { xs: "30%", lg: "22%" },
+          height: { xs: "33%", lg: "22%" },
           bottom: "0",
           bgcolor:
             mode == "light"
@@ -251,4 +279,4 @@ export default function PlaceCardSmall({
       </Box>
     </Paper>
   );
-}
+});

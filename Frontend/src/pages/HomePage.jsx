@@ -54,7 +54,7 @@ export default function HomePage() {
     getGeolocation();
   }, []);
 
-  const { precise, locationGranted, location, handlePreciseToggle } =
+  const { precise, locationGranted, userLocation, handlePreciseToggle } =
     usePreciseLocation();
 
   const handleFormChange = (e) => {
@@ -67,7 +67,7 @@ export default function HomePage() {
   const handleSubmit = (e) => {
     const submittedForm = {
       ...formData,
-      location: location || geoData.location,
+      location: userLocation || geoData.location,
     };
     setFormData(submittedForm);
     setLoadingNextPage(true);
@@ -107,7 +107,7 @@ export default function HomePage() {
             }}
           >
             Looking for fun places in <u>{geoData.city}</u>? Start typing below
-            to begin your <u>Culinairy</u> journey!
+            to begin your Culinairy journey!
           </Typography>
           <form method="POST" onSubmit={handleSubmit}>
             <Grid
@@ -125,7 +125,6 @@ export default function HomePage() {
                 onChange={handleFormChange}
                 label="Search for restaurants, cafes..."
                 variant="outlined"
-                multiline
                 fullWidth
                 required
               />
@@ -198,7 +197,7 @@ export default function HomePage() {
             title={"Hot places around you"}
             endpoint={"/recommendations/trending"}
             method={"POST"}
-            formData={location || geoData.location}
+            formData={userLocation || geoData.location}
             height={450}
           />
 
@@ -206,21 +205,21 @@ export default function HomePage() {
             title={"Top gainers amongst others in your area"}
             endpoint={"/recommendations/best"}
             method={"POST"}
-            formData={location || geoData.location}
+            formData={userLocation || geoData.location}
             height={450}
           />
           <RecommendationBox
             title={"Here's some places we think you will love"}
             endpoint={"/recommendations/curated"}
             method={"POST"}
-            formData={location || geoData.location}
+            formData={userLocation || geoData.location}
             height={450}
           />
           <RecommendationBox
             title={"You liked these places so why not visit again"}
             endpoint={"/recommendations/revisit"}
             method={"POST"}
-            formData={location || geoData.location}
+            formData={userLocation || geoData.location}
             height={450}
           />
         </>

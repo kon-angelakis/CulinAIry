@@ -1,9 +1,19 @@
 import { Box, Paper } from "@mui/material";
-import { Outlet } from "react-router";
+import { Outlet, useLocation } from "react-router";
 import CulinairyAppbar from "../components/CulinairyAppbar";
 import CulinairyFooter from "../components/CulinairyFooter";
+import { useEffect } from "react";
 
 export default function PageLayout() {
+  const location = useLocation();
+  // Scroll on top
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "smooth",
+    });
+  }, [location.pathname, location.search]);
   return (
     <Box
       sx={{
@@ -25,7 +35,6 @@ export default function PageLayout() {
           justifyContent: "start",
           alignItems: "center",
           mt: 0,
-          py: 12,
         }}
       >
         <Box
@@ -33,6 +42,7 @@ export default function PageLayout() {
             px: { xs: 3, sm: 6, md: 9, lg: 12 },
             width: "100%",
             overflow: "hidden",
+            py: 12,
           }}
         >
           <Outlet />
