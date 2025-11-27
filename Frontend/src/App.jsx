@@ -54,7 +54,9 @@ export default function App() {
           apiKey={"AIzaSyBqIg8Y57Qs4nh9cTdRlY5VEDjgOqLOHhc"}
           onLoad={() => console.log("Maps API has loaded.")}
         >
-          <GoogleOAuthProvider clientId="862654135638-ihdkg67htd7spqhla2qf3bk40ee0cdrk.apps.googleusercontent.com">
+          <GoogleOAuthProvider
+            clientId={import.meta.env.VITE_GOOGLE_OAUTH2_CLIENT_ID}
+          >
             <UserContext.Provider value={{ user, setUser }}>
               <QueryClientProvider client={queryClient}>
                 <Routes>

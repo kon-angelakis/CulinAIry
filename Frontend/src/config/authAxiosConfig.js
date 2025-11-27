@@ -1,6 +1,8 @@
 import axios from "axios";
 
-const API_BASE_URL = "http://localhost:1010/v1/api";
+const API_BASE_URL =
+  import.meta.env.VITE_DEFAULT_BACKEND_URL +
+  import.meta.env.VITE_DEFAULT_BACKEND_API_PATH;
 
 // Axios implementation for authenticated request intercepting
 const authAxios = axios.create({

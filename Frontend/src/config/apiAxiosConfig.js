@@ -1,6 +1,8 @@
 import axios from "axios";
 
-const API_BASE_URL = "http://localhost:1010/v1/api";
+const API_BASE_URL =
+  import.meta.env.VITE_DEFAULT_BACKEND_URL +
+  import.meta.env.VITE_DEFAULT_BACKEND_API_PATH;
 
 const apiAxios = axios.create({
   //default axios implementation with a base api path

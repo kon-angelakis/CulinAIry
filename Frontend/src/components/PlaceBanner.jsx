@@ -280,7 +280,7 @@ export default function PlaceBanner({
                 defaultCenter={{ lat: location.y, lng: location.x }}
                 gestureHandling="greedy"
                 disableDefaultUI
-                mapId={"4507aa4305d5313cbdf88773"}
+                mapId={import.meta.env.VITE_GOOGLE_MAP_ID}
                 colorScheme={theme.palette.mode === "dark" ? "DARK" : "LIGHT"}
               >
                 <AdvancedMarker
