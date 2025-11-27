@@ -27,7 +27,7 @@ import { Link as RouterLink } from "react-router";
 import { useNavigate } from "react-router";
 import { UserContext } from "../App.jsx"; // or wherever you put the context
 import { ReactComponent as LogoRibbon } from "../assets/logo_ribbon.svg";
-import SearchBar from "./Searchbar.jsx";
+import SearchBar from "./SearchBar.jsx";
 
 export default function CulinairyAppbar() {
   const { user, setUser } = useContext(UserContext);
