@@ -53,7 +53,7 @@ public class SearchService {
                                         request.sortDirection());
 
                         // Check if we have enough results > 20
-                        int totalElements = CountPlacesFromDB(coordinates, request.radius(),
+                        Integer totalElements = CountPlacesFromDB(coordinates, request.radius(),
                                         restaurantTypes,
                                         userIntent);
 
@@ -70,12 +70,17 @@ public class SearchService {
                         recommendedPlaces = FetchPlacesFromDB(coordinates, request.radius(), restaurantTypes,
                                         userIntent, request.pagingRequest(), request.sortField(),
                                         request.sortDirection());
+                        // New count
+                        totalElements = CountPlacesFromDB(coordinates, request.radius(),
+                                        restaurantTypes,
+                                        userIntent);
                         PaginatedResponse<LinkedHashSet<PlaceDTO>> paginatedResponse = new PaginatedResponse<LinkedHashSet<PlaceDTO>>(
                                         recommendedPlaces.stream()
                                                         .map(Place::ToPlaceDTO)
                                                         .collect(Collectors.toCollection(LinkedHashSet::new)),
-                                        totalElements,
-                                        (int) Math.ceil((double) totalElements / request.pagingRequest().size()));
+                                        totalElements.intValue(),
+                                        (int) Math.ceil((double) totalElements.intValue()
+                                                        / request.pagingRequest().size()));
                         return new ApiResponse<PaginatedResponse<LinkedHashSet<PlaceDTO>>>(true,
                                         String.format("Showing %d places", recommendedPlaces.size()),
                                         paginatedResponse);
@@ -105,13 +110,14 @@ public class SearchService {
                                                 radius, types, pagingRequest, sortField, sortDirection);
         }
 
-        private int CountPlacesFromDB(Location coordinates, int radius, List<String> types, String intent) {
-                return intent.equals("inclusive")
+        private Integer CountPlacesFromDB(Location coordinates, int radius, List<String> types, String intent) {
+                Integer res = intent.equals("inclusive")
                                 ? placeService.CountPlacesInclusive(coordinates.longitude(),
                                                 coordinates.latitude(), radius, types)
                                 : placeService.CountPlacesDemanding(coordinates.longitude(),
                                                 coordinates.latitude(),
                                                 radius, types);
+                return res != null ? res : 0;
         }
 
         // If too few entries in the db call the google maps api to retrieve

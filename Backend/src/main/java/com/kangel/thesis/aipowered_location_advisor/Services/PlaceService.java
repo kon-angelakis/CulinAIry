@@ -65,7 +65,7 @@ public class PlaceService {
         return placeRepo.findPlacesDemandingNearby(lon, lat, maxDist, types, skip, limit, sortField, sortDirection);
     }
 
-    public int CountPlacesDemanding(double lon, double lat, int maxDist, List<String> types) {
+    public Integer CountPlacesDemanding(double lon, double lat, int maxDist, List<String> types) {
         return placeRepo.countPlacesDemandingNearby(lon, lat, maxDist, types);
     }
 
@@ -76,7 +76,7 @@ public class PlaceService {
         return placeRepo.findPlacesInclusiveNearby(lon, lat, maxDist, types, skip, limit, sortField, sortDirection);
     }
 
-    public int CountPlacesInclusive(double lon, double lat, int maxDist, List<String> types) {
+    public Integer CountPlacesInclusive(double lon, double lat, int maxDist, List<String> types) {
         return placeRepo.countPlacesInclusiveNearby(lon, lat, maxDist, types);
     }
 

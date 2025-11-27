@@ -68,7 +68,7 @@ public interface PlaceRepo extends MongoRepository<Place, String> {
                         "{ $match: { $expr: { $setIsSubset: [?3, '$secondaryTypes'] } } }",
                         "{ $count: 'total' }"
         })
-        public int countPlacesDemandingNearby(double lon, double lat, int maxDist, List<String> type);
+        public Integer countPlacesDemandingNearby(double lon, double lat, int maxDist, List<String> type);
 
         @Aggregation(pipeline = {
                         "{ $geoNear: { " +
@@ -112,7 +112,7 @@ public interface PlaceRepo extends MongoRepository<Place, String> {
                         "{ $match: { matchCount: { $gt: 0 } } }",
                         "{ $count: 'total' }"
         })
-        public int countPlacesInclusiveNearby(double lon, double lat, int maxDist, List<String> types);
+        public Integer countPlacesInclusiveNearby(double lon, double lat, int maxDist, List<String> types);
 
         @Aggregation(pipeline = {
                         "{ $geoNear: { " +
